@@ -4,12 +4,13 @@
 int main()
 {
   goltsov::List< int > a;
-  a.push_back(1);
-  a.push_back(2);
-  a.push_back(3);
+  a.push_start(1);
   goltsov::LIter< int > ai = a.begin();
-  ai = ai.next();
   a.insert(ai, 10);
+  ai = ai.next();
+  ai.insert(2);
+  ai = ai.next();
+  ai.insert(3);
   ai = a.begin();
   ai = a.begin();
   ai.insert(20);
