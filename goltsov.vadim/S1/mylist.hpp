@@ -40,6 +40,8 @@ namespace goltsov
   public:
     LCIter() noexcept;
     LCIter(CNode< T >* p) noexcept;
+    LCIter< T >& operator=(Node< T >* p);
+    LCIter< T >& operator=(LIter< T > other);
     bool hasNext() const noexcept;
     LCIter< T > next() const;
     const T& operator*() const;
@@ -108,6 +110,18 @@ namespace goltsov
   LCIter< T >::LCIter(CNode< T >* p) noexcept:
     ptr(p)
   {}
+  template< class T >
+  LCIter< T >& LCIter< T >::operator=(Node< T >* p)
+  {
+    CNode< T >* cp = reinterpret_cast< CNode< T >* >(p);
+    ptr = cp;
+    return *this;
+  }
+  template< class T >
+  LCIter< T >& LCIter< T >::operator=(LIter< T > other)
+  {
+    ptr = reinterpret_cast< CNode< T >* >(other.ptr);
+  }
   template< class T >
   bool LCIter< T >::hasNext() const noexcept
   {

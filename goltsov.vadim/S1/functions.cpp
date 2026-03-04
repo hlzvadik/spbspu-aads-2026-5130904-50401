@@ -6,14 +6,14 @@ namespace goltsov
   List< std::pair< std::string, List< size_t > > > getData(std::istream& in, size_t& size)
   {
     List< std::pair< std::string, List< size_t > > > result;
-    LIter< std::pair< std::string, List< size_t > > > i(nullptr);
+    LIter< std::pair< std::string, List< size_t > > > i (nullptr);
     std::string name;
     while (in >> name)
     {
       size += 1;
       List< size_t > numbers;
       size_t number;
-      LIter< size_t > j(nullptr);
+      LIter< size_t > j (nullptr);
       while (in >> number)
       {
         j = numbers.insert(j, number);
@@ -122,5 +122,6 @@ namespace goltsov
         out << sums[i] << '\n';
       }
     }
+    return out;
   }
 }
