@@ -25,12 +25,11 @@ namespace goltsov
     friend class List< T >;
     Node< T >* ptr;
   public:
-    LIter(Node<T>* p);
+    LIter();
+    LIter(Node< T >* p);
     bool hasNext() const;
     LIter< T > next() const;
     T& operator*() const;
-    void insert(T& a);
-    void insert(T&& a);
   };
 
   template< class T >
@@ -39,7 +38,8 @@ namespace goltsov
     friend class List< T >;
     CNode< T >* ptr;
   public:
-    LCIter(CNode<T>* p);
+    LCIter();
+    LCIter(CNode< T >* p);
     bool hasNext() const;
     LCIter< T > next() const;
     const T& operator*() const;
@@ -54,20 +54,22 @@ namespace goltsov
   public:
     List();
     ~List();
-    List(List< T >& other);
+    List(const List< T >& other);
     List(List< T >&& other);
     List< T >& operator=(const List< T >& other);
     List< T >& operator=(List< T >&& other);
 
-    LIter<T> begin();
-    LCIter<T> begin() const;
-    LIter<T> end();
-    LCIter<T> end() const;
+    LIter< T > begin();
+    LCIter< T > begin() const;
+    LIter< T > end();
+    LCIter< T > end() const;
+    LIter< T > getLast();
+    LCIter< T > getLast() const;
     void push_start(const T& a);
-    void push_back(const T& a);
     void pop_start();
     void pop_end();
     void insert(LIter< T > i, const T& a);
+    void insert(LIter< T > i, const T&& a);
     void clear();
   };
 }
@@ -75,13 +77,17 @@ namespace goltsov
 namespace goltsov
 {
   template< class T >
+  LIter< T >::LIter():
+    ptr(nullptr)
+  {}
+  template< class T >
   LIter< T >::LIter(Node< T >* p):
     ptr(p)
   {}
   template< class T >
   bool LIter< T >::hasNext() const
   {
-    return ptr != nullptr && ptr->next != nullptr;
+    return ptr != nullptr;
   }
   template< class T >
   LIter< T > LIter< T >::next() const
@@ -93,19 +99,11 @@ namespace goltsov
   {
     return ptr->value;
   }
-  template< class T >
-  void LIter< T >::insert(T& a)
-  {
-    Node< T >* new_el = new Node< T > {a, this->next().ptr};
-    this->ptr->next = new_el;
-  }
-  template< class T >
-  void LIter< T >::insert(T&& a)
-  {
-    Node< T >* new_el = new Node< T > {a, this->next().ptr};
-    this->ptr->next = new_el;
-  }
 
+  template< class T >
+  LCIter< T >::LCIter():
+    ptr(nullptr)
+  {}
   template< class T >
   LCIter< T >::LCIter(CNode< T >* p):
     ptr(p)
@@ -113,7 +111,7 @@ namespace goltsov
   template< class T >
   bool LCIter< T >::hasNext() const
   {
-    return ptr != nullptr && ptr->next != nullptr;
+    return ptr != nullptr;
   }
   template< class T >
   LCIter< T > LCIter< T >::next() const
@@ -148,21 +146,22 @@ namespace goltsov
     clear();
   }
   template< class T >
-  List< T >::List(List< T >& other)
+  List< T >::List(const List< T >& other)
   {
     fake = createFake();
-    Node< T >* now_new = nullptr;
-    Node< T >* now_old = other.fake->next;
-    if (now_old != nullptr)
-    {
-      now_new = new Node< T > {now_old->value, nullptr};
-      now_old = now_old->next;
+    if (!other.fake->next) {
+        fake->next = nullptr;
+        return;
     }
+    Node< T >* now_old = other.fake->next;
+    Node< T >* now_new = new Node< T >{now_old->value, nullptr};
     fake->next = now_new;
+    now_old = now_old->next;
     while(now_old != nullptr)
     {
-      now_new->next = new Node< T > {now_old->value, nullptr};
-      now_old = now_old->next;
+        now_new->next = new Node< T >{now_old->value, nullptr};
+        now_new = now_new->next;
+        now_old = now_old->next;
     }
   }
   template< class T >
@@ -175,21 +174,26 @@ namespace goltsov
   template< class T >
   List< T >& List< T >::operator=(const List< T >& other)
   {
-    fake = createFake();
-    Node< T >* now_new = nullptr;
-    Node< T >* now_old = other.fake->next;
-    if (now_old != nullptr)
+    if (this != &other)
     {
-      now_new = new Node< T > {now_old->value, nullptr};
-      now_old = now_old->next;
+      clear();
+      fake = createFake();
+      if (other.fake->next)
+      {
+        Node< T >* now_old = other.fake->next;
+        Node< T >* now_new = new Node< T >{now_old->value, nullptr};
+        fake->next = now_new;
+        now_old = now_old->next;
+        
+        while(now_old != nullptr)
+        {
+          now_new->next = new Node< T >{now_old->value, nullptr};
+          now_new = now_new->next;
+          now_old = now_old->next;
+        }
+      }
     }
-    fake->next = now_new;
-    while(now_old != nullptr)
-    {
-      now_new->next = new Node< T > {now_old->value, nullptr};
-      now_old = now_old->next;
-    }
-    return * this;
+    return *this;
   }
   template< class T >
   List< T >& List< T >::operator=(List< T >&& other)
@@ -200,40 +204,50 @@ namespace goltsov
     return * this;
   }
   template< class T >
-  LIter<T> List<T>::begin()
+  LIter< T > List< T >::begin()
   {
     return {fake->next};
   }
   template< class T >
-  LCIter<T> List<T>::begin() const
+  LCIter< T > List< T >::begin() const
   {
-    return {const_cast< const Node<T>* >(fake->next)};
+    return {const_cast< const Node< T >* >(fake->next)};
   }
   template< class T >
-  LIter<T> List<T>::end()
+  LIter< T > List< T >::end()
   {
     return {nullptr};
   }
   template< class T >
-  LCIter<T> List<T>::end() const
+  LCIter< T > List< T >::end() const
   {
     return {nullptr};
+  }
+  template< class T >
+  LIter< T > List< T >::getLast()
+  {
+    LIter< T > now = this->begin();
+    while(now.hasNext() && now.next() != nullptr)
+    {
+      now = now.next();
+    }
+    return now;
+  }
+  template< class T >
+  LCIter< T > List< T >::getLast() const
+  {
+    LCIter< T > now = this->begin();
+    while(now.hasNext() && now.next() != nullptr)
+    {
+      now = now.next();
+    }
+    return now;
   }
   template< class T >
   void List< T >::push_start(const T& a)
   {
     Node< T >* new_el = new Node< T >{a, fake->next};
     fake->next = new_el;
-  }
-  template< class T >
-  void List< T >::push_back(const T& a)
-  {
-    Node< T >* now = fake;
-    while (now->next != nullptr)
-    {
-      now = now->next;
-    }
-    now->next = new Node< T > {a, nullptr};
   }
   template< class T >
   void List< T >::pop_start()
@@ -260,8 +274,30 @@ namespace goltsov
   template< class T >
   void List< T >::insert(LIter< T > i, const T& a)
   {
-    Node< T >* new_el = new Node< T > {a, i.next().ptr};
-    i.ptr->next = new_el;
+    if (i.ptr == nullptr)
+    {
+      i.ptr = new Node< T > {a, nullptr};
+      fake->next = i.ptr;
+    }
+    else
+    {
+      Node< T >* new_el = new Node< T > {a, i.next().ptr};
+      i.ptr->next = new_el;
+    }
+  }
+  template< class T >
+  void List< T >::insert(LIter< T > i, const T&& a)
+  {
+    if (i.ptr == nullptr)
+    {
+      i.ptr = new Node< T > {a, nullptr};
+      fake->next = i.ptr;
+    }
+    else
+    {
+      Node< T >* new_el = new Node< T > {a, i.next().ptr};
+      i.ptr->next = new_el;
+    }
   }
   template< class T >
   void List< T >::clear()
