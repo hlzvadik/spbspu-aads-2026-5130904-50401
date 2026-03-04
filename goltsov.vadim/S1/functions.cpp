@@ -16,8 +16,7 @@ namespace goltsov
       LIter< size_t > j(nullptr);
       while (in >> number)
       {
-        numbers.insert(j, number);
-        j = j.next();
+        j = numbers.insert(j, number);
         char next = in.peek();
         if (next == '\n' || next == EOF)
         {
@@ -28,8 +27,7 @@ namespace goltsov
       {
         in.clear();
       }
-      result.insert(i, {name, numbers});
-      i = i.next();
+      i = result.insert(i, {name, numbers});
     }
     return result;
   }

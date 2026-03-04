@@ -28,8 +28,8 @@ namespace goltsov
     LIter() noexcept;
     LIter(Node< T >* p) noexcept;
     bool hasNext() const noexcept;
-    LIter< T > next() const noexcept;
-    T& operator*() const noexcept;
+    LIter< T > next() const;
+    T& operator*() const;
   };
 
   template< class T >
@@ -41,8 +41,8 @@ namespace goltsov
     LCIter() noexcept;
     LCIter(CNode< T >* p) noexcept;
     bool hasNext() const noexcept;
-    LCIter< T > next() const noexcept;
-    const T& operator*() const noexcept;
+    LCIter< T > next() const;
+    const T& operator*() const;
   };
 
   template< class T >
@@ -65,11 +65,11 @@ namespace goltsov
     LCIter< T > end() const noexcept;
     LIter< T > getLast() noexcept;
     LCIter< T > getLast() const noexcept;
-    void push_start(const T& a);
+    LIter< T > push_start(const T& a);
     void pop_start() noexcept;
     void pop_end() noexcept;
-    void insert(LIter< T >& i, const T& a);
-    void insert(LIter< T >& i, const T&& a);
+    LIter< T > insert(LIter< T > i, const T& a);
+    LIter< T > insert(LIter< T > i, const T&& a);
     void clear() noexcept;
   };
 }
@@ -90,12 +90,12 @@ namespace goltsov
     return ptr != nullptr;
   }
   template< class T >
-  LIter< T > LIter< T >::next() const noexcept
+  LIter< T > LIter< T >::next() const
   {
     return {ptr->next};
   }
   template< class T >
-  T& LIter< T >::operator*() const noexcept
+  T& LIter< T >::operator*() const
   {
     return ptr->value;
   }
@@ -114,12 +114,12 @@ namespace goltsov
     return ptr != nullptr;
   }
   template< class T >
-  LCIter< T > LCIter< T >::next() const noexcept
+  LCIter< T > LCIter< T >::next() const
   {
     return {ptr->next};
   }
   template< class T >
-  const T& LCIter< T >::operator*() const noexcept
+  const T& LCIter< T >::operator*() const
   {
     return {ptr->value};
   }
@@ -249,10 +249,11 @@ namespace goltsov
     return now;
   }
   template< class T >
-  void List< T >::push_start(const T& a)
+  LIter< T > List< T >::push_start(const T& a)
   {
     Node< T >* new_el = new Node< T > {a, fake->next};
     fake->next = new_el;
+    return LIter< T >(new_el);
   }
   template< class T >
   void List< T >::pop_start() noexcept
@@ -277,31 +278,35 @@ namespace goltsov
     now->next = nullptr;
   }
   template< class T >
-  void List< T >::insert(LIter< T >& i, const T& a)
+  LIter< T > List< T >::insert(LIter< T > i, const T& a)
   {
     if (i.ptr == nullptr)
     {
-      push_start(a);
-      i = {fake};
+      i = push_start(a);
+      return LIter< T >(i);
     }
     else
     {
       Node< T >* new_el = new Node< T > {a, i.next().ptr};
       i.ptr->next = new_el;
+      i = i.ptr->next;
+      return LIter< T >(i);
     }
   }
   template< class T >
-  void List< T >::insert(LIter< T >& i, const T&& a)
+  LIter< T > List< T >::insert(LIter< T > i, const T&& a)
   {
     if (i.ptr == nullptr)
     {
-      push_start(a);
-      i = {fake};
+      i = push_start(a);
+      return LIter< T >(i);
     }
     else
     {
       Node< T >* new_el = new Node< T > {a, i.next().ptr};
       i.ptr->next = new_el;
+      i = i.ptr->next;
+      return LIter< T >(i);
     }
   }
   template< class T >
