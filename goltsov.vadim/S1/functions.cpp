@@ -6,7 +6,7 @@ namespace goltsov
 {
   bool isCorrectNumber(const std::string& num)
   {
-    std::string max_num = std::to_string(std::numeric_limits< int >::max());
+    std::string max_num = std::to_string(std::numeric_limits< unsigned long long >::max());
     if (max_num.size() < num.size())
     {
       return false;
@@ -15,12 +15,12 @@ namespace goltsov
     {
       return true;
     }
-    return num <= max_num;
+    return num < max_num;
   }
 
-  int fromStringToSizeT(const std::string& num)
+  unsigned long long fromStringToULL(const std::string& num)
   {
-    int result = 0;
+    unsigned long long result = 0;
     for (size_t i = 0; i < num.size(); ++i)
     {
       result = result * 10 + (num[i] - '0');
@@ -28,15 +28,15 @@ namespace goltsov
     return result;
   }
 
-  List< std::pair< std::string, List< int > > > getData(std::istream& in, size_t& size)
+  List< std::pair< std::string, List< unsigned long long > > > getData(std::istream& in, size_t& size)
   {
-    List< std::pair< std::string, List< int > > > result;
-    LIter< std::pair< std::string, List< int > > > i (nullptr);
+    List< std::pair< std::string, List< unsigned long long > > > result;
+    LIter< std::pair< std::string, List< unsigned long long > > > i (nullptr);
     std::string name;
     while (in >> name)
     {
       size += 1;
-      List< int > numbers;
+      List< unsigned long long > numbers;
       std::string number;
       char next = in.peek();
       if (next == '\n')
@@ -49,14 +49,14 @@ namespace goltsov
         i = result.insert(i, {name, numbers});
         break;
       }
-      LIter< int > j (nullptr);
+      LIter< unsigned long long > j (nullptr);
       while (in >> number)
       {
         if (!isCorrectNumber(number))
         {
           throw std::overflow_error("The number is too big");
         }
-        size_t real_number = fromStringToSizeT(number);
+        size_t real_number = fromStringToULL(number);
         j = numbers.insert(j, real_number);
         char next = in.peek();
         if (next == '\n' || next == EOF)
@@ -86,12 +86,12 @@ namespace goltsov
     n += 1;
   }
 
-  std::ostream& printResult(std::ostream& out, List< std::pair< std::string, List< int > > >& data, size_t size)
+  std::ostream& printResult(std::ostream& out, List< std::pair< std::string, List< unsigned long long > > >& data, size_t size)
   {
-    LIter< std::pair< std::string, List< int > > > it = data.begin();
+    LIter< std::pair< std::string, List< unsigned long long > > > it = data.begin();
     int* sums = nullptr;
     size_t n = 0;
-    LIter< int >* its = new LIter< int >[size];
+    LIter< unsigned long long >* its = new LIter< unsigned long long >[size];
     for (size_t i = 0; i < size; ++i)
     {
       if (i != size - 1)
@@ -119,7 +119,7 @@ namespace goltsov
     while (!all)
     {
       all = 1;
-      int sum = 0;
+      unsigned long long sum = 0;
       for (size_t i = 0; i < size; ++i)
       {
         if (its[i].hasNext())
