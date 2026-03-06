@@ -10,13 +10,6 @@ namespace goltsov
   };
 
   template< class T >
-  struct CNode
-  {
-    const T value;
-    const CNode< T >* next;
-  };
-
-  template< class T >
   class List;
 
   template< class T >
@@ -36,12 +29,10 @@ namespace goltsov
   class LCIter
   {
     friend class List< T >;
-    CNode< T >* ptr;
+    const Node< T >* ptr;
   public:
     LCIter() noexcept;
-    LCIter(CNode< T >* p) noexcept;
-    LCIter< T >& operator=(Node< T >* p);
-    LCIter< T >& operator=(LIter< T > other);
+    LCIter(const Node< T >* p) noexcept;
     bool hasNext() const noexcept;
     LCIter< T > next() const;
     const T& operator*() const;
@@ -107,21 +98,9 @@ namespace goltsov
     ptr(nullptr)
   {}
   template< class T >
-  LCIter< T >::LCIter(CNode< T >* p) noexcept:
+  LCIter< T >::LCIter(const Node< T >* p) noexcept:
     ptr(p)
   {}
-  template< class T >
-  LCIter< T >& LCIter< T >::operator=(Node< T >* p)
-  {
-    CNode< T >* cp = reinterpret_cast< CNode< T >* >(p);
-    ptr = cp;
-    return *this;
-  }
-  template< class T >
-  LCIter< T >& LCIter< T >::operator=(LIter< T > other)
-  {
-    ptr = reinterpret_cast< CNode< T >* >(other.ptr);
-  }
   template< class T >
   bool LCIter< T >::hasNext() const noexcept
   {
@@ -225,12 +204,12 @@ namespace goltsov
   template< class T >
   LIter< T > List< T >::begin() noexcept
   {
-    return {fake->next};
+    return LIter< T >(fake->next);
   }
   template< class T >
   LCIter< T > List< T >::begin() const noexcept
   {
-    return {const_cast< const Node< T >* >(fake->next)};
+    return LCIter< T >(fake->next);
   }
   template< class T >
   LIter< T > List< T >::end() noexcept

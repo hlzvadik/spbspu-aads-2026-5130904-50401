@@ -74,7 +74,6 @@ namespace goltsov
     }
     it = data.begin();
     bool all = 0;
-    size_t real_ind = 0;
     while (!all)
     {
       all = 1;
