@@ -110,6 +110,7 @@ namespace goltsov
       {
         delete[] its;
         delete[] sums;
+        throw;
       }
       it = it.next();
     }
@@ -134,7 +135,17 @@ namespace goltsov
             sum += (* its[i]);
           }
           all = 0;
-          its[i] = its[i].next();
+          try
+          {
+            its[i] = its[i].next();
+          }
+          catch(...)
+          {
+            delete[] its;
+            delete[] sums;
+            throw;
+          }
+          
         }
       }
       if (!all)
@@ -147,6 +158,7 @@ namespace goltsov
         {
           delete[] sums;
           delete[] its;
+          throw;
         }
         out << '\n';
       }
@@ -167,6 +179,7 @@ namespace goltsov
       std::cout << 0 << '\n';
     }
     delete[] its;
+    delete[] sums;
     return out;
   }
 }

@@ -11,7 +11,7 @@ int main()
   {
     data = goltsov::getData(std::cin, size);
   }
-  catch(const std::exception& e)
+  catch(const std::overflow_error& e)
   {
     std::cerr << e.what() << '\n';
     return 1;
