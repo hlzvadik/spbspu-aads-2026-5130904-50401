@@ -145,7 +145,6 @@ namespace goltsov
             delete[] sums;
             throw;
           }
-          
         }
       }
       if (!all)
