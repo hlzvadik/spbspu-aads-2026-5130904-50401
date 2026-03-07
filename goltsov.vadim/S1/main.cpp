@@ -9,10 +9,11 @@ int main()
   goltsov::List< std::pair< std::string, goltsov::List< unsigned long long > > > data;
   try
   {
-    data = goltsov::getData(std::cin, size);
+    goltsov::getData(data, std::cin, size);
   }
   catch(const std::overflow_error& e)
   {
+    goltsov::printResult(std::cout, data, size);
     std::cerr << e.what() << '\n';
     return 1;
   }

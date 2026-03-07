@@ -28,9 +28,9 @@ namespace goltsov
     return result;
   }
 
-  List< std::pair< std::string, List< unsigned long long > > > getData(std::istream& in, size_t& size)
+  void getData(List< std::pair< std::string, List< unsigned long long > > >& result,
+    std::istream& in, size_t& size)
   {
-    List< std::pair< std::string, List< unsigned long long > > > result;
     LIter< std::pair< std::string, List< unsigned long long > > > i (nullptr);
     std::string name;
     while (in >> name)
@@ -54,6 +54,7 @@ namespace goltsov
       {
         if (!isCorrectNumber(number))
         {
+          i = result.insert(i, {name, numbers});
           throw std::overflow_error("The number is too big");
         }
         size_t real_number = fromStringToULL(number);
@@ -70,7 +71,6 @@ namespace goltsov
       }
       i = result.insert(i, {name, numbers});
     }
-    return result;
   }
 
   void push_back(int** sums, size_t& n, size_t a)
