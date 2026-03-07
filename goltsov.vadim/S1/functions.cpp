@@ -4,9 +4,22 @@
 
 namespace goltsov
 {
+  size_t sumWithCheck(size_t a, size_t b)
+  {
+    size_t max_size_t = std::numeric_limits< size_t >::max();
+    if (a <= max_size_t - b)
+    {
+      return a + b;
+    }
+    else
+    {
+      throw(std::overflow_error("The sum is too big"));
+    }
+  }
+
   bool isCorrectNumber(const std::string& num)
   {
-    std::string max_num = std::to_string(std::numeric_limits< unsigned long long >::max());
+    std::string max_num = std::to_string(std::numeric_limits< size_t >::max());
     if (max_num.size() < num.size())
     {
       return false;
@@ -15,12 +28,12 @@ namespace goltsov
     {
       return true;
     }
-    return num < max_num;
+    return num <= max_num;
   }
 
-  unsigned long long fromStringToULL(const std::string& num)
+  size_t fromStringToST(const std::string& num)
   {
-    unsigned long long result = 0;
+    size_t result = 0;
     for (size_t i = 0; i < num.size(); ++i)
     {
       result = result * 10 + (num[i] - '0');
@@ -28,15 +41,14 @@ namespace goltsov
     return result;
   }
 
-  void getData(List< std::pair< std::string, List< unsigned long long > > >& result,
-    std::istream& in, size_t& size)
+  void getData(List< std::pair< std::string, List< size_t > > >& result, std::istream& in, size_t& size)
   {
-    LIter< std::pair< std::string, List< unsigned long long > > > i (nullptr);
+    LIter< std::pair< std::string, List< size_t > > > i (nullptr);
     std::string name;
     while (in >> name)
     {
       size += 1;
-      List< unsigned long long > numbers;
+      List< size_t > numbers;
       std::string number;
       char next = in.peek();
       if (next == '\n')
@@ -49,7 +61,7 @@ namespace goltsov
         i = result.insert(i, {name, numbers});
         break;
       }
-      LIter< unsigned long long > j (nullptr);
+      LIter< size_t > j (nullptr);
       while (in >> number)
       {
         if (!isCorrectNumber(number))
@@ -57,7 +69,7 @@ namespace goltsov
           i = result.insert(i, {name, numbers});
           throw std::overflow_error("The number is too big");
         }
-        size_t real_number = fromStringToULL(number);
+        size_t real_number = fromStringToST(number);
         j = numbers.insert(j, real_number);
         char next = in.peek();
         if (next == '\n' || next == EOF)
@@ -73,9 +85,9 @@ namespace goltsov
     }
   }
 
-  void push_back(int** sums, size_t& n, size_t a)
+  void push_back(size_t** sums, size_t& n, size_t a)
   {
-    int* new_sums = new int[n + 1];
+    size_t* new_sums = new size_t[n + 1];
     for (size_t i = 0; i < n; ++i)
     {
       new_sums[i] = sums[0][i];
@@ -86,12 +98,12 @@ namespace goltsov
     n += 1;
   }
 
-  std::ostream& printResult(std::ostream& out, List< std::pair< std::string, List< unsigned long long > > >& data, size_t size)
+  std::ostream& printResult(std::ostream& out, List< std::pair< std::string, List< size_t > > >& data, size_t size)
   {
-    LIter< std::pair< std::string, List< unsigned long long > > > it = data.begin();
-    int* sums = nullptr;
+    LIter< std::pair< std::string, List< size_t > > > it = data.begin();
+    size_t* sums = nullptr;
     size_t n = 0;
-    LIter< unsigned long long >* its = new LIter< unsigned long long >[size];
+    LIter< size_t >* its = new LIter< size_t >[size];
     for (size_t i = 0; i < size; ++i)
     {
       if (i != size - 1)
@@ -119,7 +131,7 @@ namespace goltsov
     while (!all)
     {
       all = 1;
-      unsigned long long sum = 0;
+      size_t sum = 0;
       for (size_t i = 0; i < size; ++i)
       {
         if (its[i].hasNext())
@@ -127,12 +139,30 @@ namespace goltsov
           if (all == 1)
           {
             out << (* its[i]);
-            sum += (* its[i]);
+            try
+            {
+              sum = sumWithCheck(sum, (* its[i]));
+            }
+            catch(...)
+            {
+              delete[] its;
+              delete[] sums;
+              throw;
+            }
           }
           else
           {
             out << ' ' << (* its[i]);
-            sum += (* its[i]);
+            try
+            {
+              sum = sumWithCheck(sum, (* its[i]));
+            }
+            catch(...)
+            {
+              delete[] its;
+              delete[] sums;
+              throw;
+            }
           }
           all = 0;
           try
