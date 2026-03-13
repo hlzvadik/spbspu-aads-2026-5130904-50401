@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../Common/mylist.hpp"
+#include "mystack.hpp"
 
 int main()
 {

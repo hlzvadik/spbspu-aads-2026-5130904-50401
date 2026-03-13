@@ -7,21 +7,98 @@ namespace goltsov
   template< typename T >
   class Stack
   {
-    List< T > dates;
-    size_t size;
+    List< T > dates_;
+    size_t size_;
   public:
     Stack();
-    ~Stack();
-    Stack< T >& Stack(const Stack< T >& other);
-    Stack< T >& Stack(Stack< T >&& other);
+    ~Stack() = default;
+    Stack(const Stack< T >& other);
+    Stack(Stack< T >&& other);
     Stack< T >& operator=(const Stack< T >& other);
     Stack< T >& operator=(Stack< T >&& other);
 
-    void push(T rhs);
+    void push(const T& rhs);
+    void push(T&& rhs);
     T drop();
     T front() const;
-    bool empty() const;
-    bool size() const;
+    bool empty() const noexcept;
+    size_t size() const noexcept;
   };
+}
+
+namespace goltsov
+{
+  template< typename T >
+  Stack< T >::Stack():
+    size_(0)
+  {}
+  template< typename T >
+  Stack< T >::Stack(const Stack< T >& other):
+    dates_(other.dates_),
+    size_(other.size_)
+  {}
+  template< typename T >
+  Stack< T >::Stack(Stack< T >&& other):
+    dates_(std::move(other.dates_)),
+    size_(other.size_)
+  {}
+  template< typename T >
+  Stack< T >& Stack< T >::operator=(const Stack< T >& other)
+  {
+    dates_ = other.dates_;
+    size_ = other.size_;
+    return * this;
+  }
+  template< typename T >
+  Stack< T >& Stack< T >::operator=(Stack< T >&& other)
+  {
+    dates_ = std::move(other.dates_);
+    size_ = other.size_;
+    return * this;
+  }
+
+  template< typename T >
+  void Stack< T >::push(const T& rhs)
+  {
+    dates_.push_start(rhs);
+    size_ += 1;
+  }
+  template< typename T >
+  void Stack< T >::push(T&& rhs)
+  {
+    dates_.push_start(std::move(rhs));
+    size_ += 1;
+  }
+  template< typename T >
+  T Stack< T >::drop()
+  {
+    if (empty())
+    {
+      throw std::runtime_error("Stack is empty");
+    }
+    T a = std::move(* dates_.begin());
+    dates_.pop_start();
+    size_--;
+    return a;
+  }
+  template< typename T >
+  T Stack< T >::front() const
+  {
+    if (empty())
+    {
+      throw std::runtime_error("Stack is empty");
+    }
+    return (* dates_.begin());
+  }
+  template< typename T >
+  bool Stack< T >::empty() const noexcept
+  {
+    return size_ == 0;
+  }
+  template< typename T >
+  size_t Stack< T >::size() const noexcept
+  {
+    return size_;
+  }
 }
 #endif

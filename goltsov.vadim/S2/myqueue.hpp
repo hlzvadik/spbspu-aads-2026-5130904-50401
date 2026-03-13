@@ -12,9 +12,9 @@ namespace goltsov
     size_t size;
   public:
     Queue();
-    ~Queue();
-    Queue< T >& Queue(const Queue< T >& other);
-    Queue< T >& Queue(Queue< T >&& other);
+    ~Queue() default;
+    Queue(const Queue< T >& other);
+    Queue(Queue< T >&& other);
     Queue< T >& operator=(const Queue< T >& other);
     Queue< T >& operator=(Queue< T >&& other);
 
