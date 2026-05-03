@@ -7,7 +7,9 @@
 
 namespace goltsov
 {
-  long long int priority(std::string a)
+  using lli = long long int;
+
+  lli priority(std::string a)
   {
     if (a == "-" || a == "+")
     {
@@ -104,9 +106,9 @@ namespace goltsov
     return postfix;
   }
 
-  long long int convertStringToLLI(std::string a)
+  lli convertStringToLLI(std::string a)
   {
-    long long int res = 0;
+    lli res = 0;
     for (size_t i = 0; i < a.size(); ++i)
     {
       res = res * 10 + (a[i] - '0');
@@ -114,12 +116,12 @@ namespace goltsov
     return res;
   }
 
-  long long int eval(goltsov::Queue< std::string > postfix)
+  lli eval(goltsov::Queue< std::string > postfix)
   {
-    goltsov::Stack< long long int > result;
+    goltsov::Stack< lli > result;
     while (!postfix.empty())
     {
-      long long int a, b;
+      lli a, b;
       std::string operation;
       while (!postfix.empty() && isdigit(postfix.front()[0]))
       {

@@ -57,6 +57,9 @@ namespace goltsov
     List< T >& operator=(const List< T >& other);
     List< T >& operator=(List< T >&& other);
 
+    void swap(List< T >&);
+    Node< T >** getFake();
+
     LIter< T > begin() noexcept;
     LCIter< T > begin() const noexcept;
     LIter< T > end() noexcept;
@@ -371,6 +374,17 @@ namespace goltsov
       fake->next = temp->next;
       delete temp;
     }
+  }
+
+  template< class T >
+  void swap(List< T >& other)
+  {
+    std::swap(fake, (* other.getFake()));
+  }
+  template< class T >
+  Node< T >** getFake()
+  {
+    return &fake;
   }
 }
 #endif
