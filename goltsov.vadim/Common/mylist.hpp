@@ -377,12 +377,12 @@ namespace goltsov
   }
 
   template< class T >
-  void swap(List< T >& other)
+  void List< T >::swap(List< T >& other)
   {
     std::swap(fake, (* other.getFake()));
   }
   template< class T >
-  Node< T >** getFake()
+  Node< T >** List< T >::getFake()
   {
     return &fake;
   }

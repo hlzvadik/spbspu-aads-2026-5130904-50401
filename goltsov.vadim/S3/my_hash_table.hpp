@@ -2,7 +2,7 @@
 #define MY_HASH_TABLE_HPP
 #include <cstddef>
 #include <stdexcept>
-#include <../Common/mylist.hpp>
+#include "../Common/mylist.hpp"
 
 namespace goltsov
 {
@@ -16,6 +16,12 @@ namespace goltsov
     NodeHashTable():
       is_valid_(false)
     {}
+
+    NodeHashTable(const Key& k, const Value& v, bool valid):
+      key_(k),
+      value_(v),
+      is_valid_(valid)
+    {}
   };
 
   template< class Key, class Value, size_t CAPACITY >
@@ -23,6 +29,9 @@ namespace goltsov
   {
     NodeHashTable< Key, Value > node_[CAPACITY];
   };
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  class HashTable;
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   class HashTableIterator
@@ -49,7 +58,7 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   class HashTableConstIterator
   {
-    const HashTable< class Key, class Value, class Hash, class Equal, size_t CAPACITY >* hash_table_;
+    const HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table_;
     size_t ind_;
     size_t ind_backet_;
     LIter< NodeHashTable< Key, Value > > overflow_iterator_;
@@ -122,7 +131,7 @@ namespace goltsov
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable():
     size_(1),
     data_(new Bucket< Key, Value, CAPACITY >[1]),
-    overflow_(List())
+    overflow_(List< NodeHashTable< Key, Value > >())
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -183,7 +192,7 @@ namespace goltsov
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable(size_t size):
     size_(size),
     data_(new Bucket< Key, Value, CAPACITY >[size]),
-    overflow_(List())
+    overflow_(List< NodeHashTable< Key, Value > >())
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -199,7 +208,7 @@ namespace goltsov
   {
     Hash hasher;
     Equal e;
-    size_t ind = hasher.hash(key) % size_;
+    size_t ind = hasher(key) % size_;
     for (size_t i = 0; i < CAPACITY; ++i)
     {
       if (data_[ind].node_[i].is_valid_ && e(data_[ind].node_[i].key_, key))
@@ -243,7 +252,7 @@ namespace goltsov
   {
     Hash hasher;
     Equal e;
-    size_t ind = hasher.hash(key) % size_;
+    size_t ind = hasher(key) % size_;
     for (size_t i = 0; i < CAPACITY; ++i)
     {
       if (data_[ind].node_[i].is_valid_ && e(data_[ind].node_[i].key_, key))
@@ -287,7 +296,7 @@ namespace goltsov
   {
     Hash hasher;
     Equal e;
-    size_t ind = hasher.hash(key) % size_;
+    size_t ind = hasher(key) % size_;
     for (size_t i = 0; i < CAPACITY; ++i)
     {
       if (data_[ind].node_[i].is_valid_ && e(data_[ind].node_[i].key_, key))
@@ -349,7 +358,8 @@ namespace goltsov
   {
     Hash hasher;
     Equal e;
-    size_t ind = hasher.hash(key) % size_;
+    if (size_ == 0) return false;
+    size_t ind = hasher(key) % size_;
     for (size_t i = 0; i < CAPACITY; ++i)
     {
       if (data_[ind].node_[i].is_valid_ && e(key, data_[ind].node_[i].key_))
@@ -357,12 +367,14 @@ namespace goltsov
         return true;
       }
     }
-    for (HashTableIterator< Key, Value, Hash, Equal, CAPACITY > it (this, size_, CAPACITY, overflow_.begin()); it != end(); ++it)
+    LCIter< NodeHashTable< Key, Value > > it = overflow_.begin();
+    while (it.hasNext())
     {
-      if (e(key, (* it).key_))
+      if ((*it).is_valid_ && e(key, (*it).key_))
       {
         return true;
       }
+      it = it.next();
     }
     return false;
   }
@@ -372,20 +384,23 @@ namespace goltsov
   {
     Hash hasher;
     Equal e;
-    size_t ind = hasher.hash(key) % size_;
+    if (size_ == 0) throw std::logic_error("No such key");
+    size_t ind = hasher(key) % size_;
     for (size_t i = 0; i < CAPACITY; ++i)
     {
       if (data_[ind].node_[i].is_valid_ && e(key, data_[ind].node_[i].key_))
       {
-        return data_[ind].node_[i].value_;
+        return const_cast<Value&>(data_[ind].node_[i].value_);
       }
     }
-    for (HashTableIterator< Key, Value, Hash, Equal, CAPACITY > it (this, size_, CAPACITY, overflow_.begin()); it != end(); ++it)
+    LCIter< NodeHashTable< Key, Value > > it = overflow_.begin();
+    while (it.hasNext())
     {
-      if (e(key, (* it).key_))
+      if ((*it).is_valid_ && e(key, (*it).key_))
       {
-        return (* it).value_;
+        return const_cast<Value&>((*it).value_);
       }
+      it = it.next();
     }
     throw std::logic_error("No such key");
   }
