@@ -2,7 +2,47 @@
 #define MY_HASH_TABLE_HPP
 #include <cstddef>
 #include <stdexcept>
+#include <boost/uuid/detail/sha1.hpp>
 #include "../Common/mylist.hpp"
+
+namespace goltsov
+{
+  template< class T >
+  struct Sha1Hasher
+  {
+    size_t operator()(const T& key) const
+    {
+      boost::uuids::detail::sha1 sha1;
+      sha1.process_bytes(&key, sizeof(T));
+      unsigned int digest[5];
+      sha1.get_digest(digest);
+      size_t hash = static_cast< size_t >(digest[0]);
+      return hash;
+    }
+  };
+
+  template <>
+  struct Sha1Hasher<std::string>
+  {
+    size_t operator()(const std::string& key) const
+    {
+      boost::uuids::detail::sha1 sha1;
+      sha1.process_bytes(key.data(), key.size());
+      unsigned int digest[5];
+      sha1.get_digest(digest);
+      return static_cast<size_t>(digest[0]);
+    }
+  };
+
+  template< class T >
+  struct Equal
+  {
+    bool operator()(const T& a, const T& b)
+    {
+      return a == b;
+    }
+  };
+}
 
 namespace goltsov
 {
@@ -79,6 +119,7 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   class HashTable
   {
+    size_t count_valid_;
     size_t size_;
     Bucket< Key, Value, CAPACITY >* data_;
     List< NodeHashTable< Key, Value > > overflow_;
@@ -101,6 +142,7 @@ namespace goltsov
 
     size_t size() const;
     size_t count() const;
+    size_t countValid() const;
 
     bool has(const Key&) const;
     Value& get(const Key&) const;
@@ -113,6 +155,7 @@ namespace goltsov
     HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > begin() const;
     HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > end() const;
 
+    size_t& getCountValid();
     size_t& getSize();
     Bucket< Key, Value, CAPACITY >** getData();
     List< NodeHashTable< Key, Value > >& getOverflow();
@@ -129,6 +172,7 @@ namespace goltsov
 {
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable():
+    count_valid_(0),
     size_(1),
     data_(new Bucket< Key, Value, CAPACITY >[1]),
     overflow_(List< NodeHashTable< Key, Value > >())
@@ -144,6 +188,7 @@ namespace goltsov
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable(const HashTable< Key, Value, Hash, Equal, CAPACITY >& other):
+    count_valid_(0),
     size_(other.getSize())
   {
     HashTable< Key, Value, Hash, Equal, CAPACITY > new_table (other.getSize());
@@ -156,9 +201,10 @@ namespace goltsov
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable(HashTable< Key, Value, Hash, Equal, CAPACITY >&& other):
+    count_valid_(other.getCountValid()),
     size_(other.getSize())
   {
-    data_ = other.data_;
+    data_ = (* other.getData());
     * other.getData() = nullptr;
     other.getSize() = 0;
     overflow_ = std::move(other.getOverflow());
@@ -167,6 +213,7 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >& HashTable< Key, Value, Hash, Equal, CAPACITY >::operator=(const HashTable< Key, Value, Hash, Equal, CAPACITY >& other)
   {
+    count_valid_ = 0;
     size_ = other.getSize();
     HashTable< Key, Value, Hash, Equal, CAPACITY > new_table (other.getSize());
     for (HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > it = other.begin(); it != other.end(); ++it)
@@ -180,8 +227,9 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >& HashTable< Key, Value, Hash, Equal, CAPACITY >::operator=(HashTable< Key, Value, Hash, Equal, CAPACITY >&& other)
   {
+    count_valid_ = other.getCountValid();
     size_ = other.getSize();
-    data_ = other.data_;
+    data_ = (* other.getData());
     * other.getData() = nullptr;
     other.getSize() = 0;
     overflow_ = std::move(other.getOverflow());
@@ -190,6 +238,7 @@ namespace goltsov
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable(size_t size):
+    count_valid_(0),
     size_(size),
     data_(new Bucket< Key, Value, CAPACITY >[size]),
     overflow_(List< NodeHashTable< Key, Value > >())
@@ -198,6 +247,7 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   void HashTable<Key, Value, Hash, Equal, CAPACITY >::swap(HashTable< Key, Value, Hash, Equal, CAPACITY >& other)
   {
+    std::swap(count_valid_, other.getCountValid());
     std::swap(size_, other.getSize());
     std::swap(data_, * other.getData());
     overflow_.swap(other.getOverflow());
@@ -220,6 +270,7 @@ namespace goltsov
         data_[ind].node_[i].key_ = key;
         data_[ind].node_[i].value_ = value;
         data_[ind].node_[i].is_valid_ = true;
+        count_valid_++;
         return;
       }
     }
@@ -236,6 +287,7 @@ namespace goltsov
         (*it_now).key_ = key;
         (*it_now).value_ = value;
         (*it_now).is_valid_ = true;
+        count_valid_++;
         return;
       }
       it_now = it_now.next();
@@ -245,6 +297,8 @@ namespace goltsov
       }
     }
     overflow_.insert(it_now_prev, {key, value, true});
+    count_valid_++;
+    return;
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -264,6 +318,7 @@ namespace goltsov
         data_[ind].node_[i].key_ = key;
         data_[ind].node_[i].value_ = std::move(value);
         data_[ind].node_[i].is_valid_ = true;
+        count_valid_++;
         return;
       }
     }
@@ -280,6 +335,7 @@ namespace goltsov
         (*it_now).key_ = key;
         (*it_now).value_ = std::move(value);
         (*it_now).is_valid_ = true;
+        count_valid_++;
         return;
       }
       it_now = it_now.next();
@@ -289,6 +345,8 @@ namespace goltsov
       }
     }
     overflow_.insert(it_now_prev, {key, std::move(value), true});
+    count_valid_++;
+    return;
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -302,6 +360,7 @@ namespace goltsov
       if (data_[ind].node_[i].is_valid_ && e(data_[ind].node_[i].key_, key))
       {
         data_[ind].node_[i].is_valid_ = false;
+        count_valid_--;
         return data_[ind].node_[i].value_;
       }
     }
@@ -311,6 +370,7 @@ namespace goltsov
       if ((*it_now).is_valid_ && e((*it_now).key_, key))
       {
         (*it_now).is_valid_ = false;
+        count_valid_--;
         return (*it_now).value_;
       }
     }
@@ -339,6 +399,7 @@ namespace goltsov
     delete[] data_;
     data_ = new Bucket< Key, Value, CAPACITY >[size_];
     overflow_.clear();
+    count_valid_ = 0;
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -351,6 +412,12 @@ namespace goltsov
   size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::count() const
   {
     return size_;
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::countValid() const
+  {
+    return count_valid_;
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -493,6 +560,12 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  size_t& HashTable< Key, Value, Hash, Equal, CAPACITY >::getCountValid()
+  {
+    return count_valid_;
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   Bucket< Key, Value, CAPACITY >** HashTable< Key, Value, Hash, Equal, CAPACITY >::getData()
   {
     return &data_;
@@ -617,12 +690,6 @@ namespace goltsov
       return hash_table_->data_[ind_].node_[ind_backet_];
     }
   }
-
-
-
-
-
-
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableConstIterator():
