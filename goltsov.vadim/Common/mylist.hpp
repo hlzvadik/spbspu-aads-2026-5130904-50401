@@ -403,6 +403,7 @@ namespace goltsov
   {
     std::swap(fake, (* other.getFake()));
   }
+
   template< class T >
   Node< T >** List< T >::getFake()
   {

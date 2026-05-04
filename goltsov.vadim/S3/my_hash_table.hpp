@@ -105,18 +105,18 @@ namespace goltsov
     template<class K, class V, class H, class E, size_t C>
     friend bool operator!=(const HashTableConstIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
   public:
-    HashTableIterator();
-    HashTableIterator(HashTable < Key, Value, Hash, Equal, CAPACITY >*, size_t, size_t, LIter< NodeHashTable< Key, Value > >);
+    HashTableIterator() noexcept;
+    HashTableIterator(HashTable < Key, Value, Hash, Equal, CAPACITY >*, size_t, size_t, LIter< NodeHashTable< Key, Value > >) noexcept;
 
-    Key& key() const;
-    Value& value();
+    Key& key() const noexcept;
+    Value& value() noexcept;
     HashTableIterator< Key, Value, Hash, Equal, CAPACITY > next() const;
-    bool hasNext() const;
+    bool hasNext() const noexcept;
 
-    void operator++();
+    HashTableIterator< Key, Value, Hash, Equal, CAPACITY > operator++();
 
-    NodeHashTable< Key, Value >& operator->() const;
-    NodeHashTable< Key, Value >& operator*() const;
+    NodeHashTable< Key, Value >* operator->() const noexcept;
+    NodeHashTable< Key, Value >& operator*() const noexcept;
   };
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -145,18 +145,18 @@ namespace goltsov
   template<class K, class V, class H, class E, size_t C>
   friend bool operator!=(const HashTableConstIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
   public:
-    HashTableConstIterator();
-    HashTableConstIterator(const HashTable < Key, Value, Hash, Equal, CAPACITY >*, size_t, size_t, LCIter< NodeHashTable< Key, Value > >);
+    HashTableConstIterator() noexcept;
+    HashTableConstIterator(const HashTable < Key, Value, Hash, Equal, CAPACITY >*, size_t, size_t, LCIter< NodeHashTable< Key, Value > >) noexcept;
 
-    const Key& key() const;
-    const Value& value() const;
+    const Key& key() const noexcept;
+    const Value& value() const noexcept;
     HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > next() const;
-    bool hasNext() const;
+    bool hasNext() const noexcept;
 
-    const NodeHashTable< Key, Value >& operator->() const;
-    const NodeHashTable< Key, Value >& operator*() const;
+    const NodeHashTable< Key, Value >* operator->() const noexcept;
+    const NodeHashTable< Key, Value >& operator*() const noexcept;
 
-    void operator++();
+    HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > operator++();
   };
 
 
@@ -179,7 +179,7 @@ namespace goltsov
     HashTable< Key, Value, Hash, Equal, CAPACITY >& operator=(HashTable< Key, Value, Hash, Equal, CAPACITY >&&);
     HashTable(size_t);
 
-    void swap(HashTable< Key, Value, Hash, Equal, CAPACITY >&);
+    void swap(HashTable< Key, Value, Hash, Equal, CAPACITY >&) noexcept;
 
     void add(const Key&, const Value&);
     void add(const Key&, Value&&);
@@ -187,11 +187,11 @@ namespace goltsov
     void rehash(const size_t&);
     void clear();
 
-    size_t size() const;
-    size_t count() const;
-    size_t countValid() const;
+    size_t size() const noexcept;
+    size_t count() const noexcept;
+    size_t countValid() const noexcept;
 
-    bool has(const Key&) const;
+    bool has(const Key&) const noexcept;
     Value& get(const Key&) const;
     Value& operator[](const Key&);
     const Value& operator[](const Key&) const;
@@ -276,7 +276,7 @@ namespace goltsov
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  void HashTable<Key, Value, Hash, Equal, CAPACITY >::swap(HashTable< Key, Value, Hash, Equal, CAPACITY >& other)
+  void HashTable<Key, Value, Hash, Equal, CAPACITY >::swap(HashTable< Key, Value, Hash, Equal, CAPACITY >& other) noexcept
   {
     std::swap(count_valid_, other.count_valid_);
     std::swap(size_, other.size_);
@@ -433,25 +433,25 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::size() const
+  size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::size() const noexcept
   {
     return size_ * CAPACITY;
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::count() const
+  size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::count() const noexcept
   {
     return size_;
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::countValid() const
+  size_t HashTable< Key, Value, Hash, Equal, CAPACITY >::countValid() const noexcept
   {
     return count_valid_;
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  bool HashTable< Key, Value, Hash, Equal, CAPACITY >::has(const Key& key) const
+  bool HashTable< Key, Value, Hash, Equal, CAPACITY >::has(const Key& key) const noexcept
   {
     Hash hasher;
     Equal e;
@@ -586,7 +586,7 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableIterator():
+  HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableIterator() noexcept:
     hash_table_(nullptr),
     ind_(0),
     ind_backet_(0),
@@ -594,7 +594,7 @@ namespace goltsov
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableIterator(HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table, size_t ind, size_t ind_backet, LIter< NodeHashTable< Key, Value > > overflow_it):
+  HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableIterator(HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table, size_t ind, size_t ind_backet, LIter< NodeHashTable< Key, Value > > overflow_it) noexcept:
     hash_table_(hash_table),
     ind_(ind),
     ind_backet_(ind_backet),
@@ -602,7 +602,7 @@ namespace goltsov
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  Key& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::key() const
+  Key& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::key() const noexcept
   {
     if (overflow_iterator_)
     {
@@ -615,7 +615,7 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  Value& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::value()
+  Value& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::value() noexcept
   {
     if (overflow_iterator_)
     {
@@ -675,7 +675,7 @@ namespace goltsov
     }
   }
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  bool HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::hasNext() const
+  bool HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::hasNext() const noexcept
   {
     if((* this) == hash_table_->end())
     {
@@ -687,12 +687,26 @@ namespace goltsov
     }
   }
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  void HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::operator++()
+  HashTableIterator< Key, Value, Hash, Equal, CAPACITY > HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::operator++()
   {
     (* this) = this->next();
+    return (* this);
   }
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  NodeHashTable< Key, Value >& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::operator->() const
+  NodeHashTable< Key, Value >* HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::operator->() const noexcept
+  {
+    if (overflow_iterator_)
+    {
+      return &(* overflow_iterator_);
+    }
+    else
+    {
+      return &(hash_table_->data_[ind_].node_[ind_backet_]);
+    }
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  NodeHashTable< Key, Value >& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::operator*() const noexcept
   {
     if (overflow_iterator_)
     {
@@ -705,20 +719,7 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  NodeHashTable< Key, Value >& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::operator*() const
-  {
-    if (overflow_iterator_)
-    {
-      return (* overflow_iterator_);
-    }
-    else
-    {
-      return hash_table_->data_[ind_].node_[ind_backet_];
-    }
-  }
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableConstIterator():
+  HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableConstIterator() noexcept:
     hash_table_(nullptr),
     ind_(0),
     ind_backet_(0),
@@ -726,7 +727,7 @@ namespace goltsov
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableConstIterator(const HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table, size_t ind, size_t ind_backet, LCIter< NodeHashTable< Key, Value > > overflow_it):
+  HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableConstIterator(const HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table, size_t ind, size_t ind_backet, LCIter< NodeHashTable< Key, Value > > overflow_it) noexcept:
     hash_table_(hash_table),
     ind_(ind),
     ind_backet_(ind_backet),
@@ -734,7 +735,7 @@ namespace goltsov
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  const Key& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::key() const
+  const Key& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::key() const noexcept
   {
     if (overflow_iterator_)
     {
@@ -747,7 +748,7 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  const Value& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::value() const
+  const Value& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::value() const noexcept
   {
     if (overflow_iterator_)
     {
@@ -807,7 +808,7 @@ namespace goltsov
     }
   }
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  bool HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::hasNext() const
+  bool HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::hasNext() const noexcept
   {
     if((* this) == hash_table_->end())
     {
@@ -820,7 +821,20 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  const NodeHashTable< Key, Value >& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::operator->() const
+  const NodeHashTable< Key, Value >* HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::operator->() const noexcept
+  {
+    if (overflow_iterator_)
+    {
+      return &(* overflow_iterator_);
+    }
+    else
+    {
+      return &(hash_table_->data_[ind_].node_[ind_backet_]);
+    }
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  const NodeHashTable< Key, Value >& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::operator*() const noexcept
   {
     if (overflow_iterator_)
     {
@@ -833,22 +847,10 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  const NodeHashTable< Key, Value >& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::operator*() const
-  {
-    if (overflow_iterator_)
-    {
-      return (* overflow_iterator_);
-    }
-    else
-    {
-      return hash_table_->data_[ind_].node_[ind_backet_];
-    }
-  }
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  void HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::operator++()
+  HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::operator++()
   {
     (* this) = this->next();
+    return (* this);
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >

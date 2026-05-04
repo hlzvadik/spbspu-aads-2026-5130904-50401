@@ -2,10 +2,12 @@
 #include "my_hash_table.hpp"
 
 using ht_ci4 = goltsov::HashTable< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char >, 4 >;
+using ht_ci4_it = goltsov::HashTableIterator< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char >, 4 >;
+using ht_ci4_cit = goltsov::HashTableConstIterator< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char >, 4 >;
 
 BOOST_AUTO_TEST_SUITE(HashTable_suite)
 
-BOOST_AUTO_TEST_CASE(constructor_destructor_test)
+BOOST_AUTO_TEST_CASE(constructor_test)
 {
   ht_ci4 t;
   BOOST_CHECK(t.size() == 4 && t.countValid() == 0 && t.count() == 1);
@@ -83,7 +85,6 @@ BOOST_AUTO_TEST_CASE(size_count_countValid_test)
   BOOST_CHECK(t.size() == 16 && t.count() == 4 && t.countValid() == 2);
 }
 
-
 BOOST_AUTO_TEST_CASE(has_test)
 {
   ht_ci4 t;
@@ -131,6 +132,61 @@ BOOST_AUTO_TEST_CASE(end_test)
   BOOST_CHECK(tc.begin() != t.end() && tc1.begin() == tc1.end());
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(Iterators_suite)
+
+BOOST_AUTO_TEST_CASE(constructor_test)
+{
+  ht_ci4 t;
+  t['a'] = 1;
+  ht_ci4_it i = t.begin();
+  const ht_ci4 t1 = t;
+  ht_ci4_cit ci = t1.begin();
+  BOOST_CHECK(i.value() == 1 && ci.value() == 1);
+}
+
+BOOST_AUTO_TEST_CASE(key_value_test)
+{
+  ht_ci4 t;
+  t['a'] = 1;
+  ht_ci4_it i = t.begin();
+  const ht_ci4 t1 = t;
+  ht_ci4_cit ci = t1.begin();
+  BOOST_CHECK(i.value() == 1 && ci.value() == 1 && i.key() == 'a' && ci.key() == 'a');
+}
+
+BOOST_AUTO_TEST_CASE(next_hasNext_test)
+{
+  ht_ci4 t;
+  t['a'] = 1;
+  ht_ci4_it i = t.begin();
+  const ht_ci4 t1 = t;
+  ht_ci4_cit ci = t1.begin();
+  BOOST_CHECK(i.next() == t.end() && ci.next() == t1.end());
+  BOOST_CHECK(i.hasNext() && !i.next().hasNext() && ci.hasNext() && !ci.next().hasNext());
+}
+
+BOOST_AUTO_TEST_CASE(operator_plus_plus_test)
+{
+  ht_ci4 t;
+  t['a'] = 1;
+  ht_ci4_it i = t.begin();
+  ht_ci4_it i_next = i.next();
+  const ht_ci4 t1 = t;
+  ht_ci4_cit ci = t1.begin();
+  ht_ci4_cit ci_next = ci.next();
+  BOOST_CHECK(i_next == ++i && i == t.end() && ci_next == ++ci && ci == t1.end());
+}
+
+BOOST_AUTO_TEST_CASE(dereference_operators_test)
+{
+  ht_ci4 t;
+  t['a'] = 1;
+  ht_ci4_it i = t.begin();
+  const ht_ci4 t1 = t;
+  ht_ci4_cit ci = t1.begin();
+  BOOST_CHECK((* i).value_ == 1 && i->value_ == 1 && (* ci).value_ == 1 && ci->value_ == 1);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
