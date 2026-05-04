@@ -74,12 +74,36 @@ namespace goltsov
   class HashTable;
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  class HashTableConstIterator;
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  class HashTableIterator;
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   class HashTableIterator
   {
     HashTable < Key, Value, Hash, Equal, CAPACITY >* hash_table_;
     size_t ind_;
     size_t ind_backet_;
     LIter< NodeHashTable< Key, Value > > overflow_iterator_;
+
+    template<class K, class V, class H, class E, size_t C>
+    friend bool operator==(const HashTableIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
+
+    template<class K, class V, class H, class E, size_t C>
+    friend bool operator!=(const HashTableIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
+
+    template<class K, class V, class H, class E, size_t C>
+    friend bool operator==(const HashTableIterator<K,V,H,E,C>&, const HashTableConstIterator<K,V,H,E,C>&);
+
+    template<class K, class V, class H, class E, size_t C>
+    friend bool operator!=(const HashTableIterator<K,V,H,E,C>&, const HashTableConstIterator<K,V,H,E,C>&);
+
+    template<class K, class V, class H, class E, size_t C>
+    friend bool operator==(const HashTableConstIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
+
+    template<class K, class V, class H, class E, size_t C>
+    friend bool operator!=(const HashTableConstIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
   public:
     HashTableIterator();
     HashTableIterator(HashTable < Key, Value, Hash, Equal, CAPACITY >*, size_t, size_t, LIter< NodeHashTable< Key, Value > >);
@@ -101,10 +125,28 @@ namespace goltsov
     const HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table_;
     size_t ind_;
     size_t ind_backet_;
-    LIter< NodeHashTable< Key, Value > > overflow_iterator_;
+    mutable LCIter< NodeHashTable< Key, Value > > overflow_iterator_;
+
+  template<class K, class V, class H, class E, size_t C>
+  friend bool operator==(const HashTableConstIterator<K,V,H,E,C>&, const HashTableConstIterator<K,V,H,E,C>&);
+
+  template<class K, class V, class H, class E, size_t C>
+  friend bool operator!=(const HashTableConstIterator<K,V,H,E,C>&, const HashTableConstIterator<K,V,H,E,C>&);
+
+  template<class K, class V, class H, class E, size_t C>
+  friend bool operator==(const HashTableIterator<K,V,H,E,C>&, const HashTableConstIterator<K,V,H,E,C>&);
+
+  template<class K, class V, class H, class E, size_t C>
+  friend bool operator!=(const HashTableIterator<K,V,H,E,C>&, const HashTableConstIterator<K,V,H,E,C>&);
+
+  template<class K, class V, class H, class E, size_t C>
+  friend bool operator==(const HashTableConstIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
+
+  template<class K, class V, class H, class E, size_t C>
+  friend bool operator!=(const HashTableConstIterator<K,V,H,E,C>&, const HashTableIterator<K,V,H,E,C>&);
   public:
     HashTableConstIterator();
-    HashTableConstIterator(const HashTable < Key, Value, Hash, Equal, CAPACITY >*, size_t, size_t, LIter< NodeHashTable< Key, Value > >);
+    HashTableConstIterator(const HashTable < Key, Value, Hash, Equal, CAPACITY >*, size_t, size_t, LCIter< NodeHashTable< Key, Value > >);
 
     const Key& key() const;
     const Value& value() const;
@@ -113,6 +155,8 @@ namespace goltsov
 
     const NodeHashTable< Key, Value >& operator->() const;
     const NodeHashTable< Key, Value >& operator*() const;
+
+    void operator++();
   };
 
 
@@ -123,6 +167,9 @@ namespace goltsov
     size_t size_;
     Bucket< Key, Value, CAPACITY >* data_;
     List< NodeHashTable< Key, Value > > overflow_;
+
+    friend class HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >;
+    friend class HashTableIterator< Key, Value, Hash, Equal, CAPACITY >;
   public:
     HashTable();
     ~HashTable();
@@ -154,18 +201,7 @@ namespace goltsov
 
     HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > begin() const;
     HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > end() const;
-
-    size_t& getCountValid();
-    size_t& getSize();
-    Bucket< Key, Value, CAPACITY >** getData();
-    List< NodeHashTable< Key, Value > >& getOverflow();
   };
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  bool operator==(HashTableIterator< Key, Value, Hash, Equal, CAPACITY > lhs, HashTableIterator< Key, Value, Hash, Equal, CAPACITY > rhs);
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  bool operator!=(HashTableIterator< Key, Value, Hash, Equal, CAPACITY > lhs, HashTableIterator< Key, Value, Hash, Equal, CAPACITY > rhs);
 }
 
 namespace goltsov
@@ -189,9 +225,11 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable(const HashTable< Key, Value, Hash, Equal, CAPACITY >& other):
     count_valid_(0),
-    size_(other.getSize())
+    size_(1),
+    data_(new Bucket< Key, Value, CAPACITY >[1]),
+    overflow_(List< NodeHashTable< Key, Value > >())
   {
-    HashTable< Key, Value, Hash, Equal, CAPACITY > new_table (other.getSize());
+    HashTable< Key, Value, Hash, Equal, CAPACITY > new_table (other.count());
     for (HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > it = other.begin(); it != other.end(); ++it)
     {
       new_table.add(it.key(), it.value());
@@ -201,25 +239,18 @@ namespace goltsov
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >::HashTable(HashTable< Key, Value, Hash, Equal, CAPACITY >&& other):
-    count_valid_(other.getCountValid()),
-    size_(other.getSize())
+    count_valid_(0),
+    size_(1),
+    data_(new Bucket< Key, Value, CAPACITY >[1]),
+    overflow_(List< NodeHashTable< Key, Value > >())
   {
-    data_ = (* other.getData());
-    * other.getData() = nullptr;
-    other.getSize() = 0;
-    overflow_ = std::move(other.getOverflow());
+    swap(other);
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >& HashTable< Key, Value, Hash, Equal, CAPACITY >::operator=(const HashTable< Key, Value, Hash, Equal, CAPACITY >& other)
   {
-    count_valid_ = 0;
-    size_ = other.getSize();
-    HashTable< Key, Value, Hash, Equal, CAPACITY > new_table (other.getSize());
-    for (HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > it = other.begin(); it != other.end(); ++it)
-    {
-      new_table.add(it.key(), it.value());
-    }
+    HashTable< Key, Value, Hash, Equal, CAPACITY > new_table (other);
     swap(new_table);
     return * this;
   }
@@ -227,12 +258,12 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTable< Key, Value, Hash, Equal, CAPACITY >& HashTable< Key, Value, Hash, Equal, CAPACITY >::operator=(HashTable< Key, Value, Hash, Equal, CAPACITY >&& other)
   {
-    count_valid_ = other.getCountValid();
-    size_ = other.getSize();
-    data_ = (* other.getData());
-    * other.getData() = nullptr;
-    other.getSize() = 0;
-    overflow_ = std::move(other.getOverflow());
+    count_valid_ = other.count_valid_;
+    size_ = other.count();
+    data_ = (* other.data_);
+    * other.data_ = nullptr;
+    other.size_ = 0;
+    overflow_ = std::move(other.overflow_);
     return * this;
   }
 
@@ -247,10 +278,10 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   void HashTable<Key, Value, Hash, Equal, CAPACITY >::swap(HashTable< Key, Value, Hash, Equal, CAPACITY >& other)
   {
-    std::swap(count_valid_, other.getCountValid());
-    std::swap(size_, other.getSize());
-    std::swap(data_, * other.getData());
-    overflow_.swap(other.getOverflow());
+    std::swap(count_valid_, other.count_valid_);
+    std::swap(size_, other.size_);
+    std::swap(data_, other.data_);
+    overflow_.swap(other.overflow_);
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -380,7 +411,6 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   void HashTable< Key, Value, Hash, Equal, CAPACITY >::rehash(const size_t& new_size)
   {
-    Hash hasher;
     HashTable< Key, Value, Hash, Equal, CAPACITY > new_table(new_size);
     for (HashTableIterator< Key, Value, Hash, Equal, CAPACITY > it = begin(); it != end(); ++it)
     {
@@ -502,7 +532,7 @@ namespace goltsov
       {
         if (data_[i].node_[j].is_valid_)
         {
-          return HashTableIterator(this, i, j, LIter< NodeHashTable< Key, Value > >(nullptr));
+          return HashTableIterator< Key, Value, Hash, Equal, CAPACITY >(this, i, j, LIter< NodeHashTable< Key, Value > >(nullptr));
         }
       }
     }
@@ -511,16 +541,17 @@ namespace goltsov
     {
       if ((* overflow_now).is_valid_)
       {
-        return HashTableIterator(this, size_, CAPACITY, overflow_now);
+        return HashTableIterator< Key, Value, Hash, Equal, CAPACITY >(this, size_, 0, overflow_now);
       }
+      overflow_now = overflow_now.next();
     }
-    return HashTableIterator(this, size_, CAPACITY, overflow_now);
+    return end();
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTableIterator< Key, Value, Hash, Equal, CAPACITY > HashTable< Key, Value, Hash, Equal, CAPACITY >::end()
   {
-    return HashTableIterator(this, size_, CAPACITY, overflow_.end());
+    return HashTableIterator< Key, Value, Hash, Equal, CAPACITY >(this, size_, 0, overflow_.end());
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -532,49 +563,26 @@ namespace goltsov
       {
         if (data_[i].node_[j].is_valid_)
         {
-          return HashTableIterator(this, i, j, LIter< NodeHashTable< Key, Value > >(nullptr));
+          return HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >(this, i, j, LCIter< NodeHashTable< Key, Value > >(nullptr));
         }
       }
     }
-    LIter< NodeHashTable< Key, Value > > overflow_now = overflow_.begin();
+    LCIter< NodeHashTable< Key, Value > > overflow_now = overflow_.begin();
     while(overflow_now.hasNext())
     {
       if ((* overflow_now).is_valid_)
       {
-        return HashTableIterator(this, size_, CAPACITY, overflow_now);
+        return HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >(this, size_, 0, overflow_now);
       }
+      overflow_now = overflow_now.next();
     }
-    return HashTableIterator(this, size_, CAPACITY, overflow_now);
+    return end();
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY > HashTable< Key, Value, Hash, Equal, CAPACITY >::end() const
   {
-    return HashTableIterator(this, size_, CAPACITY, overflow_.end());
-  }
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  size_t& HashTable< Key, Value, Hash, Equal, CAPACITY >::getSize()
-  {
-    return size_;
-  }
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  size_t& HashTable< Key, Value, Hash, Equal, CAPACITY >::getCountValid()
-  {
-    return count_valid_;
-  }
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  Bucket< Key, Value, CAPACITY >** HashTable< Key, Value, Hash, Equal, CAPACITY >::getData()
-  {
-    return &data_;
-  }
-
-  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  List< NodeHashTable< Key, Value > >& HashTable< Key, Value, Hash, Equal, CAPACITY >::getOverflow()
-  {
-    return overflow_;
+    return HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >(this, size_, 0, overflow_.end());
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -593,6 +601,18 @@ namespace goltsov
     overflow_iterator_(overflow_it)
   {}
 
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  Key& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::key() const
+  {
+    if (overflow_iterator_)
+    {
+      return (* overflow_iterator_).key_;
+    }
+    else
+    {
+      return hash_table_->data_[ind_].node_[ind_backet_].key_;
+    }
+  }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   Value& HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::value()
@@ -612,53 +632,59 @@ namespace goltsov
   {
     if (overflow_iterator_)
     {
-      while (overflow_iterator_.hasNext())
+      LIter< NodeHashTable< Key, Value > > it = overflow_iterator_;
+      while (it.hasNext())
       {
-        overflow_iterator_ = overflow_iterator_.next();
-        if ((* overflow_iterator_).is_valid_)
+        it = it.next();
+        if (it && (*it).is_valid_)
         {
-          return HashTableIterator(hash_table_, ind_, ind_backet_, overflow_iterator_);
+          return HashTableIterator(hash_table_, hash_table_->count(), 0, it);
         }
       }
-      throw std::runtime_error("No next element");
+      return hash_table_->end();
     }
     else
     {
-      for (size_t i = ind_; i < hash_table_->count(); ++i)
+      for (size_t j = ind_backet_ + 1; j < CAPACITY; ++j)
       {
-        for (size_t j = ind_backet_ + 1; j < CAPACITY; ++j)
+        if (hash_table_->data_[ind_].node_[j].is_valid_)
         {
-          if ((* (hash_table_->getData()))[i].node_[j].is_valid_)
+          return HashTableIterator(hash_table_, ind_, j, LIter< NodeHashTable< Key, Value > >(nullptr));
+        }
+      }
+      for (size_t i = ind_ + 1; i < hash_table_->count(); ++i)
+      {
+        for (size_t j = 0; j < CAPACITY; ++j)
+        {
+          if (hash_table_->data_[i].node_[j].is_valid_)
           {
-            return HashTableIterator(hash_table_, i, j, overflow_iterator_);
+            return HashTableIterator(hash_table_, i, j, LIter< NodeHashTable< Key, Value > >(nullptr));
           }
         }
       }
-      overflow_iterator_ = hash_table_->overflow_.begin();
-      while (overflow_iterator_.hasNext())
+      LIter< NodeHashTable< Key, Value > > it = hash_table_->overflow_.begin();
+      while (it.hasNext())
       {
-        overflow_iterator_ = overflow_iterator_.next();
-        if ((* overflow_iterator_).is_valid_)
+        if ((*it).is_valid_)
         {
-          return HashTableIterator(hash_table_, ind_, ind_backet_, overflow_iterator_);
+          return HashTableIterator(hash_table_, hash_table_->count(), 0, it);
         }
+        it = it.next();
       }
-      throw std::runtime_error("No next element");
+      return hash_table_->end();
     }
   }
-
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   bool HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::hasNext() const
   {
-    try
-    {
-      next();
-    }
-    catch(...)
+    if((* this) == hash_table_->end())
     {
       return false;
     }
-    return true;
+    else
+    {
+      return true;
+    }
   }
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   void HashTableIterator< Key, Value, Hash, Equal, CAPACITY >::operator++()
@@ -696,17 +722,29 @@ namespace goltsov
     hash_table_(nullptr),
     ind_(0),
     ind_backet_(0),
-    overflow_iterator_(LIter< NodeHashTable< Key, Value > > (nullptr))
+    overflow_iterator_(LCIter< NodeHashTable< Key, Value > > (nullptr))
   {}
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableConstIterator(const HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table, size_t ind, size_t ind_backet, LIter< NodeHashTable< Key, Value > > overflow_it):
+  HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::HashTableConstIterator(const HashTable< Key, Value, Hash, Equal, CAPACITY >* hash_table, size_t ind, size_t ind_backet, LCIter< NodeHashTable< Key, Value > > overflow_it):
     hash_table_(hash_table),
     ind_(ind),
     ind_backet_(ind_backet),
     overflow_iterator_(overflow_it)
   {}
 
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  const Key& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::key() const
+  {
+    if (overflow_iterator_)
+    {
+      return (* overflow_iterator_).key_;
+    }
+    else
+    {
+      return hash_table_->data_[ind_].node_[ind_backet_].key_;
+    }
+  }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   const Value& HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::value() const
@@ -726,53 +764,59 @@ namespace goltsov
   {
     if (overflow_iterator_)
     {
-      while (overflow_iterator_.hasNext())
+      LCIter< NodeHashTable< Key, Value > > it = overflow_iterator_;
+      while (it.hasNext())
       {
-        overflow_iterator_ = overflow_iterator_.next();
-        if ((* overflow_iterator_).is_valid_)
+        it = it.next();
+        if (it && (*it).is_valid_)
         {
-          return HashTableConstIterator(hash_table_, ind_, ind_backet_, overflow_iterator_);
+          return HashTableConstIterator(hash_table_, hash_table_->count(), 0, it);
         }
       }
-      throw std::runtime_error("No next element");
+      return hash_table_->end();
     }
     else
     {
-      for (size_t i = ind_; i < hash_table_->count(); ++i)
+      for (size_t j = ind_backet_ + 1; j < CAPACITY; ++j)
       {
-        for (size_t j = ind_backet_ + 1; j < CAPACITY; ++j)
+        if (hash_table_->data_[ind_].node_[j].is_valid_)
         {
-          if ((* (hash_table_->getData()))[i].node_[j].is_valid_)
+          return HashTableConstIterator(hash_table_, ind_, j, LCIter< NodeHashTable< Key, Value > >(nullptr));
+        }
+      }
+      for (size_t i = ind_ + 1; i < hash_table_->count(); ++i)
+      {
+        for (size_t j = 0; j < CAPACITY; ++j)
+        {
+          if (hash_table_->data_[i].node_[j].is_valid_)
           {
-            return HashTableConstIterator(hash_table_, i, j, overflow_iterator_);
+            return HashTableConstIterator(hash_table_, i, j, LCIter< NodeHashTable< Key, Value > >(nullptr));
           }
         }
       }
-      overflow_iterator_ = hash_table_->overflow_.begin();
-      while (overflow_iterator_.hasNext())
+      LCIter< NodeHashTable< Key, Value > > it = hash_table_->overflow_.begin();
+      while (it.hasNext())
       {
-        overflow_iterator_ = overflow_iterator_.next();
-        if ((* overflow_iterator_).is_valid_)
+        if ((*it).is_valid_)
         {
-          return HashTableConstIterator(hash_table_, ind_, ind_backet_, overflow_iterator_);
+          return HashTableConstIterator(hash_table_, hash_table_->count(), 0, it);
         }
+        it = it.next();
       }
-      throw std::runtime_error("No next element");
+      return hash_table_->end();
     }
   }
-
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
   bool HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::hasNext() const
   {
-    try
-    {
-      next();
-    }
-    catch(...)
+    if((* this) == hash_table_->end())
     {
       return false;
     }
-    return true;
+    else
+    {
+      return true;
+    }
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
@@ -802,17 +846,58 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  bool operator==(HashTableIterator< Key, Value, Hash, Equal, CAPACITY > lhs, HashTableIterator< Key, Value, Hash, Equal, CAPACITY > rhs)
+  void HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >::operator++()
+  {
+    (* this) = this->next();
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  bool operator==(const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
   {
     return (lhs.hash_table_ == rhs.hash_table_ && lhs.ind_ == rhs.ind_ && lhs.ind_backet_ == rhs.ind_backet_ && lhs.overflow_iterator_ == rhs.overflow_iterator_);
   }
 
   template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
-  bool operator!=(HashTableIterator< Key, Value, Hash, Equal, CAPACITY > lhs, HashTableIterator< Key, Value, Hash, Equal, CAPACITY > rhs)
+  bool operator!=(const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
   {
     return !(rhs == lhs);
   }
 
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  bool operator==(const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
+  {
+    return (lhs.hash_table_ == rhs.hash_table_ && lhs.ind_ == rhs.ind_ && lhs.ind_backet_ == rhs.ind_backet_ && lhs.overflow_iterator_ == rhs.overflow_iterator_);
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  bool operator!=(const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
+  {
+    return !(rhs == lhs);
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  bool operator==(const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
+  {
+    return (lhs.hash_table_ == const_cast< HashTable< Key, Value, Hash, Equal, CAPACITY >* >(rhs.hash_table_) && lhs.ind_ == rhs.ind_ && lhs.ind_backet_ == rhs.ind_backet_ && lhs.overflow_iterator_ == rhs.overflow_iterator_);
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  bool operator!=(const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
+  {
+    return !(rhs == lhs);
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  bool operator==(const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
+  {
+    return (lhs.hash_table_ == const_cast< const HashTable< Key, Value, Hash, Equal, CAPACITY >* >(rhs.hash_table_) && lhs.ind_ == rhs.ind_ && lhs.ind_backet_ == rhs.ind_backet_ && lhs.overflow_iterator_ == rhs.overflow_iterator_);
+  }
+
+  template< class Key, class Value, class Hash, class Equal, size_t CAPACITY >
+  bool operator!=(const HashTableConstIterator< Key, Value, Hash, Equal, CAPACITY >& lhs, const HashTableIterator< Key, Value, Hash, Equal, CAPACITY >& rhs)
+  {
+    return !(rhs == lhs);
+  }
 
 }
 
