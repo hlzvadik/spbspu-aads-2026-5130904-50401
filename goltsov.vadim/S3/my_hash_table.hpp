@@ -498,7 +498,10 @@ namespace goltsov
   {
     Hash hasher;
     Equal e;
-    if (size_ == 0) return false;
+    if (size_ == 0)
+    {
+      return false;
+    }
     size_t ind = hasher(key) % size_;
     for (size_t i = 0; i < capacity_; ++i)
     {
@@ -548,12 +551,11 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal >
   Value& HashTable< Key, Value, Hash, Equal >::operator[](const Key& key)
   {
-    try
+    if (has(key))
     {
-      Value& res = get(key);
-      return res;
+      return get(key);
     }
-    catch (...)
+    else
     {
       add(key, Value{});
       return get(key);
