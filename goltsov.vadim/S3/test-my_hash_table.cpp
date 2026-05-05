@@ -1,30 +1,30 @@
 #include <boost/test/unit_test.hpp>
 #include "my_hash_table.hpp"
 
-using ht_ci4 = goltsov::HashTable< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char >, 4 >;
-using ht_ci4_it = goltsov::HashTableIterator< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char >, 4 >;
-using ht_ci4_cit = goltsov::HashTableConstIterator< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char >, 4 >;
+using ht_ci4 = goltsov::HashTable< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char > >;
+using ht_ci4_it = goltsov::HashTableIterator< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char > >;
+using ht_ci4_cit = goltsov::HashTableConstIterator< char, int, goltsov::Sha1Hasher< char >, goltsov::Equal< char > >;
 
 BOOST_AUTO_TEST_SUITE(HashTable_suite)
 
 BOOST_AUTO_TEST_CASE(constructor_test)
 {
   ht_ci4 t;
-  BOOST_CHECK(t.size() == 4 && t.countValid() == 0 && t.count() == 1);
+  BOOST_CHECK(t.size() == 1 && t.countValid() == 0 && t.count() == 1);
   t['a'] = 1;
   t['b'] = 2;
   ht_ci4 t1 (t);
-  BOOST_CHECK(t1.size() == 4 && t1.countValid() == 2 && t1.count() == 1);
+  BOOST_CHECK(t1.size() == 1 && t1.countValid() == 2 && t1.count() == 1);
   ht_ci4 t2 (std::move(t));
-  BOOST_CHECK(t2.size() == 4 && t2.countValid() == 2 && t2.count() == 1);
+  BOOST_CHECK(t2.size() == 1 && t2.countValid() == 2 && t2.count() == 1);
   ht_ci4 t3;
   t3['a'] = 1;
   t3['b'] = 2;
   ht_ci4 t4 = t3;
-  BOOST_CHECK(t4.size() == 4 && t4.countValid() == 2 && t4.count() == 1);
+  BOOST_CHECK(t4.size() == 1 && t4.countValid() == 2 && t4.count() == 1);
   ht_ci4 t5 = std::move(t3);
-  BOOST_CHECK(t5.size() == 4 && t5.countValid() == 2 && t5.count() == 1);
-  ht_ci4 t6 (5);
+  BOOST_CHECK(t5.size() == 1 && t5.countValid() == 2 && t5.count() == 1);
+  ht_ci4 t6 (5, 4);
   BOOST_CHECK(t6.size() == 20 && t6.countValid() == 0 && t6.count() == 5);
 }
 
@@ -33,10 +33,10 @@ BOOST_AUTO_TEST_CASE(swap_test)
   ht_ci4 t;
   t['a'] = 1;
   t['b'] = 2;
-  ht_ci4 t1 (2);
+  ht_ci4 t1 (2, 2);
   t1['a'] = 1;
   t.swap(t1);
-  BOOST_CHECK(t1.size() == 4 && t1.countValid() == 2 && t1.count() == 1 && t.size() == 8 && t.countValid() == 1 && t.count() == 2);
+  BOOST_CHECK(t1.size() == 1 && t1.countValid() == 2 && t1.count() == 1 && t.size() == 4 && t.countValid() == 1 && t.count() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(add_test)
@@ -64,25 +64,25 @@ BOOST_AUTO_TEST_CASE(rehash_test)
 {
   ht_ci4 t;
   t['a'] = 1;
-  t.rehash(4);
-  BOOST_CHECK(t.size() == 16 && t.count() == 4 && t['a'] == 1);
+  t.rehash(4, 10);
+  BOOST_CHECK(t.size() == 40 && t.count() == 4 && t['a'] == 1);
 }
 
 BOOST_AUTO_TEST_CASE(clear_test)
 {
-  ht_ci4 t (4);
+  ht_ci4 t (4, 4);
   t['a'] = 1;
   t['b'] = 2;
   t.clear();
   BOOST_CHECK(t.count() == 4 && t.countValid() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(size_count_countValid_test)
+BOOST_AUTO_TEST_CASE(size_count_countValid_capacity_test)
 {
-  ht_ci4 t (4);
+  ht_ci4 t (4, 4);
   t['a'] = 1;
   t['b'] = 2;
-  BOOST_CHECK(t.size() == 16 && t.count() == 4 && t.countValid() == 2);
+  BOOST_CHECK(t.size() == 16 && t.count() == 4 && t.countValid() == 2 && t.capacity() == 4);
 }
 
 BOOST_AUTO_TEST_CASE(has_test)
