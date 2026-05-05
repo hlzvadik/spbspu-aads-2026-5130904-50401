@@ -423,7 +423,8 @@ namespace goltsov
       return;
     }
     topit::Vector< std::pair< std::string, topit::Vector< size_t > > > name_weight_vertexes;
-    for (ht_it_vertexes_vertexes it = graphs[name_graph][name_vertex].begin(); it != graphs[name_graph][name_vertex].end(); ++it)
+    for (ht_it_vertexes_vertexes it = graphs[name_graph][name_vertex].begin();
+      it != graphs[name_graph][name_vertex].end(); ++it)
     {
       name_weight_vertexes.pushBack({it.key(), it.value()});
     }
@@ -449,16 +450,19 @@ namespace goltsov
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    goltsov::HashTable< std::string, topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >, EqualString > name_weight_vertexes;
+    goltsov::HashTable< std::string, topit::Vector< size_t >,
+      goltsov::Sha1Hasher< std::string >, EqualString > name_weight_vertexes;
     for (ht_it_vertexes it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
     {
       if (it.value().has(name_vertex))
       {
-        name_weight_vertexes[it.key()].pushBackRange(it.value()[name_vertex].begin(), it.value()[name_vertex].getSize());
+        name_weight_vertexes[it.key()].pushBackRange(it.value()[name_vertex].begin(),
+          it.value()[name_vertex].getSize());
       }
     }
     topit::Vector< std::pair< std::string, topit::Vector< size_t > > > res;
-    for (goltsov::HashTableIterator< std::string, topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >, EqualString > it = name_weight_vertexes.begin(); it != name_weight_vertexes.end(); ++it)
+    for (goltsov::HashTableIterator< std::string, topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >,
+           EqualString > it = name_weight_vertexes.begin(); it != name_weight_vertexes.end(); ++it)
     {
       sortSizeTVector(it.value());
       res.pushBack({it.key(), it.value()});
@@ -482,7 +486,8 @@ namespace goltsov
     }
   }
 
-  void bind(ht_graphs& graphs, std::string name_graph, std::string name_vertex1, std::string name_vertex2, size_t weight)
+  void bind(ht_graphs& graphs, std::string name_graph, std::string name_vertex1,
+    std::string name_vertex2, size_t weight)
   {
     if (!graphs.has(name_graph))
     {
@@ -492,7 +497,8 @@ namespace goltsov
     graphs[name_graph][name_vertex2][name_vertex1];
   }
 
-  void cut(ht_graphs& graphs, std::string name_graph, std::string name_vertex1, std::string name_vertex2, size_t weight)
+  void cut(ht_graphs& graphs, std::string name_graph, std::string name_vertex1,
+    std::string name_vertex2, size_t weight)
   {
     if (!graphs.has(name_graph))
     {
@@ -562,7 +568,8 @@ namespace goltsov
     }
   }
 
-  void extract(ht_graphs& graphs, std::string name_new_graph, std::string name_old_graph, size_t count_vertexes, topit::Vector< std::string > vertexes)
+  void extract(ht_graphs& graphs, std::string name_new_graph, std::string name_old_graph,
+    size_t count_vertexes, topit::Vector< std::string > vertexes)
   {
     if (graphs.has(name_new_graph))
     {
@@ -588,7 +595,9 @@ namespace goltsov
       {
         if (i != j)
         {
-          graphs[name_new_graph][vertexes[i]][vertexes[j]].pushBackRange(graphs[name_old_graph][vertexes[i]][vertexes[j]].begin(), graphs[name_old_graph][vertexes[i]][vertexes[j]].getSize());
+          graphs[name_new_graph][vertexes[i]][vertexes[j]].pushBackRange(
+            graphs[name_old_graph][vertexes[i]][vertexes[j]].begin(),
+            graphs[name_old_graph][vertexes[i]][vertexes[j]].getSize());
         }
       }
     }

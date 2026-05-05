@@ -36,7 +36,8 @@ BOOST_AUTO_TEST_CASE(swap_test)
   ht_ci4 t1 (2, 2);
   t1['a'] = 1;
   t.swap(t1);
-  BOOST_CHECK(t1.size() == 1 && t1.countValid() == 2 && t1.count() == 1 && t.size() == 4 && t.countValid() == 1 && t.count() == 2);
+  BOOST_CHECK(t1.size() == 1 && t1.countValid() == 2 && t1.count() == 1
+    && t.size() == 4 && t.countValid() == 1 && t.count() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(add_test)
@@ -117,8 +118,10 @@ BOOST_AUTO_TEST_CASE(begin_test)
   ht_ci4 t1;
   const ht_ci4 tc = t;
   const ht_ci4 tc1 = t1;
-  BOOST_CHECK(t.begin().value() == 1 && t.begin().key() == 'a' && t.begin().hasNext() && t1.begin() == t1.end() && !t1.begin().hasNext());
-  BOOST_CHECK(tc.begin().value() == 1 && tc.begin().key() == 'a' && tc.begin().hasNext() && tc1.begin() == tc1.end() && !tc1.begin().hasNext());
+  BOOST_CHECK(t.begin().value() == 1 && t.begin().key() == 'a' && t.begin().hasNext()
+    && t1.begin() == t1.end() && !t1.begin().hasNext());
+  BOOST_CHECK(tc.begin().value() == 1 && tc.begin().key() == 'a' && tc.begin().hasNext()
+    && tc1.begin() == tc1.end() && !tc1.begin().hasNext());
 }
 
 BOOST_AUTO_TEST_CASE(end_test)
