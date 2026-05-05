@@ -14,9 +14,16 @@ namespace goltsov
   class List;
 
   template< class T >
+  class LIter;
+
+  template< class T >
+  class LCIter;
+
+  template< class T >
   class LIter
   {
     friend class List< T >;
+    friend class LCIter< T >;
     Node< T >* ptr;
   public:
     LIter() noexcept;
@@ -26,12 +33,20 @@ namespace goltsov
     T& operator*() const;
     bool operator==(const LIter< T >& other) const noexcept;
     bool operator!=(const LIter< T >& other) const noexcept;
+    bool operator==(const LCIter< T >& other) const noexcept;
+    bool operator!=(const LCIter< T >& other) const noexcept;
+
+    explicit operator bool() const noexcept
+    {
+      return ptr != nullptr;
+    }
   };
 
   template< class T >
   class LCIter
   {
     friend class List< T >;
+    friend class LIter< T >;
     const Node< T >* ptr;
   public:
     LCIter() noexcept;
@@ -41,6 +56,13 @@ namespace goltsov
     const T& operator*() const;
     bool operator==(const LCIter< T >& other) const noexcept;
     bool operator!=(const LCIter< T >& other) const noexcept;
+    bool operator==(const LIter< T >& other) const noexcept;
+    bool operator!=(const LIter< T >& other) const noexcept;
+
+    explicit operator bool() const noexcept
+    {
+      return ptr != nullptr;
+    }
   };
 
   template< class T >
@@ -56,6 +78,9 @@ namespace goltsov
     List(List< T >&& other);
     List< T >& operator=(const List< T >& other);
     List< T >& operator=(List< T >&& other);
+
+    void swap(List< T >&);
+    Node< T >** getFake();
 
     LIter< T > begin() noexcept;
     LCIter< T > begin() const noexcept;
@@ -372,5 +397,39 @@ namespace goltsov
       delete temp;
     }
   }
+
+  template< class T >
+  void List< T >::swap(List< T >& other)
+  {
+    std::swap(fake, (* other.getFake()));
+  }
+
+  template< class T >
+  Node< T >** List< T >::getFake()
+  {
+    return &fake;
+  }
+
+  template< class T >
+  bool LIter< T >::operator==(const LCIter< T >& other) const noexcept
+  {
+    return ptr == other.ptr;
+  }
+  template< class T >
+  bool LIter< T >::operator!=(const LCIter< T >& other) const noexcept
+  {
+    return !((* this) == other);
+  }
+  template< class T >
+  bool LCIter< T >::operator==(const LIter< T >& other) const noexcept
+  {
+    return ptr == other.ptr;
+  }
+  template< class T >
+  bool LCIter< T >::operator!=(const LIter< T >& other) const noexcept
+  {
+    return !((* this) == other);
+  }
 }
+
 #endif
