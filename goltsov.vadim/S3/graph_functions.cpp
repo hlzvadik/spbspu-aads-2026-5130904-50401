@@ -6,13 +6,6 @@
 
 namespace goltsov
 {
-  struct EqualString
-  {
-    bool operator()(std::string a, std::string b)
-    {
-      return a == b;
-    }
-  };
 
   void graphsParsing(ht_graphs& g, std::istream& in)
   {
@@ -21,12 +14,10 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
-    char a;
-    in.get(a);
     graphs(g);
   }
 
@@ -52,7 +43,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -81,7 +72,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -110,7 +101,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -140,7 +131,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -170,7 +161,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -216,7 +207,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -245,7 +236,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -292,7 +283,7 @@ namespace goltsov
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' || in.peek() != EOF)
+    if (in.peek() != '\n' && in.peek() != EOF)
     {
       throw std::runtime_error("Bad input");
     }
@@ -372,6 +363,7 @@ namespace goltsov
       {
         break;
       }
+      graphs[name_graph];
       for (size_t i = 0; i < count_vertexes; ++i)
       {
         std::string name_vertex1, name_vertex2;

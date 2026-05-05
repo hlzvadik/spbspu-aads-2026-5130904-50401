@@ -5,8 +5,14 @@
 
 namespace goltsov
 {
-  
-  struct EqualString;
+
+  struct EqualString
+  {
+    bool operator()(std::string a, std::string b)
+    {
+      return a == b;
+    }
+  };
 
   using ht_graphs = goltsov::HashTable< std::string,
       goltsov::HashTable< std::string, goltsov::HashTable< std::string, topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >, EqualString >,
