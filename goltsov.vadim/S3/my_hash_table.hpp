@@ -14,9 +14,13 @@ namespace goltsov
     {
       boost::uuids::detail::sha1 sha1;
       sha1.process_bytes(&key, sizeof(T));
-      unsigned int digest[5];
+      unsigned char digest[20];
       sha1.get_digest(digest);
-      size_t hash = static_cast< size_t >(digest[0]);
+      size_t hash = 0;
+      for (size_t i = 0; i < sizeof(size_t); ++i)
+      {
+        hash = (hash << 8) | digest[i];
+      }
       return hash;
     }
   };
@@ -28,9 +32,14 @@ namespace goltsov
     {
       boost::uuids::detail::sha1 sha1;
       sha1.process_bytes(key.data(), key.size());
-      unsigned int digest[5];
+      unsigned char digest[20];
       sha1.get_digest(digest);
-      return static_cast<size_t>(digest[0]);
+      size_t hash = 0;
+      for (size_t i = 0; i < sizeof(size_t); ++i)
+      {
+        hash = (hash << 8) | digest[i];
+      }
+      return hash;
     }
   };
 
