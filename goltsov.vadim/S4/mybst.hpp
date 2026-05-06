@@ -15,6 +15,14 @@ namespace goltsov
   {
     Node* ptr_;
   public:
+    BSTIterator();
+    ~BSTIterator() = default;
+    BSTIterator(const BSTIterator< Key, Value >&);
+    BSTIterator(BSTIterator< Key, Value >&&);
+    BSTIterator< Key, Value > opertor=(const BSTIterator< Key, Value >&);
+    BSTIterator< Key, Value > opertor=(BSTIterator< Key, Value >&&);
+    BSTIterator(Node*);
+
     BSTIterator< Key, Value > next() const;
     BSTIterator< Key, Value > hasNext() const noexcept;
     BSTIterator< Key, Value > prev() const;
@@ -34,6 +42,14 @@ namespace goltsov
   {
     const Node* ptr_;
   public:
+    BSTConstIterator();
+    ~BSTConstIterator() = default;
+    BSTConstIterator(const BSTConstIterator< Key, Value >&);
+    BSTConstIterator(BSTConstIterator< Key, Value >&&);
+    BSTConstIterator< Key, Value >& opertor=(const BSTConstIterator< Key, Value >&);
+    BSTConstIterator< Key, Value >& opertor=(BSTConstIterator< Key, Value >&&);
+    BSTConstIterator(const Node*);
+
     BSTConstIterator< Key, Value > next() const;
     BSTConstIterator< Key, Value > hasNext() const noexcept;
     BSTConstIterator< Key, Value > prev() const;
@@ -53,6 +69,16 @@ namespace goltsov
   {
     Node* root;
   public:
+    BSTree();
+    ~BSTree();
+    BSTree(const BSTree< Key, Value, Compare >&);
+    BSTree(BSTree< Key, Value, Compare >&&);
+    BSTree(const BSTree< Key, Value, Compare >&);
+    BSTree(BSTree< Key, Value, Compare >&&);
+    BSTree& opertor=(const BSTree< Key, Value, Compare >&);
+    BSTree& opertor=(BSTree< Key, Value, Compare >&&);
+
+
     void push(Key k, Value v);
     Value get(Key k);
     Value drop(Key k);
