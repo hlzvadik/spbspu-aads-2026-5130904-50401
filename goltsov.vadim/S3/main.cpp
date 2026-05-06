@@ -41,7 +41,14 @@ int main(int argc, char** argv)
     }
     else
     {
-      functions_graph[command](graphs, std::cin);
+      try
+      {
+        functions_graph[command](graphs, std::cin);
+      }
+      catch(...)
+      {
+        std::cout << "<INVALID COMMAND>\n";
+      }
     }
   }
 
