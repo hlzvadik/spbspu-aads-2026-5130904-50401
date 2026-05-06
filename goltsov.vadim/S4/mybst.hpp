@@ -24,9 +24,9 @@ namespace goltsov
     BSTIterator(Node*);
 
     BSTIterator< Key, Value > next() const;
-    BSTIterator< Key, Value > hasNext() const noexcept;
+    bool hasNext() const noexcept;
     BSTIterator< Key, Value > prev() const;
-    BSTIterator< Key, Value > hasPrev() const noexcept;
+    bool hasPrev() const noexcept;
 
     BSTIterator< Key, Value > opertor++();
 
@@ -51,9 +51,9 @@ namespace goltsov
     BSTConstIterator(const Node*);
 
     BSTConstIterator< Key, Value > next() const;
-    BSTConstIterator< Key, Value > hasNext() const noexcept;
+    bool hasNext() const noexcept;
     BSTConstIterator< Key, Value > prev() const;
-    BSTConstIterator< Key, Value > hasPrev() const noexcept;
+    bool hasPrev() const noexcept;
 
     BSTConstIterator< Key, Value > opertor++();
 
@@ -67,6 +67,8 @@ namespace goltsov
   template< class Key, class Value, class Compare >
   class BSTree
   {
+    friend BSTIterator< Key, Value >;
+    friend BSTConstIterator< Key, Value >;
     Node* root;
   public:
     BSTree();
