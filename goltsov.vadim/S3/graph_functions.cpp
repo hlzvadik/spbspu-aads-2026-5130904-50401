@@ -448,6 +448,7 @@ namespace goltsov
 
   void graphs(ht_graphs& graphs)
   {
+    bool has_output = false;
     topit::Vector< std::string > name_graphs;
     for (ht_it_graphs it = graphs.begin(); it != graphs.end(); ++it)
     {
@@ -456,14 +457,21 @@ namespace goltsov
     sortStringVector(name_graphs);
     for (size_t i = 0; i < name_graphs.getSize(); ++i)
     {
+      has_output = true;
       std::cout << name_graphs[i] << '\n';
+    }
+    if (!has_output)
+    {
+      std::cout << '\n';
     }
   }
 
   void vertexes(ht_graphs& graphs, std::string name_graph)
   {
+    bool has_output = false;
     if (!graphs.has(name_graph))
     {
+      has_output = true;
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
@@ -475,19 +483,27 @@ namespace goltsov
     sortStringVector(name_vertexes);
     for (size_t i = 0; i < name_vertexes.getSize(); ++i)
     {
+      has_output = true;
       std::cout << name_vertexes[i] << '\n';
+    }
+    if (!has_output)
+    {
+      std::cout << '\n';
     }
   }
 
   void outbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex)
   {
+    bool has_output = false;
     if (!graphs.has(name_graph))
     {
+      has_output = true;
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
     if (!graphs[name_graph].has(name_vertex))
     {
+      has_output = true;
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
@@ -502,20 +518,28 @@ namespace goltsov
     {
       for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
       {
+        has_output = true;
         std::cout << name_weight_vertexes[i].first << " " << name_weight_vertexes[i].second[j] << '\n';
       }
+    }
+    if (!has_output)
+    {
+      std::cout << '\n';
     }
   }
 
   void inbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex)
   {
+    bool has_output = false;
     if (!graphs.has(name_graph))
     {
+      has_output = true;
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
     if (!graphs[name_graph].has(name_vertex))
     {
+      has_output = true;
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
@@ -539,19 +563,27 @@ namespace goltsov
     sortPairStringSizeTVector(res);
     for (size_t i = 0; i < res.getSize(); ++i)
     {
+      has_output = true;
       std::cout << res[i].first << ' ';
       for (size_t j = 0; j < res[i].second.getSize(); ++j)
       {
+        has_output = true;
         std::cout << res[i].second[j];
         if (j == res[i].second.getSize() - 1)
         {
+          has_output = true;
           std::cout << '\n';
         }
         else
         {
+          has_output = true;
           std::cout << ' ';
         }
       }
+    }
+    if (!has_output)
+    {
+      std::cout << '\n';
     }
   }
 
