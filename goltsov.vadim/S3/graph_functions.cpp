@@ -397,6 +397,7 @@ namespace goltsov
     if (!graphs.has(name_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     topit::Vector< std::string > name_vertexes;
     for (ht_it_vertexes it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)

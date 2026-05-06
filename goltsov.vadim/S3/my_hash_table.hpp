@@ -300,6 +300,7 @@ namespace goltsov
     count_valid_ = 0;
     size_ = 1;
     capacity_ = 1;
+    delete[] data_;
     data_ = new Bucket< Key, Value >[1];
     overflow_ = List< NodeHashTable< Key, Value > >();
     swap(other);
