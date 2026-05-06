@@ -26,7 +26,7 @@ namespace goltsov
   };
 
   template <>
-  struct Sha1Hasher<std::string>
+  struct Sha1Hasher< std::string >
   {
     size_t operator()(const std::string& key) const
     {

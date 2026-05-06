@@ -6,15 +6,28 @@
 
 namespace goltsov
 {
-
-  void graphsParsing(ht_graphs& g, std::istream& in)
+  void skipSpaces(std::istream& in)
   {
     while(in.peek() == ' ')
     {
       char a;
       in.get(a);
     }
-    if (in.peek() != '\n' && in.peek() != EOF)
+  }
+
+  bool checkEndLine(std::istream& in)
+  {
+    if (in.peek() == '\n' || in.peek() == EOF)
+    {
+      return true;
+    }
+    return false;
+  }
+
+  void graphsParsing(ht_graphs& g, std::istream& in)
+  {
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
@@ -23,12 +36,8 @@ namespace goltsov
 
   void vertexesParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
@@ -37,150 +46,196 @@ namespace goltsov
     {
       throw std::runtime_error("Bad input");
     }
-    vertexes(g, graph_name);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
+    vertexes(g, graph_name);
   }
 
   void outboundParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     std::string graph_name;
     std::string vertexe_name;
-    if (!(in >> graph_name >> vertexe_name))
+    if (!(in >> graph_name))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> vertexe_name))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     outbound(g, graph_name, vertexe_name);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
-    {
-      throw std::runtime_error("Bad input");
-    }
   }
 
   void inboundParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     std::string graph_name;
     std::string vertexe_name;
-    if (!(in >> graph_name >> vertexe_name))
+    if (!(in >> graph_name))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> vertexe_name))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     inbound(g, graph_name, vertexe_name);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
-    {
-      throw std::runtime_error("Bad input");
-    }
   }
 
   void bindParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     std::string graph_name;
     std::string vertexe_a, vertexe_b;
     size_t weight;
-    if (!(in >> graph_name >> vertexe_a >> vertexe_b >> weight))
+    if (!(in >> graph_name))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> vertexe_a))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> vertexe_b))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> weight))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     bind(g, graph_name, vertexe_a, vertexe_b, weight);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
-    {
-      throw std::runtime_error("Bad input");
-    }
   }
 
   void cutParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     std::string graph_name;
     std::string vertexe_a, vertexe_b;
     size_t weight;
-    if (!(in >> graph_name >> vertexe_a >> vertexe_b >> weight))
+    if (!(in >> graph_name))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in  >> vertexe_a))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> vertexe_b))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> weight))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     cut(g, graph_name, vertexe_a, vertexe_b, weight);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
-    {
-      throw std::runtime_error("Bad input");
-    }
   }
 
   void createParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     std::string graph_name;
     size_t count;
-    if (!(in >> graph_name >> count))
+    if (!(in >> graph_name))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> count))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in) && count != 0)
     {
       throw std::runtime_error("Bad input");
     }
@@ -193,72 +248,93 @@ namespace goltsov
         throw std::runtime_error("Bad input");
       }
       vertexes_names.pushBack(name);
-      while(in.peek() == ' ')
-      {
-        char a;
-        in.get(a);
-      }
-      if ((in.peek() == '\n' || in.peek() == EOF) && i + 1 < count)
+      skipSpaces(in);
+      if (checkEndLine(in) && i + 1 < count)
       {
         throw std::runtime_error("Bad input");
       }
     }
-    create(g, graph_name, count, vertexes_names);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
+    create(g, graph_name, count, vertexes_names);
   }
 
   void mergeParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     std::string new_graph;
     std::string old_graph_1, old_graph_2;
-    if (!(in >> new_graph >> old_graph_1 >> old_graph_2))
+    if (!(in >> new_graph))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> old_graph_1))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> old_graph_2))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     merge(g, new_graph, old_graph_1, old_graph_2);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
-    {
-      throw std::runtime_error("Bad input");
-    }
   }
 
   void extractParsing(ht_graphs& g, std::istream& in)
   {
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() == '\n' || in.peek() == EOF)
+    skipSpaces(in);
+    if (checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
     std::string new_graph;
     std::string old_graph;
     size_t count;
-    if (!(in >> new_graph >> old_graph >> count))
+    if (!(in >> new_graph))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> old_graph))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    if (!(in >> count))
+    {
+      throw std::runtime_error("Bad input");
+    }
+    skipSpaces(in);
+    if (checkEndLine(in) && count != 0)
     {
       throw std::runtime_error("Bad input");
     }
@@ -271,26 +347,18 @@ namespace goltsov
         throw std::runtime_error("Bad input");
       }
       vertexes_names.pushBack(name);
-      while(in.peek() == ' ')
-      {
-        char a;
-        in.get(a);
-      }
-      if ((in.peek() == '\n' || in.peek() == EOF) && i + 1 < count)
+      skipSpaces(in);
+      if (checkEndLine(in) && i + 1 < count)
       {
         throw std::runtime_error("Bad input");
       }
     }
-    extract(g, new_graph, old_graph, count, vertexes_names);
-    while(in.peek() == ' ')
-    {
-      char a;
-      in.get(a);
-    }
-    if (in.peek() != '\n' && in.peek() != EOF)
+    skipSpaces(in);
+    if (!checkEndLine(in))
     {
       throw std::runtime_error("Bad input");
     }
+    extract(g, new_graph, old_graph, count, vertexes_names);
   }
 
   void sortStringVector(topit::Vector< std::string >& vec)
@@ -493,6 +561,7 @@ namespace goltsov
     if (!graphs.has(name_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     graphs[name_graph][name_vertex1][name_vertex2].pushBack(weight);
     graphs[name_graph][name_vertex2][name_vertex1];
@@ -504,24 +573,32 @@ namespace goltsov
     if (!graphs.has(name_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     if (!graphs[name_graph].has(name_vertex1))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     if (!graphs[name_graph][name_vertex1].has(name_vertex2))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     for (size_t i = 0; i < graphs[name_graph][name_vertex1][name_vertex2].getSize(); ++i)
     {
       if (graphs[name_graph][name_vertex1][name_vertex2][i] == weight)
       {
         graphs[name_graph][name_vertex1][name_vertex2].erase(i);
+        if (graphs[name_graph][name_vertex1][name_vertex2].getSize() == 0)
+        {
+          graphs[name_graph][name_vertex1].drop(name_vertex2);
+        }
         return;
       }
     }
     std::cout << "<INVALID COMMAND>\n";
+    return;
   }
 
   void create(ht_graphs& graphs, std::string name_graph, size_t count, topit::Vector< std::string > vertexes_names)
@@ -529,6 +606,7 @@ namespace goltsov
     if (graphs.has(name_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     graphs[name_graph];
     for (size_t i = 0; i < count; ++i)
@@ -542,14 +620,17 @@ namespace goltsov
     if (graphs.has(name_new_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     if (!graphs.has(name_graph1))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     if (!graphs.has(name_graph2))
     {
       std::cout << "<INVALID COMMAND>\n";
+      return;
     }
     for (ht_it_vertexes it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
     {

@@ -38,6 +38,11 @@ int main(int argc, char** argv)
     if (!functions_graph.has(command))
     {
       std::cout << "<INVALID COMMAND>\n";
+      while (std::cin.peek() != '\n' && std::cin.peek() != EOF)
+      {
+        char a;
+        std::cin.get(a);
+      }
     }
     else
     {
