@@ -397,7 +397,7 @@ namespace goltsov
   template< class Key, class Value, class Compare >
   BSTConstIterator< Key, Value > BSTree< Key, Value, Compare >::end() const
   {
-    return BSTIterator(nullptr);
+    return BSTConstIterator(nullptr);
   }
 
   template< class Key, class Value, class Compare >
@@ -409,7 +409,22 @@ namespace goltsov
       throw std::logic_error("Can not do rotate. No parent");
     }
     current->parent_->right_ = current->left_;
+    if (current->left_)
+    {
+      current->left_->parent_ = current->parent_;
+    }
     current->left_ = current->parent_;
+    if (current->parent_->parent_)
+    {
+      if (current->parent_->parent_->left_ == current->parent_)
+      {
+        current->parent_->parent_->left_ = current;
+      }
+      else
+      {
+        current->parent_->parent_->right_ = current;
+      }
+    }
     current->parent_ = current->parent_->parent_;
     return BSTConstIterator(current->right_);
   }
@@ -417,13 +432,28 @@ namespace goltsov
   template< class Key, class Value, class Compare >
   BSTConstIterator< Key, Value > BSTree< Key, Value, Compare >::rotateRight(BSTConstIterator< Key, Value > it)
   {
+    Node< Key, Value >* current = &(* it);
     if (!current->parent_)
     {
       throw std::logic_error("Can not do rotate. No parent");
     }
-    Node< Key, Value >* current = &(* it);
     current->parent_->left_ = current->right_;
-    current->right_ = current->parent_;
+    if (current->right_)
+    {
+      current->right_->parent_ = current->parent_;
+    }
+    current->left_ = current->parent_;
+    if (current->parent_->parent_)
+    {
+      if (current->parent_->parent_->left_ == current->parent_)
+      {
+        current->parent_->parent_->left_ = current;
+      }
+      else
+      {
+        current->parent_->parent_->right_ = current;
+      }
+    }
     current->parent_ = current->parent_->parent_;
     return BSTConstIterator(current->left_);
   }
@@ -431,29 +461,38 @@ namespace goltsov
   template< class Key, class Value, class Compare >
   BSTConstIterator< Key, Value > BSTree< Key, Value, Compare >::rotateLargeLeft(BSTConstIterator< Key, Value > it)
   {
+    Node< Key, Value >* current = &(* it);
     if (!current->parent_ || !current->parent_->parent)
     {
       throw std::logic_error("Can not do rotate. No parent");
     }
     rotateRight(it);
     rotateLeft(it);
-    return &(* it)->right_->left_;
+    return BSTConstIterator(&(* it)->right_->left_);
   }
 
   template< class Key, class Value, class Compare >
   BSTConstIterator< Key, Value > BSTree< Key, Value, Compare >::rotateLargeRight(BSTConstIterator< Key, Value > it)
   {
+    Node< Key, Value >* current = &(* it);
     if (!current->parent_ || !current->parent_->parent)
     {
       throw std::logic_error("Can not do rotate. No parent");
     }
     rotateLeft(it);
     rotateRight(it);
-    return &(* it)->left_->right_;
+    return BSTConstIterator(&(* it)->left_->right_);
   }
 
   template< class Key, class Value, class Compare >
-  size_t BSTree< Key, Value, Compare >::height(BSTConstIterator< Key, Value > it) const noexcept;
+  size_t BSTree< Key, Value, Compare >::height(BSTConstIterator< Key, Value > it) const noexcept
+  {
+    return (* it).height_;
+  }
+
   template< class Key, class Value, class Compare >
-  size_t BSTree< Key, Value, Compare >::height() const noexcept;
+  size_t BSTree< Key, Value, Compare >::height() const noexcept
+  {
+    return root_->height_;
+  }
 }
