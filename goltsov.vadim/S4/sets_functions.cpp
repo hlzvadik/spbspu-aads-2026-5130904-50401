@@ -257,9 +257,9 @@ void goltsov::complement_ds(
   }
   goltsov::bst_is_iterator it_1 = all_sets.get(dataset_1).begin();
   goltsov::bst_is_iterator it_2 = all_sets.get(dataset_2).begin();
-  while (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end())
+  while (it_1 != all_sets.get(dataset_1).end() || it_2 != all_sets.get(dataset_2).end())
   {
-    if (it_1 != all_sets.get(dataset_1).end() || it_2 != all_sets.get(dataset_2).end()
+    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
       && (* it_1).first == (* it_2).first)
     {
       ++it_1;
