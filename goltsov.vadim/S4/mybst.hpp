@@ -213,19 +213,22 @@ namespace goltsov
       return;
     }
     BSTree< Key, Value, Compare > new_tree;
-    new_tree.root_ = new NodeBST< Key, Value > {current->data_, nullptr, nullptr, nullptr, current->height_};
+    new_tree.root_ = new NodeBST< Key, Value >
+      {current->data_, nullptr, nullptr, nullptr, current->height_};
     NodeBST< Key, Value >* new_node = new_tree.root_;
     while (current)
     {
       if (current->left_ && !new_node->left_)
       {
-        new_node->left_ = new NodeBST< Key, Value > {current->left_->data_, nullptr, nullptr, new_node, current->left_->height_};
+        new_node->left_ = new NodeBST< Key, Value >
+          {current->left_->data_, nullptr, nullptr, new_node, current->left_->height_};
         new_node = new_node->left_;
         current = current->left_;
       }
       else if (current->right_ && !new_node->right_)
       {
-        new_node->right_ = new NodeBST< Key, Value > {current->right_->data_, nullptr, nullptr, new_node, current->right_->height_};
+        new_node->right_ = new NodeBST< Key, Value >
+          {current->right_->data_, nullptr, nullptr, new_node, current->right_->height_};
         new_node = new_node->right_;
         current = current->right_;
       }
@@ -532,10 +535,12 @@ namespace goltsov
       root_ = current;
     }
     P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-    current->height_ = std::max(current->right_ ? current->right_->height_ : 0, current->left_ ? current->left_->height_ : 0) + 1;
+    current->height_ =
+      std::max(current->right_ ? current->right_->height_ : 0, current->left_ ? current->left_->height_ : 0) + 1;
     if (current->parent_)
     {
-      current->parent_->height_ = std::max(current->parent_->right_ ? current->parent_->right_->height_ : 0, current->parent_->left_ ? current->parent_->left_->height_ : 0) + 1;
+      current->parent_->height_ = std::max(current->parent_->right_ ? current->parent_->right_->height_ : 0,
+        current->parent_->left_ ? current->parent_->left_->height_ : 0) + 1;
     }
     return BSTIterator< Key, Value > (current->right_);
   }
@@ -583,10 +588,12 @@ namespace goltsov
       root_ = current;
     }
     P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-    current->height_ = std::max(current->right_ ? current->right_->height_ : 0, current->left_ ? current->left_->height_ : 0) + 1;
+    current->height_ =
+      std::max(current->right_ ? current->right_->height_ : 0, current->left_ ? current->left_->height_ : 0) + 1;
     if (current->parent_)
     {
-      current->parent_->height_ = std::max(current->parent_->right_ ? current->parent_->right_->height_ : 0, current->parent_->left_ ? current->parent_->left_->height_ : 0) + 1;
+      current->parent_->height_ = std::max(current->parent_->right_ ? current->parent_->right_->height_ : 0,
+        current->parent_->left_ ? current->parent_->left_->height_ : 0) + 1;
     }
     return BSTIterator< Key, Value > (current->left_);
   }

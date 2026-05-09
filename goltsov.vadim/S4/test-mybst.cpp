@@ -89,12 +89,14 @@ BOOST_AUTO_TEST_CASE(rotates_test)
   b2.push("c", 3);
   b2.push("a", 1);
   b2.push("b", 2);
-  BOOST_CHECK(b2.rotateLargeRight(b2.begin().next()) == (goltsov::BSTConstIterator< std::string, int > (nullptr)) && b2.height() == 2);
+  BOOST_CHECK(b2.rotateLargeRight(b2.begin().next())
+    == (goltsov::BSTConstIterator< std::string, int > (nullptr)) && b2.height() == 2);
   bst_si b3;
   b3.push("a", 1);
   b3.push("c", 3);
   b3.push("b", 2);
-  BOOST_CHECK(b3.rotateLargeLeft(b3.begin().next()) == (goltsov::BSTConstIterator< std::string, int > (nullptr)) && b3.height() == 2);
+  BOOST_CHECK(b3.rotateLargeLeft(b3.begin().next())
+    == (goltsov::BSTConstIterator< std::string, int > (nullptr)) && b3.height() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(height_test)

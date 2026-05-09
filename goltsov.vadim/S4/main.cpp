@@ -1,22 +1,47 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 #include "mybst.hpp"
+#include "sets_functions.hpp"
 
-struct ComparatorString
+int main(int argc, char** argv)
 {
-  bool operator()(const std::string& a, const std::string& b)
+  if (argc != 2)
   {
-    return a < b;
+    return 1;
   }
-};
 
-using bst_si = goltsov::BSTree< std::string, int, ComparatorString >;
+  std::fstream file_in (argv[1]);
 
-int main()
-{
-  bst_si b1;
-  b1.push("c", 3);
-  b1.push("b", 2);
-  b1.push("a", 1);
-  std::cout << b1.height();
+  goltsov::bst_s_bst_is all_sets;
+
+  goltsov::readSets(file_in, all_sets);
+
+  goltsov::bst_func functions;
+  functions.push("print", goltsov::printParsing);
+  functions.push("complement", goltsov::complementParsing);
+  functions.push("intersect", goltsov::intersectParsing);
+  functions.push("union", goltsov::unionParsing);
+
+  while(1)
+  {
+    std::string command;
+    if (!(std::cin >> command))
+    {
+      break;
+    }
+    try
+    {
+      functions.get(command)(std::cout, std::cin, all_sets);
+    }
+    catch (std::exception& e)
+    {
+      std::cout << "<INVALID COMMAND>\n";
+      while (std::cin.peek() != '\n' && std::cin.peek() != EOF)
+      {
+        char a;
+        std::cin.get(a);
+      }
+    }
+  }
 }
