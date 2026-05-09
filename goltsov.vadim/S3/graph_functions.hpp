@@ -8,26 +8,31 @@ namespace goltsov
 
   struct EqualString
   {
-    bool operator()(std::string a, std::string b)
+    bool operator()(const std::string& a, const std::string& b)
     {
       return a == b;
     }
   };
 
-  using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::string, goltsov::HashTable< std::string,
-    topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >, EqualString >, goltsov::Sha1Hasher< std::string >,
-    EqualString >, goltsov::Sha1Hasher< std::string >, EqualString >;
+  struct EqualPairString
+  {
+    bool operator()(const std::pair< std::string, std::string >& a, const std::pair< std::string, std::string >& b)
+    {
+      return a.first == b.first && a.second == b.second;
+    }
+  };
+  
 
-  using ht_it_graphs = goltsov::HashTableIterator< std::string, goltsov::HashTable< std::string,
-    goltsov::HashTable< std::string, topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >, EqualString >,
-    goltsov::Sha1Hasher< std::string >, EqualString >, goltsov::Sha1Hasher< std::string >, EqualString >;
-
-  using ht_it_vertexes = goltsov::HashTableIterator< std::string, goltsov::HashTable< std::string,
-    topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >, EqualString >,
+  using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
+    topit::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, EqualPairString >,
     goltsov::Sha1Hasher< std::string >, EqualString >;
 
-  using ht_it_vertexes_vertexes = goltsov::HashTableIterator< std::string, topit::Vector< size_t >,
+  using ht_it_graphs = goltsov::HashTableIterator< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
+    topit::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, EqualPairString >,
     goltsov::Sha1Hasher< std::string >, EqualString >;
+
+    using ht_it_pairs = goltsov::HashTableIterator< std::pair< std::string, std::string >, topit::Vector< size_t >,
+      goltsov::Sha1Hasher< std::pair< std::string, std::string > >, EqualPairString >;
 
   using ht_functions = goltsov::HashTable< std::string, void (*)(ht_graphs&, std::istream&),
     goltsov::Sha1Hasher< std::string >, EqualString >;

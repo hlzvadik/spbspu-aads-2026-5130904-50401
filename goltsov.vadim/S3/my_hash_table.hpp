@@ -43,6 +43,27 @@ namespace goltsov
     }
   };
 
+  template <>
+  struct Sha1Hasher< std::pair< std::string, std::string > >
+  {
+    size_t operator()(const std::pair< std::string, std::string >& key) const
+    {
+      boost::uuids::detail::sha1 sha1;
+      sha1.process_bytes(key.first.data(), key.first.size());
+      char separator = '\0';
+      sha1.process_bytes(&separator, 1);
+      sha1.process_bytes(key.second.data(), key.second.size());
+      unsigned char digest[20];
+      sha1.get_digest(digest);
+      size_t hash = 0;
+      for (size_t i = 0; i < sizeof(size_t); ++i)
+      {
+        hash = (hash << 8) | digest[i];
+      }
+    return hash;
+    }
+  };
+
   template< class T >
   struct Equal
   {

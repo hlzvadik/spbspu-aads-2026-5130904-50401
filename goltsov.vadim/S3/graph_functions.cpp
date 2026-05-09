@@ -440,8 +440,7 @@ namespace goltsov
         {
           throw std::runtime_error("Bad input file");
         }
-        graphs[name_graph][name_vertex1][name_vertex2].pushBack(weight);
-        graphs[name_graph][name_vertex2];
+        graphs[name_graph][{name_vertex1, name_vertex2}].pushBack(weight);
       }
     }
   }
@@ -476,15 +475,23 @@ namespace goltsov
       return;
     }
     topit::Vector< std::string > name_vertexes;
-    for (ht_it_vertexes it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
+    for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
     {
-      name_vertexes.pushBack(it.key());
+      name_vertexes.pushBack(it.key().first);
+      name_vertexes.pushBack(it.key().second);
     }
     sortStringVector(name_vertexes);
     for (size_t i = 0; i < name_vertexes.getSize(); ++i)
     {
       has_output = true;
-      std::cout << name_vertexes[i] << '\n';
+      if (i != 0 && name_vertexes[i] != name_vertexes[i - 1])
+      {
+        std::cout << name_vertexes[i] << '\n';
+      }
+      if (i == 0)
+      {
+        std::cout << name_vertexes[i] << '\n';
+      }
     }
     if (!has_output)
     {
@@ -501,26 +508,36 @@ namespace goltsov
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs[name_graph].has(name_vertex))
+    bool is_has_name = false;
+    topit::Vector< std::pair< std::string, topit::Vector< size_t > > > name_weight_vertexes;
+    for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
+    {
+      if (it.key().first == name_vertex)
+      {
+        name_weight_vertexes.pushBack({it.key().second, it.value()});
+        is_has_name = true;
+      }
+      else if (it.key().second == name_vertex)
+      {
+        is_has_name = true;
+      }
+    }
+    if (!is_has_name)
     {
       has_output = true;
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    topit::Vector< std::pair< std::string, topit::Vector< size_t > > > name_weight_vertexes;
-    for (ht_it_vertexes_vertexes it = graphs[name_graph][name_vertex].begin();
-      it != graphs[name_graph][name_vertex].end(); ++it)
-    {
-      name_weight_vertexes.pushBack({it.key(), it.value()});
-    }
     sortPairStringSizeTVector(name_weight_vertexes);
     for (size_t i = 0; i < name_weight_vertexes.getSize(); ++i)
     {
+      has_output = true;
+      std::cout << name_weight_vertexes[i].first;
       for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
       {
-        has_output = true;
-        std::cout << name_weight_vertexes[i].first << " " << name_weight_vertexes[i].second[j] << '\n';
+          std::cout << " " << name_weight_vertexes[i].second[j];
       }
+      std::cout << '\n';
     }
     if (!has_output)
     {
@@ -537,49 +554,36 @@ namespace goltsov
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs[name_graph].has(name_vertex))
+    bool is_has_name = false;
+    topit::Vector< std::pair< std::string, topit::Vector< size_t > > > name_weight_vertexes;
+    for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
+    {
+      if (it.key().second == name_vertex)
+      {
+        name_weight_vertexes.pushBack({it.key().first, it.value()});
+        is_has_name = true;
+      }
+      else if (it.key().first == name_vertex)
+      {
+        is_has_name = true;
+      }
+    }
+    if (!is_has_name)
     {
       has_output = true;
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    goltsov::HashTable< std::string, topit::Vector< size_t >,
-      goltsov::Sha1Hasher< std::string >, EqualString > name_weight_vertexes;
-    for (ht_it_vertexes it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
-    {
-      if (it.value().has(name_vertex))
-      {
-        name_weight_vertexes[it.key()].pushBackRange(it.value()[name_vertex].begin(),
-          it.value()[name_vertex].getSize());
-      }
-    }
-    topit::Vector< std::pair< std::string, topit::Vector< size_t > > > res;
-    for (goltsov::HashTableIterator< std::string, topit::Vector< size_t >, goltsov::Sha1Hasher< std::string >,
-           EqualString > it = name_weight_vertexes.begin(); it != name_weight_vertexes.end(); ++it)
-    {
-      sortSizeTVector(it.value());
-      res.pushBack({it.key(), it.value()});
-    }
-    sortPairStringSizeTVector(res);
-    for (size_t i = 0; i < res.getSize(); ++i)
+    sortPairStringSizeTVector(name_weight_vertexes);
+    for (size_t i = 0; i < name_weight_vertexes.getSize(); ++i)
     {
       has_output = true;
-      std::cout << res[i].first << ' ';
-      for (size_t j = 0; j < res[i].second.getSize(); ++j)
+      std::cout << name_weight_vertexes[i].first;
+      for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
       {
-        has_output = true;
-        std::cout << res[i].second[j];
-        if (j == res[i].second.getSize() - 1)
-        {
-          has_output = true;
-          std::cout << '\n';
-        }
-        else
-        {
-          has_output = true;
-          std::cout << ' ';
-        }
+          std::cout << " " << name_weight_vertexes[i].second[j];
       }
+      std::cout << '\n';
     }
     if (!has_output)
     {
@@ -595,8 +599,7 @@ namespace goltsov
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    graphs[name_graph][name_vertex1][name_vertex2].pushBack(weight);
-    graphs[name_graph][name_vertex2][name_vertex1];
+    graphs[name_graph][{name_vertex1, name_vertex2}].pushBack(weight);
   }
 
   void cut(ht_graphs& graphs, std::string name_graph, std::string name_vertex1,
@@ -607,25 +610,16 @@ namespace goltsov
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs[name_graph].has(name_vertex1))
+    if (!graphs[name_graph].has({name_vertex1, name_vertex2}))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs[name_graph][name_vertex1].has(name_vertex2))
+    for (size_t i = 0; i < graphs[name_graph][{name_vertex1, name_vertex2}].getSize(); ++i)
     {
-      std::cout << "<INVALID COMMAND>\n";
-      return;
-    }
-    for (size_t i = 0; i < graphs[name_graph][name_vertex1][name_vertex2].getSize(); ++i)
-    {
-      if (graphs[name_graph][name_vertex1][name_vertex2][i] == weight)
+      if (graphs[name_graph][{name_vertex1, name_vertex2}][i] == weight)
       {
-        graphs[name_graph][name_vertex1][name_vertex2].erase(i);
-        if (graphs[name_graph][name_vertex1][name_vertex2].getSize() == 0)
-        {
-          graphs[name_graph][name_vertex1].drop(name_vertex2);
-        }
+        graphs[name_graph][{name_vertex1, name_vertex2}].erase(i);
         return;
       }
     }
@@ -643,7 +637,7 @@ namespace goltsov
     graphs[name_graph];
     for (size_t i = 0; i < count; ++i)
     {
-      graphs[name_graph][vertexes_names[i]];
+      graphs[name_graph][{vertexes_names[i], vertexes_names[0]}];
     }
   }
 
@@ -664,21 +658,15 @@ namespace goltsov
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    for (ht_it_vertexes it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
+    for (ht_it_pairs it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
     {
-      for (ht_it_vertexes_vertexes jt = it.value().begin(); jt != it.value().end(); ++jt)
-      {
-        graphs[name_new_graph][it.key()][jt.key()].pushBackRange(
-          graphs[name_graph1][it.key()][jt.key()].begin(), graphs[name_graph1][it.key()][jt.key()].getSize());
-      }
+      graphs[name_new_graph][it.key()].pushBackRange(
+        graphs[name_graph1][it.key()].begin(), graphs[name_graph1][it.key()].getSize());
     }
-    for (ht_it_vertexes it = graphs[name_graph2].begin(); it != graphs[name_graph2].end(); ++it)
+    for (ht_it_pairs it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
     {
-      for (ht_it_vertexes_vertexes jt = it.value().begin(); jt != it.value().end(); ++jt)
-      {
-        graphs[name_new_graph][it.key()][jt.key()].pushBackRange(
-          graphs[name_graph2][it.key()][jt.key()].begin(), graphs[name_graph2][it.key()][jt.key()].getSize());
-      }
+      graphs[name_new_graph][it.key()].pushBackRange(
+        graphs[name_graph2][it.key()].begin(), graphs[name_graph2][it.key()].getSize());
     }
   }
 
@@ -695,9 +683,16 @@ namespace goltsov
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
+    goltsov::HashTable< std::string, std::string, goltsov::Sha1Hasher< std::string >,
+      goltsov::EqualString > name_vertexes;
+    for (ht_it_pairs it = graphs[name_old_graph].begin(); it != graphs[name_old_graph].end(); ++it)
+    {
+      name_vertexes[it.key().first];
+      name_vertexes[it.key().second];
+    }
     for (size_t i = 0; i < count_vertexes; ++i)
     {
-      if (!graphs[name_old_graph].has(vertexes[i]))
+      if (!name_vertexes.has(vertexes[i]))
       {
         std::cout << "<INVALID COMMAND>\n";
         return;
@@ -707,11 +702,11 @@ namespace goltsov
     {
       for (size_t j = 0; j < count_vertexes; ++j)
       {
-        if (i != j)
+        if (i != j && graphs[name_old_graph].has({vertexes[i], vertexes[j]}))
         {
-          graphs[name_new_graph][vertexes[i]][vertexes[j]].pushBackRange(
-            graphs[name_old_graph][vertexes[i]][vertexes[j]].begin(),
-            graphs[name_old_graph][vertexes[i]][vertexes[j]].getSize());
+          graphs[name_new_graph][{vertexes[i], vertexes[j]}].pushBackRange(
+            graphs[name_old_graph][{vertexes[i], vertexes[j]}].begin(),
+            graphs[name_old_graph][{vertexes[i],vertexes[j]}].getSize());
         }
       }
     }
