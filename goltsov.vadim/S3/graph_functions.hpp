@@ -5,7 +5,6 @@
 
 namespace goltsov
 {
-
   struct EqualString
   {
     bool operator()(const std::string& a, const std::string& b)
@@ -21,7 +20,6 @@ namespace goltsov
       return a.first == b.first && a.second == b.second;
     }
   };
-  
 
   using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
     topit::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, EqualPairString >,
