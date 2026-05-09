@@ -535,12 +535,12 @@ namespace goltsov
       {
         has_output = true;
         std::cout << name_weight_vertexes[i].first;
+        for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
+        {
+          std::cout << " " << name_weight_vertexes[i].second[j];
+        }
+        std::cout << '\n';
       }
-      for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
-      {
-        std::cout << " " << name_weight_vertexes[i].second[j];
-      }
-      std::cout << '\n';
     }
     if (!has_output)
     {
@@ -584,12 +584,12 @@ namespace goltsov
       {
         has_output = true;
         std::cout << name_weight_vertexes[i].first;
+        for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
+        {
+          std::cout << " " << name_weight_vertexes[i].second[j];
+        }
+        std::cout << '\n';
       }
-      for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
-      {
-        std::cout << " " << name_weight_vertexes[i].second[j];
-      }
-      std::cout << '\n';
     }
     if (!has_output)
     {
