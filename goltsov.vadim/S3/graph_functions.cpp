@@ -531,11 +531,14 @@ namespace goltsov
     sortPairStringSizeTVector(name_weight_vertexes);
     for (size_t i = 0; i < name_weight_vertexes.getSize(); ++i)
     {
-      has_output = true;
-      std::cout << name_weight_vertexes[i].first;
+      if (name_weight_vertexes[i].second.getSize())
+      {
+        has_output = true;
+        std::cout << name_weight_vertexes[i].first;
+      }
       for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
       {
-          std::cout << " " << name_weight_vertexes[i].second[j];
+        std::cout << " " << name_weight_vertexes[i].second[j];
       }
       std::cout << '\n';
     }
@@ -577,11 +580,14 @@ namespace goltsov
     sortPairStringSizeTVector(name_weight_vertexes);
     for (size_t i = 0; i < name_weight_vertexes.getSize(); ++i)
     {
-      has_output = true;
-      std::cout << name_weight_vertexes[i].first;
+      if (name_weight_vertexes[i].second.getSize())
+      {
+        has_output = true;
+        std::cout << name_weight_vertexes[i].first;
+      }
       for (size_t j = 0; j < name_weight_vertexes[i].second.getSize(); ++j)
       {
-          std::cout << " " << name_weight_vertexes[i].second[j];
+        std::cout << " " << name_weight_vertexes[i].second[j];
       }
       std::cout << '\n';
     }
