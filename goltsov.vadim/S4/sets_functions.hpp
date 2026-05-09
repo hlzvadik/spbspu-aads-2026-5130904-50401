@@ -27,7 +27,7 @@ namespace goltsov
   void unionParsing(std::ostream& out, std::istream& in, bst_s_bst_is& all_sets);
 
   void print_ds(std::ostream& out, bst_s_bst_is& all_sets, std::string dataset);
-  void complement_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2);
-  void intersect_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2);
-  void union_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2);
+  void complement_ds(std::ostream& out, bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2);
+  void intersect_ds(std::ostream& out, bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2);
+  void union_ds(std::ostream& out, bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2);
 }

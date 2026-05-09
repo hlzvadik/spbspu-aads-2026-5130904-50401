@@ -125,7 +125,7 @@ void goltsov::complementParsing(std::ostream& out, std::istream& in, goltsov::bs
     out << "<INVALID COMMAND\n";
     return;
   }
-  complement_ds(all_sets, new_dataset, dataset_1, dataset_2);
+  complement_ds(out, all_sets, new_dataset, dataset_1, dataset_2);
 }
 
 void goltsov::intersectParsing(std::ostream& out, std::istream& in, goltsov::bst_s_bst_is& all_sets)
@@ -170,7 +170,7 @@ void goltsov::intersectParsing(std::ostream& out, std::istream& in, goltsov::bst
     out << "<INVALID COMMAND\n";
     return;
   }
-  intersect_ds(all_sets, new_dataset, dataset_1, dataset_2);
+  intersect_ds(out, all_sets, new_dataset, dataset_1, dataset_2);
 }
 
 void goltsov::unionParsing(std::ostream& out, std::istream& in, goltsov::bst_s_bst_is& all_sets)
@@ -215,7 +215,7 @@ void goltsov::unionParsing(std::ostream& out, std::istream& in, goltsov::bst_s_b
     out << "<INVALID COMMAND\n";
     return;
   }
-  union_ds(all_sets, new_dataset, dataset_1, dataset_2);
+  union_ds(out, all_sets, new_dataset, dataset_1, dataset_2);
 }
 
 void goltsov::print_ds(std::ostream& out, goltsov::bst_s_bst_is& all_sets, std::string dataset)
@@ -224,16 +224,16 @@ void goltsov::print_ds(std::ostream& out, goltsov::bst_s_bst_is& all_sets, std::
   {
     if (all_sets.get(dataset).height() == 0)
     {
-      std::cout << "<EMPTY>\n";
+      out << "<EMPTY>\n";
       return;
     }
   }
   catch (...)
   {
-    std::cout << "<INVALID COMMAND>\n";
+    out << "<INVALID COMMAND>\n";
     return;
   }
-  std::cout << dataset;
+  out << dataset;
   for (goltsov::bst_is_iterator it = all_sets.get(dataset).begin(); it != all_sets.get(dataset).end(); ++it)
   {
     out << " " << (* it).first << " " << (* it).second;
@@ -242,14 +242,24 @@ void goltsov::print_ds(std::ostream& out, goltsov::bst_s_bst_is& all_sets, std::
 }
 
 void goltsov::complement_ds(
-  bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
+  std::ostream& out, bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
 {
-  all_sets.push(new_dataset, goltsov::BSTree< long long, std::string, Comparator< long long > > ());
+  goltsov::BSTree< long long, std::string, Comparator< long long > > new_set;
+  try
+  {
+    all_sets.get(dataset_1);
+    all_sets.get(dataset_2);
+  }
+  catch (...)
+  {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
   goltsov::bst_is_iterator it_1 = all_sets.get(dataset_1).begin();
   goltsov::bst_is_iterator it_2 = all_sets.get(dataset_2).begin();
   while (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end())
   {
-    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
+    if (it_1 != all_sets.get(dataset_1).end() || it_2 != all_sets.get(dataset_2).end()
       && (* it_1).first == (* it_2).first)
     {
       ++it_1;
@@ -259,7 +269,7 @@ void goltsov::complement_ds(
       && (* it_1).first < (* it_2).first)
       || (it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end()))
     {
-      all_sets.get(new_dataset).push((* it_1).first, (* it_1).second);
+      new_set.push((* it_1).first, (* it_1).second);
       ++it_1;
     }
     if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
@@ -268,21 +278,39 @@ void goltsov::complement_ds(
     {
       ++it_2;
     }
+  }
+  try
+  {
+    all_sets.push(new_dataset, new_set);
+  }
+  catch (...)
+  {
+    all_sets.get(new_dataset) = new_set;
   }
 }
 
 void goltsov::intersect_ds(
-  bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
+  std::ostream& out, bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
 {
-  all_sets.push(new_dataset, goltsov::BSTree< long long, std::string, Comparator< long long > > ());
+  goltsov::BSTree< long long, std::string, Comparator< long long > > new_set;
+  try
+  {
+    all_sets.get(dataset_1);
+    all_sets.get(dataset_2);
+  }
+  catch (...)
+  {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
   goltsov::bst_is_iterator it_1 = all_sets.get(dataset_1).begin();
   goltsov::bst_is_iterator it_2 = all_sets.get(dataset_2).begin();
-  while (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end())
+  while (it_1 != all_sets.get(dataset_1).end() || it_2 != all_sets.get(dataset_2).end())
   {
     if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
       && (* it_1).first == (* it_2).first)
     {
-      all_sets.get(new_dataset).push((* it_1).first, (* it_1).second);
+      new_set.push((* it_1).first, (* it_1).second);
       ++it_1;
       ++it_2;
     }
@@ -299,20 +327,38 @@ void goltsov::intersect_ds(
       ++it_2;
     }
   }
+  try
+  {
+    all_sets.push(new_dataset, new_set);
+  }
+  catch (...)
+  {
+    all_sets.get(new_dataset) = new_set;
+  }
 }
 
-void goltsov::union_ds
-  (bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
+void goltsov::union_ds(
+  std::ostream& out, bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
 {
-  all_sets.push(new_dataset, goltsov::BSTree< long long, std::string, Comparator< long long > > ());
+  goltsov::BSTree< long long, std::string, Comparator< long long > > new_set;
+  try
+  {
+    all_sets.get(dataset_1);
+    all_sets.get(dataset_2);
+  }
+  catch (...)
+  {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
   goltsov::bst_is_iterator it_1 = all_sets.get(dataset_1).begin();
   goltsov::bst_is_iterator it_2 = all_sets.get(dataset_2).begin();
-  while (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end())
+  while (it_1 != all_sets.get(dataset_1).end() || it_2 != all_sets.get(dataset_2).end())
   {
     if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
       && (* it_1).first == (* it_2).first)
     {
-      all_sets.get(new_dataset).push((* it_1).first, (* it_1).second);
+      new_set.push((* it_1).first, (* it_1).second);
       ++it_1;
       ++it_2;
     }
@@ -320,15 +366,23 @@ void goltsov::union_ds
       && (* it_1).first < (* it_2).first)
       || (it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end()))
     {
-      all_sets.get(new_dataset).push((* it_1).first, (* it_1).second);
+      new_set.push((* it_1).first, (* it_1).second);
       ++it_1;
     }
     if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
       && (* it_1).first > (* it_2).first)
       || (it_1 == all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()))
     {
-      all_sets.get(new_dataset).push((* it_2).first, (* it_2).second);
+      new_set.push((* it_2).first, (* it_2).second);
       ++it_2;
     }
+  }
+  try
+  {
+    all_sets.push(new_dataset, new_set);
+  }
+  catch (...)
+  {
+    all_sets.get(new_dataset) = new_set;
   }
 }
