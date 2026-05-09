@@ -255,16 +255,16 @@ void goltsov::complement_ds(
       ++it_1;
       ++it_2;
     }
-    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
-      && (* it_1).first < (* it_2).first
-      || it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end())
+    if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
+      && (* it_1).first < (* it_2).first)
+      || (it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end()))
     {
       all_sets.get(new_dataset).push((* it_1).first, (* it_1).second);
       ++it_1;
     }
-    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
-      && (* it_1).first > (* it_2).first
-      || it_1 == all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end())
+    if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
+      && (* it_1).first > (* it_2).first)
+      || (it_1 == all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()))
     {
       ++it_2;
     }
@@ -286,15 +286,15 @@ void goltsov::intersect_ds(
       ++it_1;
       ++it_2;
     }
-    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
-      && (* it_1).first < (* it_2).first
-      || it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end())
+    if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
+      && (* it_1).first < (* it_2).first)
+      || (it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end()))
     {
       ++it_1;
     }
-    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
-      && (* it_1).first > (* it_2).first
-      || it_1 == all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end())
+    if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
+      && (* it_1).first > (* it_2).first)
+      || (it_1 == all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()))
     {
       ++it_2;
     }
@@ -316,16 +316,16 @@ void goltsov::union_ds
       ++it_1;
       ++it_2;
     }
-    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
-      && (* it_1).first < (* it_2).first
-      || it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end())
+    if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
+      && (* it_1).first < (* it_2).first)
+      || (it_1 != all_sets.get(dataset_1).end() && it_2 == all_sets.get(dataset_2).end()))
     {
       all_sets.get(new_dataset).push((* it_1).first, (* it_1).second);
       ++it_1;
     }
-    if (it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
-      && (* it_1).first > (* it_2).first
-      || it_1 == all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end())
+    if ((it_1 != all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()
+      && (* it_1).first > (* it_2).first)
+      || (it_1 == all_sets.get(dataset_1).end() && it_2 != all_sets.get(dataset_2).end()))
     {
       all_sets.get(new_dataset).push((* it_2).first, (* it_2).second);
       ++it_2;
