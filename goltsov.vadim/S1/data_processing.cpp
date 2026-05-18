@@ -89,6 +89,11 @@ namespace goltsov
 
   std::ostream& printResult(std::ostream& out, List< std::pair< std::string, List< size_t > > >& data, size_t size)
   {
+    if (size == 0)
+    {
+      out << 0 << '\n';
+      return out;
+    }
     LIter< std::pair< std::string, List< size_t > > > it = data.begin();
     size_t* sums = nullptr;
     size_t n = 0;
