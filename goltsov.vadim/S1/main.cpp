@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include "mylist.hpp"
-#include "functions.hpp"
+#include "data_processing.hpp"
 
 int main()
 {
@@ -9,7 +9,7 @@ int main()
   goltsov::List< std::pair< std::string, goltsov::List< size_t > > > data;
   try
   {
-    goltsov::getData(data, std::cin, size);
+    goltsov::getData(std::cin, data, size);
   }
   catch(const std::overflow_error& e)
   {
