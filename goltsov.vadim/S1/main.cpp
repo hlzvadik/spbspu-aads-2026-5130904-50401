@@ -11,14 +11,14 @@ int main()
   {
     goltsov::getData(std::cin, data, size);
   }
-  catch(const std::overflow_error& e)
+  catch (const std::overflow_error& e)
   {
     std::cerr << e.what() << '\n';
     try
     {
       goltsov::printResult(std::cout, data, size);
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
       std::cerr << e.what() << '\n';
       return 1;
@@ -29,7 +29,7 @@ int main()
   {
     goltsov::printResult(std::cout, data, size);
   }
-  catch(const std::exception& e)
+  catch (const std::exception& e)
   {
     std::cerr << e.what() << '\n';
     return 1;

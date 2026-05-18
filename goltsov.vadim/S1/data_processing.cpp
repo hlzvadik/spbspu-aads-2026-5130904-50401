@@ -144,7 +144,7 @@ namespace goltsov
             {
               sum = sumWithCheck(sum, (* its[i]));
             }
-            catch(...)
+            catch (...)
             {
               without_overflows = 0;
             }
@@ -156,7 +156,7 @@ namespace goltsov
             {
               sum = sumWithCheck(sum, (* its[i]));
             }
-            catch(...)
+            catch (...)
             {
               without_overflows = 0;
             }
@@ -166,7 +166,7 @@ namespace goltsov
           {
             its[i] = its[i].next();
           }
-          catch(...)
+          catch (...)
           {
             delete[] its;
             delete[] sums;

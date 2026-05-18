@@ -323,7 +323,7 @@ namespace goltsov
   LIter< T > List< T >::getLast() noexcept
   {
     LIter< T > now = begin();
-    while(now.hasNext() && now.next() != nullptr)
+    while (now.hasNext() && now.next() != nullptr)
     {
       now = now.next();
     }
@@ -333,7 +333,7 @@ namespace goltsov
   LCIter< T > List< T >::getLast() const noexcept
   {
     LCIter< T > now = begin();
-    while(now.hasNext() && now.next() != nullptr)
+    while (now.hasNext() && now.next() != nullptr)
     {
       now = now.next();
     }
