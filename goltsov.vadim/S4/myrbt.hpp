@@ -1,9 +1,9 @@
-#ifndef MYBST_HPP
-#define MYBST_HPP
+#ifndef MYRBT_HPP
+#define MYRBT_HPP
 #include <cstddef>
 #include "../Common/mystack.hpp"
 
-namespace goltsov
+namespace detail
 {
   template< class Key, class Value, class Compare >
   class BSTree;
@@ -15,9 +15,8 @@ namespace goltsov
   struct NodeBST
   {
     std::pair< Key, Value > data_;
-    NodeBST< Key, Value >* left_;
-    NodeBST< Key, Value >* right_;
-    NodeBST< Key, Value >* parent_;
+    NodeBST< Key, Value >* left_, * right_, * parent_;
+    bool is_black_;
     size_t height_;
   };
 
@@ -105,9 +104,9 @@ namespace goltsov
     BSTree< Key, Value, Compare >& operator=(const BSTree< Key, Value, Compare >&);
     BSTree< Key, Value, Compare >& operator=(BSTree< Key, Value, Compare >&&);
 
-    void push(Key k, Value v);
+    NodeBST< Key, Value >* push(Key k, Value v);
     Value& get(Key k);
-    Value drop(Key k);
+    NodeBST< Key, Value >* drop(Key k);
 
     void swap(BSTree< Key, Value, Compare >&);
 
@@ -124,10 +123,7 @@ namespace goltsov
     size_t height(BSTConstIterator< Key, Value > it) const noexcept;
     size_t height() const noexcept;
   };
-}
 
-namespace goltsov
-{
   template< class Key, class Value >
   NodeBST< Key, Value >* falLeft(NodeBST< Key, Value >* a)
   {
@@ -214,21 +210,21 @@ namespace goltsov
     }
     BSTree< Key, Value, Compare > new_tree;
     new_tree.root_ = new NodeBST< Key, Value >
-      {current->data_, nullptr, nullptr, nullptr, current->height_};
+      {current->data_, nullptr, nullptr, nullptr, current->is_black_, current->height_};
     NodeBST< Key, Value >* new_node = new_tree.root_;
     while (current)
     {
       if (current->left_ && !new_node->left_)
       {
         new_node->left_ = new NodeBST< Key, Value >
-          {current->left_->data_, nullptr, nullptr, new_node, current->left_->height_};
+          {current->left_->data_, nullptr, nullptr, new_node, current->left_->is_black_, current->left_->height_};
         new_node = new_node->left_;
         current = current->left_;
       }
       else if (current->right_ && !new_node->right_)
       {
         new_node->right_ = new NodeBST< Key, Value >
-          {current->right_->data_, nullptr, nullptr, new_node, current->right_->height_};
+          {current->right_->data_, nullptr, nullptr, new_node, current->right_->is_black_, current->right_->height_};
         new_node = new_node->right_;
         current = current->right_;
       }
@@ -267,13 +263,15 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Compare >
-  void BSTree< Key, Value, Compare >::push(Key k, Value v)
+  NodeBST< Key, Value >* BSTree< Key, Value, Compare >::push(Key k, Value v)
   {
     Compare comparator;
-    if (!root_)
+    NodeBST< Key, Value >* current = root_;
+    NodeBST< Key, Value >* inserted = nullptr;
+    if (!current)
     {
-      root_ = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, nullptr, 1};
-      return;
+      inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, nullptr, false, 1};
+      root_ = inserted;
     }
     NodeBST< Key, Value >* current = root_;
     NodeBST< Key, Value >* inserted = nullptr;
@@ -283,7 +281,7 @@ namespace goltsov
       {
         if (!current->left_)
         {
-          inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, current, 1};
+          inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, false, current, 1};
           current->left_ = inserted;
           break;
         }
@@ -296,7 +294,7 @@ namespace goltsov
       {
         if (!current->right_)
         {
-          inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, current, 1};
+          inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, false, current, 1};
           current->right_ = inserted;
           break;
         }
@@ -318,6 +316,7 @@ namespace goltsov
       current->height_ = 1 + std::max(leftHeight, rightHeight);
       current = current->parent_;
     }
+    return inserted->parent_;
   }
 
   template< class Key, class Value, class Compare >
@@ -344,7 +343,7 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Compare >
-  Value BSTree< Key, Value, Compare >::drop(Key k)
+  NodeBST< Key, Value >* BSTree< Key, Value, Compare >::drop(Key k)
   {
     Compare comparator;
     NodeBST<Key, Value>* current = root_;
@@ -379,74 +378,43 @@ namespace goltsov
         }
         else if (current->left_ && !current->right_)
         {
+          NodeBST< Key, Value >* maxLeft = falRight(current->left_);
+          std::swap(maxLeft->data_, current->data_);
+          current = maxLeft;
           startHeightUpdate = current->parent_;
           if (current->parent_ && current->parent_->left_ == current)
           {
-            current->parent_->left_ = current->left_;
+            current->parent_->left_ = nullptr;
           }
           else if (current->parent_)
           {
-            current->parent_->right_ = current->left_;
+            current->parent_->right_ = nullptr;
           }
           else
           {
-            root_ = current->left_;
-          }
-          if (current->left_)
-          {
-            current->left_->parent_ = current->parent_;
-          }
-        }
-        else if (!current->left_ && current->right_)
-        {
-          startHeightUpdate = current->parent_;
-          if (current->parent_ && current->parent_->left_ == current)
-          {
-            current->parent_->left_ = current->right_;
-          }
-          else if (current->parent_)
-          {
-            current->parent_->right_ = current->right_;
-          }
-          else
-          {
-            root_ = current->right_;
-          }
-          if (current->right_)
-          {
-            current->right_->parent_ = current->parent_;
+            root_ = nullptr;
           }
         }
         else
         {
-          NodeBST<Key, Value>* successor = falLeft(current->right_);
-          std::swap(current->data_, successor->data_);
-          Value res = current->data_.second;
-          startHeightUpdate = successor->parent_;
-          if (successor->parent_->left_ == successor)
+          NodeBST< Key, Value >* minRight = falLeft(current->right_);
+          std::swap(minRight->data_, current->data_);
+          current = minRight;
+          startHeightUpdate = current->parent_;
+          if (current->parent_ && current->parent_->left_ == current)
           {
-            successor->parent_->left_ = successor->right_;
+            current->parent_->left_ = nullptr;
+          }
+          else if (current->parent_)
+          {
+            current->parent_->right_ = nullptr;
           }
           else
           {
-            successor->parent_->right_ = successor->right_;
+            root_ = nullptr;
           }
-          if (successor->right_)
-          {
-            successor->right_->parent_ = successor->parent_;
-          }
-          delete successor;
-          NodeBST< Key, Value >* node = startHeightUpdate;
-          while (node)
-          {
-            size_t leftHeight = node->left_ ? node->left_->height_ : 0;
-            size_t rightHeight = node->right_ ? node->right_->height_ : 0;
-            node->height_ = 1 + std::max(leftHeight, rightHeight);
-            node = node->parent_;
-          }
-          return res;
         }
-        Value res = current->data_.second;
+        NodeBST< Key, Value >* res = current->parent_;
         delete current;
         NodeBST< Key, Value >* node = startHeightUpdate;
         while (node)
@@ -950,6 +918,48 @@ namespace goltsov
   {
     return ptr_;
   }
+}
+
+namespace goltsov
+{
+  template< class Key, class Value >
+  using RBTIterator = detail::BSTIterator< Key, Value >;
+  template< class Key, class Value >
+  using RBTConstIterator = detail::BSTConstIterator< Key, Value >;
+
+  template< class Key, class Value, class Compare >
+  class RBTree
+  {
+  public:
+    RBTree();
+    ~RBTree();
+    RBTree(const RBTree< Key, Value, Compare >&);
+    RBTree(RBTree< Key, Value, Compare >&&);
+    RBTree< Key, Value, Compare >& operator=(const RBTree< Key, Value, Compare >&);
+    RBTree< Key, Value, Compare >& operator=(RBTree< Key, Value, Compare >&&);
+
+    RBTIterator< Key, Value > push(Key k, Value v);
+    Value& get(Key k);
+    Value drop(Key k);
+
+    void swap(RBTree< Key, Value, Compare >&);
+
+    RBTIterator< Key, Value > begin();
+    RBTConstIterator< Key, Value > begin() const;
+    RBTIterator< Key, Value > end();
+    RBTConstIterator< Key, Value > end() const;
+
+    RBTIterator< Key, Value > rotateLeft(RBTConstIterator< Key, Value > it);
+    RBTIterator< Key, Value > rotateRight(RBTConstIterator< Key, Value > it);
+    RBTIterator< Key, Value > rotateLargeLeft(RBTConstIterator< Key, Value > it);
+    RBTIterator< Key, Value > rotateLargeRight(RBTConstIterator< Key, Value > it);
+
+    size_t height(RBTConstIterator< Key, Value > it) const noexcept;
+    size_t height() const noexcept;
+  private:
+    detail::RBTree< Key, Value, Compare > tree;
+    void makeBalance(detail::NodeBST< Key, Value >* rootDisbalance);
+  };
 }
 
 #endif
