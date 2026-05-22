@@ -31,6 +31,7 @@ namespace goltsov
 
     std::pair< MapIterator< Key, Value >, bool > insert(const std::pair< Key, Value >&);
     void erase(const Key&);
+    void clear();
 
     MapIterator< Key, Value > find(const Key&);
     MapConstIterator< Key, Value > find(const Key&) const;
@@ -91,6 +92,11 @@ namespace goltsov
   void Map< Key, Value >::erase(const Key& k)
   {
     data_.drop(k);
+  }
+  template< class Key, class Value >
+  void Map< Key, Value >::clear()
+  {
+    data_.clear();
   }
   template< class Key, class Value >
   MapIterator<Key, Value> Map< Key, Value >::find(const Key& k)

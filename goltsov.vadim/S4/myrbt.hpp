@@ -107,6 +107,7 @@ namespace detail
     NodeBST< Key, Value >* push(Key k, Value v);
     BSTIterator< Key, Value > get(const Key& k);
     std::tuple< NodeBST< Key, Value >*, Value, bool > drop(const Key& k);
+    void clear();
 
     void swap(BSTree< Key, Value, Compare >&);
 
@@ -441,6 +442,48 @@ namespace detail
       }
     }
     throw std::runtime_error("Key is not in table");
+  }
+
+  template< class Key, class Value, class Compare >
+  void BSTree< Key, Value, Compare >::clear()
+  {
+    NodeBST< Key, Value >* current = root_;
+    while (current)
+    {
+      if (!current->left_ && !current->right_)
+      {
+        if (!current->parent_)
+        {
+          delete current;
+          root_ = nullptr;
+          current = nullptr;
+        }
+        else
+        {
+          if (current == current->parent_->left_)
+          {
+            current = current->parent_;
+            delete current->left_;
+            current->left_ = nullptr;
+          }
+          else
+          {
+            current = current->parent_;
+            delete current->right_;
+            current->right_ = nullptr;
+          }
+        }
+      }
+      else if (current->left_)
+      {
+        current = current->left_;
+      }
+      else if (current->right_)
+      {
+        current = current->right_;
+      }
+    }
+    root_ = nullptr;
   }
 
   template< class Key, class Value, class Compare >
@@ -986,6 +1029,7 @@ namespace goltsov
     RBTIterator< Key, Value > push(Key, Value);
     RBTIterator< Key, Value > get(const Key&);
     Value drop(const Key&);
+    void clear();
 
     void swap(RBTree< Key, Value, Compare >&);
 
@@ -1043,6 +1087,11 @@ namespace goltsov
     std::tuple< detail::NodeBST< Key, Value >*, Value, bool > after_drop = tree_.drop(k);
     makeBalanceAfterDrop(after_drop);
     return std::get< 1 >(after_drop);
+  }
+  template< class Key, class Value, class Compare >
+  void RBTree< Key, Value, Compare >::clear()
+  {
+    tree_.clear();
   }
   template< class Key, class Value, class Compare >
   void RBTree< Key, Value, Compare >::swap(RBTree< Key, Value, Compare >& other)
