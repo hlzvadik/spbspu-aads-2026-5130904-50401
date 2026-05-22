@@ -36,7 +36,7 @@ namespace goltsov
     goltsov::Queue< std::string > postfix;
     goltsov::Stack< std::string > op_and_br;
     std::string prev = " ";
-    while(!a.empty())
+    while (!a.empty())
     {
       if (isdigit(a.front()[0]))
       {
@@ -60,16 +60,16 @@ namespace goltsov
         {
           throw std::logic_error("Bad input expression");
         }
-        while(op_and_br.front() != "(" && !op_and_br.empty())
+        while (op_and_br.top() != "(" && !op_and_br.empty())
         {
-          postfix.push(op_and_br.front());
-          op_and_br.drop();
+          postfix.push(op_and_br.top());
+          op_and_br.pop();
         }
         if (op_and_br.empty())
         {
           throw std::logic_error("Bad input expression");
         }
-        op_and_br.drop();
+        op_and_br.pop();
       }
       else
       {
@@ -77,28 +77,28 @@ namespace goltsov
         {
           throw std::logic_error("Bad input expression");
         }
-        if (op_and_br.empty() || priority(a.front()) > priority(op_and_br.front()))
+        if (op_and_br.empty() || priority(a.front()) > priority(op_and_br.top()))
         {
           op_and_br.push(a.front());
         }
         else
         {
           while (!op_and_br.empty()
-            && (priority(a.front()) <= priority(op_and_br.front())) && op_and_br.front() != "(")
+            && (priority(a.front()) <= priority(op_and_br.top())) && op_and_br.top() != "(")
           {
-            postfix.push(op_and_br.front());
-            op_and_br.drop();
+            postfix.push(op_and_br.top());
+            op_and_br.pop();
           }
           op_and_br.push(a.front());
         }
       }
       prev = a.front();
-      a.drop();
+      a.pop();
     }
-    while(!op_and_br.empty())
+    while (!op_and_br.empty())
     {
-      postfix.push(op_and_br.front());
-      op_and_br.drop();
+      postfix.push(op_and_br.top());
+      op_and_br.pop();
     }
 
     return postfix;
@@ -124,12 +124,12 @@ namespace goltsov
       while (!postfix.empty() && isdigit(postfix.front()[0]))
       {
         result.push(convertStringToLLI(postfix.front()));
-        postfix.drop();
+        postfix.pop();
       }
       try
       {
         operation = postfix.front();
-        postfix.drop();
+        postfix.pop();
       }
       catch (...)
       {
@@ -139,13 +139,13 @@ namespace goltsov
         }
         else
         {
-          return result.front();
+          return result.top();
         }
       }
-      a = result.front();
-      result.drop();
-      b = result.front();
-      result.drop();
+      a = result.top();
+      result.pop();
+      b = result.top();
+      result.pop();
       if (operation == "+")
       {
         result.push(goltsov::addition(b, a));
@@ -171,6 +171,6 @@ namespace goltsov
         result.push(goltsov::concatenation(b, a));
       }
     }
-    return result.front();
+    return result.top();
   }
 }

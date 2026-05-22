@@ -6,7 +6,7 @@
 #include "myqueue.hpp"
 #include "mystack.hpp"
 
-namespace goltsov
+namespace
 {
   goltsov::Queue< std::string > getLine(std::istream& input)
   {
@@ -37,31 +37,26 @@ namespace goltsov
 int main(int argc, char** argv)
 {
   std::ifstream input_file;
-  std::istream* input = & std::cin;
+  std::istream* input = &std::cin;
   if (argc > 1)
   {
     input_file.open(argv[1]);
-    input = & input_file;
+    input = &input_file;
   }
 
   goltsov::Stack< long long int > result;
-  while(* input)
+  while (*input)
   {
-    if (input->peek() == '\n')
-    {
-      input->get();
-      continue;
-    }
     try
     {
-      goltsov::Queue< std::string > infix = goltsov::getLine(* input);
-      if (infix.empty())
-      {
-        continue;
-      }
+      goltsov::Queue< std::string > infix = getLine(*input);
       if (infix.empty() && input->eof())
       {
         break;
+      }
+      if (infix.empty())
+      {
+        continue;
       }
       result.push(goltsov::eval(goltsov::converToPostfix(infix)));
     }
@@ -75,11 +70,11 @@ int main(int argc, char** argv)
   {
     while (result.size() > 1)
     {
-      std::cout << result.front() << ' ';
-      result.drop();
+      std::cout << result.top() << ' ';
+      result.pop();
     }
-    std::cout << result.front() << '\n';
-    result.drop();
+    std::cout << result.top() << '\n';
+    result.pop();
   }
   else
   {

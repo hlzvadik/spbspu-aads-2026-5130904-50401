@@ -36,10 +36,10 @@ BOOST_AUTO_TEST_CASE(push_test)
 BOOST_AUTO_TEST_CASE(drop_test)
 {
   goltsov::Queue< int > a;
-  BOOST_CHECK_THROW(a.drop(), std::runtime_error);
+  BOOST_CHECK_THROW(a.pop(), std::runtime_error);
   a.push(5);
   a.push(4);
-  a.drop();
+  a.pop();
   BOOST_CHECK(a.size() == 1 && a.front() == 4);
 }
 
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(clear_test)
   a.push(5);
   a.push(4);
   a.clear();
-  BOOST_CHECK_THROW(a.drop(), std::runtime_error);
+  BOOST_CHECK_THROW(a.pop(), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

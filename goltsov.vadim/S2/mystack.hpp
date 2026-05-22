@@ -1,30 +1,31 @@
 #ifndef MYSTACK_HPP
 #define MYSTACK_HPP
-#include "../Common/mylist.hpp"
+#include <mylist.hpp>
 
 namespace goltsov
 {
   template< class T >
   class Stack
   {
-    List< T > dates_;
-    size_t size_;
   public:
     Stack();
+    Stack(const Stack< T >& other) = default;
+    Stack(Stack< T >&& other) = default;
     ~Stack() = default;
-    Stack(const Stack< T >& other);
-    Stack(Stack< T >&& other);
-    Stack< T >& operator=(const Stack< T >& other);
-    Stack< T >& operator=(Stack< T >&& other);
+    Stack< T >& operator=(const Stack< T >& other) = default;
+    Stack< T >& operator=(Stack< T >&& other) = default;
 
-    void push(const T& rhs);
-    void push(T&& rhs);
-    void drop();
-    T& front();
-    const T& front() const;
+    void push(const T&);
+    void push(T&&);
+    void pop();
+    T& top();
+    const T& top() const;
     bool empty() const noexcept;
     size_t size() const noexcept;
     void clear();
+  private:
+    List< T > dates_;
+    size_t size_;
   };
 }
 
@@ -32,33 +33,9 @@ namespace goltsov
 {
   template< class T >
   Stack< T >::Stack():
+    dates_(goltsov::List< T > {}),
     size_(0)
   {}
-  template< class T >
-  Stack< T >::Stack(const Stack< T >& other):
-    dates_(other.dates_),
-    size_(other.size_)
-  {}
-  template< class T >
-  Stack< T >::Stack(Stack< T >&& other):
-    dates_(std::move(other.dates_)),
-    size_(other.size_)
-  {}
-  template< class T >
-  Stack< T >& Stack< T >::operator=(const Stack< T >& other)
-  {
-    dates_ = other.dates_;
-    size_ = other.size_;
-    return * this;
-  }
-  template< class T >
-  Stack< T >& Stack< T >::operator=(Stack< T >&& other)
-  {
-    dates_ = std::move(other.dates_);
-    size_ = other.size_;
-    return * this;
-  }
-
   template< class T >
   void Stack< T >::push(const T& rhs)
   {
@@ -72,7 +49,7 @@ namespace goltsov
     size_ += 1;
   }
   template< class T >
-  void Stack< T >::drop()
+  void Stack< T >::pop()
   {
     if (empty())
     {
@@ -82,22 +59,22 @@ namespace goltsov
     size_--;
   }
   template< class T >
-  T& Stack< T >::front()
+  T& Stack< T >::top()
   {
     if (empty())
     {
       throw std::runtime_error("Stack is empty");
     }
-    return (* dates_.begin());
+    return (*dates_.begin());
   }
   template< class T >
-  const T& Stack< T >::front() const
+  const T& Stack< T >::top() const
   {
     if (empty())
     {
       throw std::runtime_error("Stack is empty");
     }
-    return (* dates_.begin());
+    return (*dates_.begin());
   }
   template< class T >
   bool Stack< T >::empty() const noexcept

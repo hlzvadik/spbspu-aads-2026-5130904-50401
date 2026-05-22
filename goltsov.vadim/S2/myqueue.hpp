@@ -1,26 +1,23 @@
 #ifndef MYQUEUE_HPP
 #define MYQUEUE_HPP
-#include "../Common/mylist.hpp"
+#include <mylist.hpp>
 
 namespace goltsov
 {
   template< class T >
   class Queue
   {
-    List< T > dates_;
-    LIter< T > tail_;
-    size_t size_;
   public:
     Queue();
+    Queue(const Queue< T >& other) = default;
+    Queue(Queue< T >&& other) = default;
     ~Queue() = default;
-    Queue(const Queue< T >& other);
-    Queue(Queue< T >&& other);
-    Queue< T >& operator=(const Queue< T >& other);
-    Queue< T >& operator=(Queue< T >&& other);
+    Queue< T >& operator=(const Queue< T >& other) = default;
+    Queue< T >& operator=(Queue< T >&& other) = default;
 
     void push(const T& rhs);
     void push(T&& rhs);
-    void drop();
+    void pop();
     T& front();
     const T& front() const;
     T& back();
@@ -28,6 +25,10 @@ namespace goltsov
     bool empty() const noexcept;
     size_t size() const noexcept;
     void clear();
+  private:
+    List< T > dates_;
+    LIter< T > tail_;
+    size_t size_;
   };
 }
 
@@ -35,55 +36,10 @@ namespace goltsov
 {
   template< class T >
   Queue< T >::Queue():
+    dates_(List< T > {}),
+    tail_(LIter< T > {}),
     size_(0)
   {}
-  template< class T >
-  Queue< T >::Queue(const Queue< T >& other):
-    dates_(other.dates_),
-    size_(other.size_)
-  {
-    tail_ = dates_.begin();
-    while (tail_.hasNext() && tail_.next().hasNext())
-    {
-      tail_ = tail_.next();
-    }
-  }
-  template< class T >
-  Queue< T >::Queue(Queue< T >&& other):
-    dates_(std::move(other.dates_)),
-    size_(other.size_)
-  {
-    tail_ = dates_.begin();
-    while (tail_.hasNext() && tail_.next().hasNext())
-    {
-      tail_ = tail_.next();
-    }
-  }
-  template< class T >
-  Queue< T >& Queue< T >::operator=(const Queue< T >& other)
-  {
-    dates_ = other.dates_;
-    size_ = other.size_;
-    tail_ = dates_.begin();
-    while (tail_.hasNext() && tail_.next().hasNext())
-    {
-      tail_ = tail_.next();
-    }
-    return * this;
-  }
-  template< class T >
-  Queue< T >& Queue< T >::operator=(Queue< T >&& other)
-  {
-    dates_ = std::move(other.dates_);
-    size_ = other.size_;
-    tail_ = dates_.begin();
-    while (tail_.hasNext() && tail_.next().hasNext())
-    {
-      tail_ = tail_.next();
-    }
-    return * this;
-  }
-
   template< class T >
   void Queue< T >::push(const T& rhs)
   {
@@ -97,7 +53,7 @@ namespace goltsov
     size_ += 1;
   }
   template< class T >
-  void Queue< T >::drop()
+  void Queue< T >::pop()
   {
     if (empty())
     {
@@ -117,7 +73,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (* dates_.begin());
+    return (*dates_.begin());
   }
   template< class T >
   const T& Queue< T >::front() const
@@ -126,7 +82,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (* dates_.begin());
+    return (*dates_.begin());
   }
   template< class T >
   T& Queue< T >::back()
@@ -135,7 +91,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (* tail_);
+    return (*tail_);
   }
   template< class T >
   const T& Queue< T >::back() const
@@ -144,7 +100,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (* tail_);
+    return (*tail_);
   }
   template< class T >
   bool Queue< T >::empty() const noexcept
