@@ -1,7 +1,6 @@
 #ifndef MYBST_HPP
 #define MYBST_HPP
 #include <cstddef>
-#include "../Common/mystack.hpp"
 
 namespace goltsov
 {
