@@ -37,19 +37,19 @@ namespace
 int main(int argc, char** argv)
 {
   std::ifstream input_file;
-  std::istream* input = &std::cin;
+  std::istream* input = & std::cin;
   if (argc > 1)
   {
     input_file.open(argv[1]);
-    input = &input_file;
+    input = & input_file;
   }
 
   goltsov::Stack< long long int > result;
-  while (*input)
+  while ( * input)
   {
     try
     {
-      goltsov::Queue< std::string > infix = getLine(*input);
+      goltsov::Queue< std::string > infix = getLine( * input);
       if (infix.empty() && input->eof())
       {
         break;

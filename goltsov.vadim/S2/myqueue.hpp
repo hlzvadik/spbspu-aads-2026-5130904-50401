@@ -73,7 +73,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (*dates_.begin());
+    return ( * dates_.begin());
   }
   template< class T >
   const T& Queue< T >::front() const
@@ -82,7 +82,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (*dates_.begin());
+    return ( * dates_.begin());
   }
   template< class T >
   T& Queue< T >::back()
@@ -91,7 +91,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (*tail_);
+    return ( * tail_);
   }
   template< class T >
   const T& Queue< T >::back() const
@@ -100,7 +100,7 @@ namespace goltsov
     {
       throw std::runtime_error("Queue is empty");
     }
-    return (*tail_);
+    return ( * tail_);
   }
   template< class T >
   bool Queue< T >::empty() const noexcept
