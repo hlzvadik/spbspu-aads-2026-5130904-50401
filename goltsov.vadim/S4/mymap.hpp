@@ -17,13 +17,13 @@ namespace goltsov
   class Map
   {
   public:
-    Map();
-    Map(const Map&);
-    Map(Map&&) noexcept;
-    ~Map();
+    Map() = default;
+    Map(const Map&) = default;
+    Map(Map&&) noexcept = default;
+    ~Map() = default;
 
-    Map& operator=(const Map&);
-    Map& operator=(Map&&) noexcept;
+    Map& operator=(const Map&) = default;
+    Map& operator=(Map&&) noexcept = default;
 
     Value& operator[](const Key&);
     Value& at(const Key&);
@@ -52,6 +52,29 @@ namespace goltsov
   private:
     goltsov::RBTree< Key, Value, std::less< Key > > data_;
   };
+
+  template< class Key, class Value >
+  Value& Map< Key, Value>::operator[](const Key& k)
+  {
+    try
+    {
+      return data_.get(k);
+    }
+    catch (std::logic_error& e)
+    {
+      return (* data_.push(k, Value {})).second;
+    }
+  }
+  template< class Key, class Value >
+  Value& Map< Key, Value >::at(const Key& k)
+  {
+    return data_.get(k);
+  }
+  template< class Key, class Value >
+  const Value& Map< Key, Value >::at(const Key&) const
+  {
+    return data_.get(k);
+  }
 }
 
 #endif
