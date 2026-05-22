@@ -105,7 +105,7 @@ namespace detail
     BSTree< Key, Value, Compare >& operator=(BSTree< Key, Value, Compare >&&);
 
     NodeBST< Key, Value >* push(Key k, Value v);
-    Value& get(const Key& k);
+    BSTIterator< Key, Value > get(const Key& k);
     std::tuple< NodeBST< Key, Value >*, Value, bool > drop(const Key& k);
 
     void swap(BSTree< Key, Value, Compare >&);
@@ -322,7 +322,7 @@ namespace detail
   }
 
   template< class Key, class Value, class Compare >
-  Value& BSTree< Key, Value, Compare >::get(const Key& k)
+  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::get(const Key& k)
   {
     Compare comparator;
     NodeBST< Key, Value >* current = root_;
@@ -338,7 +338,7 @@ namespace detail
       }
       else
       {
-        return current->data_.second;
+        return BSTIterator< Key, Value > (current);
       }
     }
     throw std::logic_error("No such key");
@@ -984,7 +984,7 @@ namespace goltsov
     RBTree< Key, Value, Compare >& operator=(RBTree< Key, Value, Compare >&&);
 
     RBTIterator< Key, Value > push(Key, Value);
-    Value& get(const Key&);
+    RBTIterator< Key, Value > get(const Key&);
     Value drop(const Key&);
 
     void swap(RBTree< Key, Value, Compare >&);
@@ -1033,7 +1033,7 @@ namespace goltsov
     return res;
   }
   template< class Key, class Value, class Compare >
-  Value& RBTree< Key, Value, Compare >::get(const Key& k)
+  RBTIterator< Key, Value > RBTree< Key, Value, Compare >::get(const Key& k)
   {
     return tree_.get(k);
   }
