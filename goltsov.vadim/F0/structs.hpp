@@ -1,6 +1,21 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 #include <string>
+#include <mymap.hpp>
+
+struct goltsov::TimeInterval;
+struct goltsov::DateTime;
+struct goltsov::Task;
+struct goltsov::Schedule;
+struct goltsov::Context;
+
+namespace detail
+{
+  struct CompareTasks
+  {
+    bool operator()(const goltsov::Task&, const goltsov::Task&);
+  };
+}
 
 namespace goltsov
 {
@@ -23,6 +38,18 @@ namespace goltsov
     DateTime strart_time_, end_time_;
     size_t priority_;
     bool is_protected_;
+  };
+
+  struct Schedule
+  {
+    std::string name_schedule_;
+    goltsov::RBTree< std::string, Task, detail::CompareTasks > tasks_tree_;
+  };
+
+  struct Context
+  {
+    std::string name_context_;
+    goltsov::RBTree< std::string, Schedule, std::less< std::string > > schedules_tree_;
   };
 }
 

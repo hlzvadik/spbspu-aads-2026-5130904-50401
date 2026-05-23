@@ -31,4 +31,7 @@ int main()
   commands["find_common_gap"] = goltsov::parsingFindCommonGap;
   commands["find_common_gap_on_interval"] = goltsov::parsingFindCommonGapOnInterval;
   commands["exit"] = goltsov::parsingExit;
+
+  goltsov::Context current_context;
+  goltsov::Schedule current_schedule;
 }
