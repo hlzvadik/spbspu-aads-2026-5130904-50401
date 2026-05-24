@@ -26,7 +26,7 @@ namespace detail
 
 namespace goltsov
 {
-  void parsingAdd(std::istream& is, std::ostream& os)
+  void parsingAdd(std::istream& is, std::ostream& os, goltsov::State& current_state)
   {
     std::string id;
     std::string title, description;
@@ -34,171 +34,459 @@ namespace goltsov
     goltsov::TimeInterval duration;
     size_t priority;
     is >> id;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> title;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> description;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> start_time;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> end_time;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> duration;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> priority;
-    if (!is || !detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
-    add(os, id, title, description, start_time, end_time, duration, priority);
+    add(os, current_state, id, title, description, start_time, end_time, duration, priority);
   }
-  void parsingAddProtected(std::istream& is, std::ostream& os)
+  void parsingAddProtected(std::istream& is, std::ostream& os, goltsov::State& current_state)
   {
     std::string id;
     std::string title, description;
     goltsov::DateTime start_time, end_time;
     is >> id;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> title;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> description;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> start_time;
-    if (!is || detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     is >> end_time;
-    if (!is || !detail::isEndOfLine(detail::skipSpaces(is)))
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
-    addProtected(os, id, title, description, start_time, end_time);
+    addProtected(os, current_state, id, title, description, start_time, end_time);
   }
-  void parsingRemove(std::istream&, std::ostream& os)
-  {}
-  void parsingList(std::istream&, std::ostream& os)
-  {}
-  void parsingMerge(std::istream&, std::ostream& os)
-  {}
-  void parsingShowUnplanned(std::istream&, std::ostream& os)
-  {}
-  void parsingUnplannedRemove(std::istream&, std::ostream& os)
-  {}
-  void parsingUnplannedForce(std::istream&, std::ostream& os)
-  {}
-  void parsingMergeScheduleOtherContext(std::istream&, std::ostream& os)
-  {}
-  void parsingAddScheduleOtherContext(std::istream&, std::ostream& os)
-  {}
-  void parsingAddForceScheduleOtherContext(std::istream&, std::ostream& os)
-  {}
-  void parsingSwitchSchedule(std::istream&, std::ostream& os)
-  {}
-  void parsingSwitchContext(std::istream&, std::ostream& os)
-  {}
-  void parsingStats(std::istream&, std::ostream& os)
-  {}
-  void parsingNewSchedule(std::istream&, std::ostream& os)
-  {}
-  void parsingNewContext(std::istream&, std::ostream& os)
-  {}
-  void parsingLoadSchedule(std::istream&, std::ostream& os)
-  {}
-  void parsingSaveSchedule(std::istream&, std::ostream& os)
-  {}
-  void parsingLoadContext(std::istream&, std::ostream& os)
-  {}
-  void parsingSaveContext(std::istream&, std::ostream& os)
-  {}
-  void parsingFindGap(std::istream&, std::ostream& os)
-  {}
-  void parsingFindGapOnInterval(std::istream&, std::ostream& os)
-  {}
-  void parsingFindCommonGap(std::istream&, std::ostream& os)
-  {}
-  void parsingFindCommonGapOnInterval(std::istream&, std::ostream& os)
-  {}
-  void parsingExit(std::istream&, std::ostream& os)
-  {}
+  void parsingRemove(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string id;
+    is >> id;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    remove(os, current_state, id);
+  }
+  void parsingList(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    list(os, current_state);
+  }
+  void parsingMerge(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string schedule_name;
+    is >> schedule_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    merge(os, current_state, schedule_name);
+  }
+  void parsingShowUnplanned(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    showUnplanned(os, current_state);
+  }
+  void parsingUnplannedRemove(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string id;
+    is >> id;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    unplannedRemove(os, current_state, id);
+  }
+  void parsingUnplannedForce(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string id;
+    is >> id;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    unplannedForce(os, current_state, id);
+  }
+  void parsingMergeScheduleOtherContext(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string schedule_name, context_name;
+    is >> schedule_name;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> context_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    mergeScheduleOtherContext(os, current_state, schedule_name, context_name);
+  }
+  void parsingAddScheduleOtherContext(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string schedule_name, context_name;
+    is >> schedule_name;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> context_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    addScheduleOtherContext(os, current_state, schedule_name, context_name);
+  }
+  void parsingAddForceScheduleOtherContext(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string schedule_name, context_name;
+    is >> schedule_name;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> context_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    addForceScheduleOtherContext(os, current_state, schedule_name, context_name);
+  }
+  void parsingSwitchSchedule(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string schedule_name;
+    is >> schedule_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    switchSchedule(os, current_state, schedule_name);
+  }
+  void parsingSwitchContext(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string context_name;
+    is >> context_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    switchContext(os, current_state, context_name);
+  }
+  void parsingStats(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    goltsov::DateTime start_time, end_time;
+    is >> start_time;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> end_time;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    stats(os, current_state, start_time, end_time);
+  }
+  void parsingNewSchedule(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string name_schedule;
+    is >> name_schedule;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    newSchedule(os, current_state, name_schedule);
+  }
+  void parsingNewContext(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string name_context;
+    is >> name_context;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    newContext(os, current_state, name_context);
+  }
+  void parsingLoadSchedule(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string schedule_name, file_name;
+    is >> schedule_name;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> file_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    loadSchedule(os, current_state, schedule_name, file_name);
+  }
+  void parsingSaveSchedule(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string schedule_name, file_name;
+    is >> schedule_name;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> file_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    saveSchedule(os, current_state, schedule_name, file_name);
+  }
+  void parsingLoadContext(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string context_name, file_name;
+    is >> context_name;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> file_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    loadContext(os, current_state, context_name, file_name);
+  }
+  void parsingSaveContext(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    std::string context_name, file_name;
+    is >> context_name;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> file_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    saveContext(os, current_state, context_name, file_name);
+  }
+  void parsingFindGap(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    goltsov::TimeInterval gap;
+    is >> gap;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    findGap(os, current_state, gap);
+  }
+  void parsingFindGapOnInterval(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    goltsov::DateTime start_time, end_time;
+    goltsov::TimeInterval gap;
+    is >> start_time;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> end_time;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> gap;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    findGapOnInterval(os, current_state, start_time, end_time, gap);
+  }
+  void parsingFindCommonGap(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    goltsov::TimeInterval gap;
+    size_t count;
+    topit::Vector< std::string > names_schedules;
+    is >> gap;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> count;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    for (size_t i = 0; i + 1 < count; ++i)
+    {
+      std::string schedule_name;
+      is >> schedule_name;
+      if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+      {
+        throw std::runtime_error("<INVALID COMMAND>");
+      }
+      names_schedules.pushBack(schedule_name);
+    }
+    std::string schedule_name;
+    is >> schedule_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    names_schedules.pushBack(schedule_name);
+    findCommonGap(os, current_state, gap, count, names_schedules);
+  }
+  void parsingFindCommonGapOnInterval(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    goltsov::DateTime start_time, end_time;
+    goltsov::TimeInterval gap;
+    size_t count;
+    topit::Vector< std::string > names_schedules;
+    is >> start_time;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> end_time;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> gap;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    is >> count;
+    if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    for (size_t i = 0; i + 1 < count; ++i)
+    {
+      std::string schedule_name;
+      is >> schedule_name;
+      if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
+      {
+        throw std::runtime_error("<INVALID COMMAND>");
+      }
+      names_schedules.pushBack(schedule_name);
+    }
+    std::string schedule_name;
+    is >> schedule_name;
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    names_schedules.pushBack(schedule_name);
+    findCommonGap(os, current_state, gap, count, names_schedules);
+  }
+  void parsingExit(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  {
+    if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
+    {
+      throw std::runtime_error("<INVALID COMMAND>");
+    }
+    exit(os, current_state);
+  }
 
-  void add(std::ostream&, const std::string&, const std::string&, const std::string&,
+  void add(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&)
   {}
-  void addProtected(std::ostream&, const std::string&, const std::string&, const std::string&,
+  void addProtected(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&)
   {}
-  void remove(std::ostream&, const std::string&)
+  void remove(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void list(std::ostream&)
+  void list(std::ostream&, goltsov::State& current_state)
   {}
-  void merge(std::ostream&, const std::string&)
+  void merge(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void showUnplanned(std::ostream&)
+  void showUnplanned(std::ostream&, goltsov::State& current_state)
   {}
-  void unplannedRemove(std::ostream&, const std::string&)
+  void unplannedRemove(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void unplannedForce(std::ostream&, const std::string&)
+  void unplannedForce(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void mergeScheduleOtherContext(std::ostream&, const std::string&, const std::string&)
+  void mergeScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
-  void addScheduleOtherContext(std::ostream&, const std::string&, const std::string&)
+  void addScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
-  void addForceScheduleOtherContext(std::ostream&, const std::string&, const std::string&)
+  void addForceScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
-  void switchSchedule(std::ostream&, const std::string&)
+  void switchSchedule(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void switchContext(std::ostream&, const std::string&)
+  void switchContext(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void stats(std::ostream&, const goltsov::DateTime&, const goltsov::DateTime&)
+  void stats(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&)
   {}
-  void newSchedule(std::ostream&, const std::string&)
+  void newSchedule(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void newContext(std::ostream&, const std::string&)
+  void newContext(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
-  void loadSchedule(std::ostream&, const std::string&, const std::string&)
+  void loadSchedule(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
-  void saveSchedule(std::ostream&, const std::string&, const std::string&)
+  void saveSchedule(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
-  void loadContext(std::ostream&, const std::string&, const std::string&)
+  void loadContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
-  void saveContext(std::ostream&, const std::string&, const std::string&)
+  void saveContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
-  void findGap(std::ostream&, const goltsov::TimeInterval&)
+  void findGap(std::ostream&, goltsov::State& current_state, const goltsov::TimeInterval&)
   {}
-  void findGapOnInterval(std::ostream&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&)
+  void findGapOnInterval(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&)
   {}
-  void findCommonGap(std::ostream&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&)
+  void findCommonGap(std::ostream&, goltsov::State& current_state, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&)
   {}
-  void findCommonGapOnInterval(std::ostream&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&)
+  void findCommonGapOnInterval(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&)
   {}
-  void exit(std::ostream&)
+  void exit(std::ostream&, goltsov::State& current_state)
   {}
 }

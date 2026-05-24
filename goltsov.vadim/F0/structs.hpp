@@ -84,6 +84,13 @@ namespace goltsov
     std::string name_context_;
     goltsov::RBTree< std::string, Schedule, std::less< std::string > > schedules_tree_;
   };
+
+  struct State
+  {
+    Schedule& current_schedule_;
+    Context& current_context_;
+    goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
+  };
 }
 
 #endif
