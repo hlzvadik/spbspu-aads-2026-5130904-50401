@@ -67,6 +67,11 @@ namespace goltsov
   std::istream& operator>>(std::istream&, TimeInterval&);
   std::ostream& operator<<(std::ostream&, const TimeInterval&);
   bool operator<(const TimeInterval&, const TimeInterval&);
+  bool operator>(const TimeInterval&, const TimeInterval&);
+  bool operator==(const TimeInterval&, const TimeInterval&);
+  bool operator!=(const TimeInterval&, const TimeInterval&);
+  bool operator<=(const TimeInterval&, const TimeInterval&);
+  bool operator>=(const TimeInterval&, const TimeInterval&);
 
   struct DateTime
   {
@@ -76,6 +81,11 @@ namespace goltsov
   std::istream& operator>>(std::istream&, DateTime&);
   std::ostream& operator<<(std::ostream&, const DateTime&);
   bool operator<(const DateTime&, const DateTime&);
+  bool operator>(const DateTime&, const DateTime&);
+  bool operator==(const DateTime&, const DateTime&);
+  bool operator!=(const DateTime&, const DateTime&);
+  bool operator<=(const DateTime&, const DateTime&);
+  bool operator>=(const DateTime&, const DateTime&);
   TimeInterval operator-(const DateTime&, const DateTime&);
   DateTime operator-(const DateTime&, const TimeInterval&);
   DateTime operator+(const DateTime&, const TimeInterval&);

@@ -135,6 +135,26 @@ namespace goltsov
     }
     return lhs.seconds_ < rhs.seconds_;
   }
+  bool operator>(const TimeInterval& lhs, const TimeInterval& rhs)
+  {
+    return rhs < lhs;
+  }
+  bool operator==(const TimeInterval& lhs, const TimeInterval& rhs)
+  {
+    return !(lhs < rhs) && !(rhs < lhs);
+  }
+  bool operator!=(const TimeInterval& lhs, const TimeInterval& rhs)
+  {
+    return !(lhs == rhs);
+  }
+  bool operator<=(const TimeInterval& lhs, const TimeInterval& rhs)
+  {
+    return !(lhs > rhs);
+  }
+  bool operator>=(const TimeInterval& lhs, const TimeInterval& rhs)
+  {
+    return !(lhs < rhs);
+  }
   bool operator<(const DateTime& lhs, const DateTime& rhs)
   {
     if (lhs.year_ != rhs.year_)
@@ -158,6 +178,26 @@ namespace goltsov
       return lhs.minute_ < rhs.minute_;
     }
     return lhs.second_ < rhs.second_;
+  }
+  bool operator>(const DateTime& lhs, const DateTime& rhs)
+  {
+    return rhs < lhs;
+  }
+  bool operator==(const DateTime& lhs, const DateTime& rhs)
+  {
+    return !(lhs < rhs) && ! (rhs < lhs);
+  }
+  bool operator!=(const DateTime& lhs, const DateTime& rhs)
+  {
+    return !(lhs == rhs);
+  }
+  bool operator<=(const DateTime& lhs, const DateTime& rhs)
+  {
+    return !(lhs > rhs);
+  }
+  bool operator>=(const DateTime& lhs, const DateTime& rhs)
+  {
+    return !(lhs < rhs);
   }
   TimeInterval operator-(const DateTime& lhs, const DateTime& rhs)
   {
@@ -212,7 +252,6 @@ namespace goltsov
     result.years_ = static_cast<size_t>(year);
     return result;
   }
-
   DateTime operator+(const DateTime& lhs, const TimeInterval& rhs)
   {
     DateTime result = lhs;
@@ -253,7 +292,6 @@ namespace goltsov
     }
     return result;
   }
-
   DateTime operator-(const DateTime& lhs, const TimeInterval& rhs)
   {
     DateTime result = lhs;

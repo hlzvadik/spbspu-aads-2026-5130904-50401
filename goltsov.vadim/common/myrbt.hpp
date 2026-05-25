@@ -492,6 +492,10 @@ namespace detail
   template< class Predicate >
   BSTIterator< Key, Value > BSTree< Key, Value, Compare >::find(Predicate pred)
   {
+    if (!root_)
+    {
+      return end();
+    }
     BSTIterator< Key, Value > current (root_);
     if (pred(* current))
     {

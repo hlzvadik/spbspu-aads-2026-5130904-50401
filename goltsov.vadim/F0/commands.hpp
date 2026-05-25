@@ -8,7 +8,8 @@ namespace detail
 {
   std::istream& skipSpaces(std::istream&);
   bool isEndOfLine(std::istream&);
-  bool pushTask(std::ostream&, goltsov::State&, goltsov::Task&);
+  bool pushTask(goltsov::State&, goltsov::Task&);
+  void pushUnplanned(goltsov::State&);
 }
 
 namespace goltsov
@@ -41,7 +42,7 @@ namespace goltsov
 
   void add(std::ostream&, goltsov::State&, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&);
-  void addProtected(std::ostream&, const std::string&, goltsov::State&, const std::string&, const std::string&,
+  void addProtected(std::ostream&, goltsov::State&, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&);
   void remove(std::ostream&, goltsov::State&, const std::string&);
   void list(std::ostream&, goltsov::State&);
