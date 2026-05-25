@@ -22,6 +22,45 @@ namespace detail
       return false;
     }
   }
+  bool pushTask(std::ostream& os, goltsov::State& current_state, goltsov::Task& task, const goltsov::TimeInterval& duration)
+  {
+    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {task});
+    if (current == current_state.current_schedule_.tasks_tree_.begin())
+    {
+      if (!(((* current).first) < task.left_boundary_time_) && !(((* current).first) - task.left_boundary_time_ < duration))
+      {
+        task.start_time_ = task.left_boundary_time_;
+        task.end_time_ = task.left_boundary_time_ + duration;
+        current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
+        current_state.id_start_time_[task.id_] = task.start_time_;
+        return true;
+      }
+    }
+    while ((* current).first + duration < task.right_boundary_time_)
+    {
+      if (!(((* current).first) < task.left_boundary_time_) && !(((* current).first) - std::max(task.left_boundary_time_, (* current.prev()).first) < duration))
+      {
+        task.start_time_ = std::max(task.left_boundary_time_, (* current.prev()).first);
+        task.end_time_ = task.start_time_ + duration;
+        current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
+        current_state.id_start_time_[task.id_] = task.start_time_;
+        return true;
+      }
+      else
+      {
+        if ((* current).second.is_protected_ || (* current).second.priority_ >= task.priority_)
+        {
+          current = current.next();
+        }
+        else
+        {
+          current_state.unplanned_tasks_.pushBack((* current).second);
+          current_state.current_schedule_.tasks_tree_.drop((* current).first);
+        }
+      }
+    }
+    return true;
+  }
 }
 
 namespace goltsov
@@ -441,8 +480,25 @@ namespace goltsov
     const goltsov::DateTime& left_boundary_time, const goltsov::DateTime& right_boundary_time, const goltsov::TimeInterval& duration, const size_t& priority)
   {
     Task temp {id, title, description, left_boundary_time, right_boundary_time, DateTime {}, DateTime {}, priority, false};
-    RBTIterator< goltsov::DateTime, Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {temp});
-    if 
+    bool is_planned = detail::pushTask(os, current_state, temp);
+    if (is_planned)
+    {
+      goltsov::DateTime k = current_state.id_start_time_[id];
+      os << "<TASK ADDED: Scheduled at " << current_state.current_schedule_.tasks_tree_.get(k)->second.start_time_ << "---" << current_state.current_schedule_.tasks_tree_.get(k)->second.end_time_ << '\n';
+    }
+    else
+    {
+      current_state.unplanned_tasks_.pushBack(temp);
+      os << "<TASK UNPLANNED>\n";
+    }
+    topit::Vector< size_t > inds;
+    for (size_t i = 0; i < current_state.unplanned_tasks_.getSize(); ++i)
+    {
+      if (detail::pushTask(os, current_state, current_state.unplanned_tasks_[i]))
+      {
+        --i;
+      }
+    }
   }
   void addProtected(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&)

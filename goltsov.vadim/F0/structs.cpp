@@ -111,6 +111,30 @@ namespace goltsov
     a.priority_ = priority;
     return is;
   }
+  bool operator<(const TimeInterval& lhs, const TimeInterval& rhs)
+  {
+    if (lhs.years_ != rhs.years_)
+    {
+      return lhs.years_ < rhs.years_;
+    }
+    if (lhs.months_ != rhs.months_)
+    {
+      return lhs.months_ < rhs.months_;
+    }
+    if (lhs.days_ != rhs.days_)
+    {
+      return lhs.days_ < rhs.days_;
+    }
+    if (lhs.hours_ != rhs.hours_)
+    {
+      return lhs.hours_ < rhs.hours_;
+    }
+    if (lhs.minutes_ != rhs.minutes_)
+    {
+      return lhs.minutes_ < rhs.minutes_;
+    }
+    return lhs.seconds_ < rhs.seconds_;
+  }
   bool operator<(const DateTime& lhs, const DateTime& rhs)
   {
     if (lhs.year_ != rhs.year_)

@@ -8,6 +8,7 @@ namespace detail
 {
   std::istream& skipSpaces(std::istream&);
   bool isEndOfLine(std::istream&);
+  bool pushTask(std::ostream&, goltsov::State&, goltsov::Task&);
 }
 
 namespace goltsov
@@ -38,7 +39,7 @@ namespace goltsov
   void parsingFindCommonGapOnInterval(std::istream&, std::ostream&, goltsov::State&);
   void parsingExit(std::istream&, std::ostream&, goltsov::State&);
 
-  void add(std::ostream&, const std::string&, goltsov::State&, const std::string&, const std::string&,
+  void add(std::ostream&, goltsov::State&, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&);
   void addProtected(std::ostream&, const std::string&, goltsov::State&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&);

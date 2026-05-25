@@ -65,6 +65,8 @@ namespace goltsov
     size_t hours_, minutes_, seconds_;
   };
   std::istream& operator>>(std::istream&, TimeInterval&);
+  std::ostream& operator<<(std::ostream&, const TimeInterval&);
+  bool operator<(const TimeInterval&, const TimeInterval&);
 
   struct DateTime
   {
@@ -72,6 +74,7 @@ namespace goltsov
     size_t hour_, minute_, second_;
   };
   std::istream& operator>>(std::istream&, DateTime&);
+  std::ostream& operator<<(std::ostream&, const DateTime&);
   bool operator<(const DateTime&, const DateTime&);
   TimeInterval operator-(const DateTime&, const DateTime&);
   DateTime operator-(const DateTime&, const TimeInterval&);
@@ -106,7 +109,7 @@ namespace goltsov
     Context& current_context_;
     goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
     topit::Vector< Task > unplanned_tasks_;
-    goltsov::Map< std::string, std::string > id_start_time_;
+    goltsov::Map< std::string, goltsov::DateTime > id_start_time_;
   };
 }
 
