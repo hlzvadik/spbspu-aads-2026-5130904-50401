@@ -108,6 +108,8 @@ namespace detail
     BSTIterator< Key, Value > get(const Key& k);
     std::tuple< NodeBST< Key, Value >*, Value, bool > drop(const Key& k);
     void clear();
+    template< class Predicate >
+    BSTIterator< Key, Value > find(Predicate);
 
     void swap(BSTree< Key, Value, Compare >&);
 
@@ -484,6 +486,28 @@ namespace detail
       }
     }
     root_ = nullptr;
+  }
+
+  template< class Key, class Value, class Compare >
+  template< class Predicate >
+  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::find(Predicate pred)
+  {
+    BSTIterator< Key, Value > current (root_);
+    if (pred(* current))
+    {
+      while (current != begin() || pred(* current.prev()))
+      {
+        current = current.prev();
+      }
+    }
+    else
+    {
+      while(current != end() || !pred(* current.next()))
+      {
+        current = current.next();
+      }
+    }
+    return current;
   }
 
   template< class Key, class Value, class Compare >
@@ -1030,6 +1054,8 @@ namespace goltsov
     RBTIterator< Key, Value > get(const Key&);
     Value drop(const Key&);
     void clear();
+    template< class Predicate >
+    RBTIterator< Key, Value > find(Predicate);
 
     void swap(RBTree< Key, Value, Compare >&);
 
@@ -1092,6 +1118,12 @@ namespace goltsov
   void RBTree< Key, Value, Compare >::clear()
   {
     tree_.clear();
+  }
+  template< class Key, class Value, class Compare >
+  template< class Predicate >
+  RBTIterator< Key, Value > RBTree< Key, Value, Compare >::find(Predicate pred)
+  {
+    return tree_.find(pred);
   }
   template< class Key, class Value, class Compare >
   void RBTree< Key, Value, Compare >::swap(RBTree< Key, Value, Compare >& other)

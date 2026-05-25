@@ -5,6 +5,7 @@
 
 int main()
 {
+  /*
   goltsov::Map< std::string, void (*)(std::istream&) > commands;
   commands["add"] = goltsov::parsingAdd;
   commands["add_protected"] = goltsov::parsingAddProtected;
@@ -34,4 +35,5 @@ int main()
 
   goltsov::Context current_context;
   goltsov::Schedule current_schedule;
+  */
 }

@@ -30,7 +30,7 @@ namespace goltsov
   {
     std::string id;
     std::string title, description;
-    goltsov::DateTime start_time, end_time;
+    goltsov::DateTime left_boundary_time, right_boundary_time;
     goltsov::TimeInterval duration;
     size_t priority;
     is >> id;
@@ -48,12 +48,12 @@ namespace goltsov
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
-    is >> start_time;
+    is >> left_boundary_time;
     if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
-    is >> end_time;
+    is >> right_boundary_time;
     if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
     {
       throw std::runtime_error("<INVALID COMMAND>");
@@ -68,7 +68,7 @@ namespace goltsov
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
-    add(os, current_state, id, title, description, start_time, end_time, duration, priority);
+    add(os, current_state, id, title, description, left_boundary_time, right_boundary_time, duration, priority);
   }
   void parsingAddProtected(std::istream& is, std::ostream& os, goltsov::State& current_state)
   {
@@ -437,9 +437,13 @@ namespace goltsov
     exit(os, current_state);
   }
 
-  void add(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&, const std::string&,
-    const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&)
-  {}
+  void add(std::ostream& os, goltsov::State& current_state, const std::string& id, const std::string& title, const std::string& description,
+    const goltsov::DateTime& left_boundary_time, const goltsov::DateTime& right_boundary_time, const goltsov::TimeInterval& duration, const size_t& priority)
+  {
+    Task temp {id, title, description, left_boundary_time, right_boundary_time, DateTime {}, DateTime {}, priority, false};
+    RBTIterator< goltsov::DateTime, Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {temp});
+    if 
+  }
   void addProtected(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&)
   {}

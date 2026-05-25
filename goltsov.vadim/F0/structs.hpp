@@ -2,6 +2,7 @@
 #define STRUCTS_HPP
 #include <string>
 #include <mymap.hpp>
+#include <myvector.hpp>
 
 struct goltsov::TimeInterval;
 struct goltsov::DateTime;
@@ -13,7 +14,13 @@ namespace detail
 {
   struct CompareTasks
   {
-    bool operator()(const goltsov::Task&, const goltsov::Task&);
+    bool operator()(const goltsov::DateTime&, const goltsov::DateTime&);
+  };
+
+  struct FindTask
+  {
+    const goltsov::Task& a;
+    bool operator()(const std::pair< goltsov::DateTime, goltsov::Task >&);
   };
 
   struct Delimeter
@@ -45,12 +52,16 @@ namespace detail
     std::basic_ios< char >::fmtflags flags_;
     char fill_;
   };
+
+  bool isLeapYear(const size_t& year);
+  static size_t getDaysInMonth(const size_t& year, const size_t& month);
 }
 
 namespace goltsov
 {
   struct TimeInterval
   {
+    size_t years_, months_, days_;
     size_t hours_, minutes_, seconds_;
   };
   std::istream& operator>>(std::istream&, TimeInterval&);
@@ -61,6 +72,10 @@ namespace goltsov
     size_t hour_, minute_, second_;
   };
   std::istream& operator>>(std::istream&, DateTime&);
+  bool operator<(const DateTime&, const DateTime&);
+  TimeInterval operator-(const DateTime&, const DateTime&);
+  DateTime operator-(const DateTime&, const TimeInterval&);
+  DateTime operator+(const DateTime&, const TimeInterval&);
 
   struct Task
   {
@@ -76,7 +91,7 @@ namespace goltsov
   struct Schedule
   {
     std::string name_schedule_;
-    goltsov::RBTree< std::string, Task, detail::CompareTasks > tasks_tree_;
+    goltsov::RBTree< goltsov::DateTime, Task, detail::CompareTasks > tasks_tree_;
   };
 
   struct Context
@@ -90,6 +105,8 @@ namespace goltsov
     Schedule& current_schedule_;
     Context& current_context_;
     goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
+    topit::Vector< Task > unplanned_tasks_;
+    goltsov::Map< std::string, std::string > id_start_time_;
   };
 }
 
