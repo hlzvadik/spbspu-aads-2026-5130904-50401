@@ -111,6 +111,18 @@ namespace goltsov
     a.priority_ = priority;
     return is;
   }
+  std::ostream& operator<<(std::ostream& os, const TimeInterval& a)
+  {
+    os << a.years_ << '-' << a.months_ << '-' << a.days_ << '_' << a.hours_ << ':' << a.minutes_ << ':' << a.seconds_;
+  }
+  std::ostream& operator<<(std::ostream& os, const DateTime& a)
+  {
+    os << a.year_ << '-' << a.month_ << '-' << a.day_ << '_' << a.hour_ << ':' << a.minute_ << ':' << a.second_;
+  }
+  std::ostream& operator<<(std::ostream& os, const Task& a)
+  {
+    os << "(id: " << a.id_ << " (" << a.start_time_ << " " << a.end_time_ << ") " << a.title_ << " (Prio: " << a.priority_ << ") (Is_protected: " << (a.is_protected_ ? 1 : 0) << ")";
+  }
   bool operator<(const TimeInterval& lhs, const TimeInterval& rhs)
   {
     if (lhs.years_ != rhs.years_)

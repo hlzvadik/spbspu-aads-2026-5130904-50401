@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "commands.hpp"
 #include "structs.hpp"
 
@@ -71,7 +72,7 @@ namespace detail
         }
         else
         {
-          current_state.unplanned_tasks_.pushBack((* current).second);
+          current_state.current_unplanned_tasks_.pushBack((* current).second);
           goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
           current = current.next();
           current_state.current_schedule_.tasks_tree_.drop((* temp).first);
@@ -80,11 +81,33 @@ namespace detail
     }
     return false;
   }
+  goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State& current_state, goltsov::Task& task)
+  {
+    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {task});
+    while (current != current_state.current_schedule_.tasks_tree_.end() && (* current).first < task.start_time_)
+    {
+      if ((* current).second.is_protected_)
+      {
+        detail::pushUnplanned(current_state);
+        return current;
+      }
+      else
+      {
+        current_state.current_unplanned_tasks_.pushBack((* current).second);
+        goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
+        current = current.next();
+        current_state.current_schedule_.tasks_tree_.drop((* current).first);
+      }
+    }
+    detail::pushTask(current_state, task, task.right_boundary_time_ - task.left_boundary_time_);
+    detail::pushUnplanned(current_state);
+    return current_state.current_schedule_.tasks_tree_.end();
+  }
   void pushUnplanned(goltsov::State& current_state)
   {
-    for (size_t i = 0; i < current_state.unplanned_tasks_.getSize(); ++i)
+    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
     {
-      if (detail::pushTask(current_state, current_state.unplanned_tasks_[i]))
+      if (detail::pushTask(current_state, current_state.current_unplanned_tasks_[i], current_state.current_unplanned_tasks_[i].end_time_ - current_state.current_unplanned_tasks_[i].start_time_))
       {
         --i;
       }
@@ -516,16 +539,16 @@ namespace goltsov
   void add(std::ostream& os, goltsov::State& current_state, const std::string& id, const std::string& title, const std::string& description,
     const goltsov::DateTime& left_boundary_time, const goltsov::DateTime& right_boundary_time, const goltsov::TimeInterval& duration, const size_t& priority)
   {
-    Task temp {id, title, description, left_boundary_time, right_boundary_time, DateTime {}, DateTime {}, priority, false};
-    bool is_planned = detail::pushTask(current_state, temp);
+    Task temp {id, title, description, left_boundary_time, right_boundary_time, left_boundary_time, left_boundary_time + duration, priority, false};
+    bool is_planned = detail::pushTask(current_state, temp, duration);
     if (is_planned)
     {
       goltsov::DateTime k = current_state.id_start_time_[id];
-      os << "<TASK ADDED: Scheduled at " << current_state.current_schedule_.tasks_tree_.get(k)->second.start_time_ << "---" << current_state.current_schedule_.tasks_tree_.get(k)->second.end_time_ << '\n';
+      os << "<TASK ADDED: Scheduled at " << current_state.current_schedule_.tasks_tree_.get(k)->second.start_time_ << ' ' << current_state.current_schedule_.tasks_tree_.get(k)->second.end_time_ << '\n';
     }
     else
     {
-      current_state.unplanned_tasks_.pushBack(temp);
+      current_state.current_unplanned_tasks_.pushBack(temp);
       os << "<TASK UNPLANNED>\n";
     }
     detail::pushUnplanned(current_state);
@@ -534,36 +557,84 @@ namespace goltsov
     const goltsov::DateTime& left_boundary_time, const goltsov::DateTime& right_boundary_time)
   {
     Task task {id, title, description, left_boundary_time, right_boundary_time, left_boundary_time, right_boundary_time, 0, true};
-    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {task});
-    while (current != current_state.current_schedule_.tasks_tree_.end() && (* current).first < task.start_time_)
+    RBTIterator< goltsov::DateTime, goltsov::Task > res = detail::pushProtectedTask(current_state, task);
+    if (res == current_state.current_schedule_.tasks_tree_.end())
     {
-      if ((* current).second.is_protected_)
+      os << "<TASK ADDED: Scheduled at " << left_boundary_time << ' ' << right_boundary_time << '\n';
+    }
+    else
+    {
+      os << "<TASK DID NOT ADDED: Allready scheduled " << (* res).second.title_ << " at " << (* res).second.start_time_ << ' ' << (* res).second.end_time_ << '\n';
+    }
+  }
+  void remove(std::ostream& os, goltsov::State& current_state, const std::string& id)
+  {
+    goltsov::DateTime k = current_state.id_start_time_[id];
+    current_state.current_schedule_.tasks_tree_.drop(k);
+    os << "<TASK REMOVED: ID " << id << '\n';
+  }
+  void list(std::ostream& os, goltsov::State& current_state)
+  {
+    for (RBTIterator< goltsov::DateTime, goltsov::Task > it = current_state.current_schedule_.tasks_tree_.begin(); it != current_state.current_schedule_.tasks_tree_.end(); ++it)
+    {
+      os << (* it).second << '\n';
+    }
+  }
+  void merge(std::ostream& os, goltsov::State& current_state, const std::string& name_other_schedule)
+  {
+    goltsov::Schedule* other_schedule;
+    try
+    {
+      other_schedule = & ((* current_state.current_context_.schedules_tree_.get(name_other_schedule)).second);
+    }
+    catch (...)
+    {
+      os << "<INVALID COMMAND>\n";
+    }
+    size_t added = 0;
+    for (RBTIterator< goltsov::DateTime, goltsov::Task > it = other_schedule->tasks_tree_.begin(); it != other_schedule->tasks_tree_.end(); ++it)
+    {
+      if (it->second.is_protected_)
       {
-        os << "<TASK DID NOT ADDED: Allready scheduled " << (* current).second.title_ << " at " << (* current).second.start_time_ << "---" << (* current).second.end_time_ << '\n';
-        detail::pushUnplanned(current_state);
-        break;
+        if (detail::pushTask(current_state, it->second, it->second.end_time_ - it->second.start_time_))
+        {
+          added += 1;
+        }
       }
       else
       {
-        current_state.unplanned_tasks_.pushBack((* current).second);
-        goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
-        current = current.next();
-        current_state.current_schedule_.tasks_tree_.drop((* current).first);
+        if (detail::pushProtectedTask(current_state, it->second) == other_schedule->tasks_tree_.end())
+        {
+          added += 1;
+        }
       }
     }
-    detail::pushTask(current_state, task, right_boundary_time - left_boundary_time);
-    detail::pushUnplanned(current_state);
+    os << "<MERGE DONE. Added: " << added << ", Conflicts: " << current_state.current_unplanned_tasks_.getSize() << "<\n";
   }
-  void remove(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
-  void list(std::ostream&, goltsov::State& current_state)
-  {}
-  void merge(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
-  void showUnplanned(std::ostream&, goltsov::State& current_state)
-  {}
-  void unplannedRemove(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
+  void showUnplanned(std::ostream& os, goltsov::State& current_state)
+  {
+    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
+    {
+      goltsov::Task& a = current_state.current_unplanned_tasks_[i];
+      os << "<UNPLANNED: id=" << a.id_ << " Task=\"" << a.title_ << "\", left_boundary_time=" << a.left_boundary_time_
+        << ", right_boundary_time=" << a.right_boundary_time_ << ", duration="
+        << a.right_boundary_time_ - a.left_boundary_time_ << ", priority=" << a.priority_ << ", is_protected="
+        << a.is_protected_ << ">\n";
+    }
+  }
+  void unplannedRemove(std::ostream& os, goltsov::State& current_state, const std::string& id)
+  {
+    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
+    {
+      if (current_state.current_unplanned_tasks_[i].id_ == id)
+      {
+        current_state.current_unplanned_tasks_.erase(i);
+        os << "<REMOVED>\n";
+        return;
+      }
+    }
+    os << "<INVALID COMMAND>\n";
+  }
   void unplannedForce(std::ostream&, goltsov::State& current_state, const std::string&)
   {}
   void mergeScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)

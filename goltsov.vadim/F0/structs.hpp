@@ -100,6 +100,7 @@ namespace goltsov
     bool is_protected_;
   };
   std::istream& operator>>(std::istream&, Task&);
+  std::ostream& operator<<(std::ostream&, const Task&);
 
   struct Schedule
   {
@@ -117,8 +118,8 @@ namespace goltsov
   {
     Schedule& current_schedule_;
     Context& current_context_;
-    goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
-    topit::Vector< Task > unplanned_tasks_;
+    topit::Vector< Task >& current_unplanned_tasks_;
+    goltsov::RBTree< std::string, std::pair< Context, Schedule >, std::less< std::string > > contexts_tree_;
     goltsov::Map< std::string, goltsov::DateTime > id_start_time_;
   };
 }

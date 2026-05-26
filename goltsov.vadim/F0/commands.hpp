@@ -8,8 +8,9 @@ namespace detail
 {
   std::istream& skipSpaces(std::istream&);
   bool isEndOfLine(std::istream&);
-  bool pushTask(goltsov::State&, goltsov::Task&);
+  bool pushTask(goltsov::State&, goltsov::Task&, const goltsov::TimeInterval&);
   void pushUnplanned(goltsov::State&);
+  goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State&, goltsov::Task&);
 }
 
 namespace goltsov
