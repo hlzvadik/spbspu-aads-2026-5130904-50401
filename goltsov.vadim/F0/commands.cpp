@@ -635,10 +635,32 @@ namespace goltsov
     }
     os << "<INVALID COMMAND>\n";
   }
-  void unplannedForce(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
+  void unplannedForce(std::ostream& os, goltsov::State& current_state, const std::string& id)
+  {
+    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
+    {
+      if (current_state.current_unplanned_tasks_[i].id_ == id)
+      {
+        goltsov::Task task = current_state.current_unplanned_tasks_[i];
+        current_state.current_unplanned_tasks_.erase(i);
+        size_t now_size_unplanned = current_state.current_unplanned_tasks_.getSize();
+        RBTIterator< goltsov::DateTime, goltsov::Task > res = detail::pushProtectedTask(current_state, task);
+        if (res == current_state.current_schedule_.tasks_tree_.end())
+        {
+          os << "<FORCED ADD: " << task.title_ << ", NEW UNPLANNED: " << current_state.current_unplanned_tasks_.getSize() - now_size_unplanned << ">\n";
+        }
+        else
+        {
+          os << "<FORCED ADD FAILED: " << res->second.title_ << " allready scheduled at " << res->second.start_time_ << ' ' << res->second.end_time_ << ">\n";
+        }
+        return;
+      }
+    }
+  }
   void mergeScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
-  {}
+  {
+    
+  }
   void addScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
   {}
   void addForceScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
