@@ -11,6 +11,7 @@ namespace detail
   bool pushTask(goltsov::State&, goltsov::Task&, const goltsov::TimeInterval&);
   void pushUnplanned(goltsov::State&);
   goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State&, goltsov::Task&);
+  std::pair< size_t, size_t > mergeInterval(goltsov::State&, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >);
 }
 
 namespace goltsov

@@ -72,7 +72,7 @@ namespace detail
         }
         else
         {
-          current_state.current_unplanned_tasks_.pushBack((* current).second);
+          current_state.current_schedule_.unplanned_tasks_.insert({current->second.id_, current->second});
           goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
           current = current.next();
           current_state.current_schedule_.tasks_tree_.drop((* temp).first);
@@ -93,7 +93,7 @@ namespace detail
       }
       else
       {
-        current_state.current_unplanned_tasks_.pushBack((* current).second);
+        current_state.current_schedule_.unplanned_tasks_.insert({current->second.id_, current->second});
         goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
         current = current.next();
         current_state.current_schedule_.tasks_tree_.drop((* current).first);
@@ -105,13 +105,44 @@ namespace detail
   }
   void pushUnplanned(goltsov::State& current_state)
   {
-    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
+    for (goltsov::MapIterator< std::string, goltsov::Task > it = current_state.current_schedule_.unplanned_tasks_.begin(); it != current_state.current_schedule_.unplanned_tasks_.end(); ++it)
     {
-      if (detail::pushTask(current_state, current_state.current_unplanned_tasks_[i], current_state.current_unplanned_tasks_[i].end_time_ - current_state.current_unplanned_tasks_[i].start_time_))
+      if (detail::pushTask(current_state, it->second, it->second.end_time_ - it->second.start_time_))
       {
-        --i;
+        current_state.current_schedule_.unplanned_tasks_.erase(it->second.id_);
       }
     }
+  }
+  std::pair< size_t, size_t > mergeInterval(goltsov::State& current_state, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > s, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > e)
+  {
+    size_t added = 0;
+    size_t conflicts = 0;
+    for (; s != e; ++s)
+    {
+      if (!s->second.is_protected_)
+      {
+        if (pushTask(current_state, s->second, s->second.end_time_ - s->second.start_time_))
+        {
+          added += 1;
+        }
+        else
+        {
+          conflicts += 1;
+        }
+      }
+      else
+      {
+        if (pushProtectedTask(current_state, s->second) == current_state.current_schedule_.tasks_tree_.end())
+        {
+          added += 1;
+        }
+        else
+        {
+          conflicts += 1;
+        }
+      }
+    }
+    return {added, conflicts};
   }
 }
 
@@ -548,7 +579,7 @@ namespace goltsov
     }
     else
     {
-      current_state.current_unplanned_tasks_.pushBack(temp);
+      current_state.current_schedule_.unplanned_tasks_.insert({temp.id_, temp});
       os << "<TASK UNPLANNED>\n";
     }
     detail::pushUnplanned(current_state);
@@ -609,13 +640,13 @@ namespace goltsov
         }
       }
     }
-    os << "<MERGE DONE. Added: " << added << ", Conflicts: " << current_state.current_unplanned_tasks_.getSize() << "<\n";
+    os << "<MERGE DONE. Added: " << added << ", Conflicts: " << current_state.current_schedule_.unplanned_tasks_.size() << ">\n";
   }
   void showUnplanned(std::ostream& os, goltsov::State& current_state)
   {
-    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
+    for (MapIterator< std::string, goltsov::Task > it = current_state.current_schedule_.unplanned_tasks_.begin(); it != current_state.current_schedule_.unplanned_tasks_.end(); ++it)
     {
-      goltsov::Task& a = current_state.current_unplanned_tasks_[i];
+      goltsov::Task& a = it->second;
       os << "<UNPLANNED: id=" << a.id_ << " Task=\"" << a.title_ << "\", left_boundary_time=" << a.left_boundary_time_
         << ", right_boundary_time=" << a.right_boundary_time_ << ", duration="
         << a.right_boundary_time_ - a.left_boundary_time_ << ", priority=" << a.priority_ << ", is_protected="
@@ -624,51 +655,134 @@ namespace goltsov
   }
   void unplannedRemove(std::ostream& os, goltsov::State& current_state, const std::string& id)
   {
-    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
+    try
     {
-      if (current_state.current_unplanned_tasks_[i].id_ == id)
-      {
-        current_state.current_unplanned_tasks_.erase(i);
-        os << "<REMOVED>\n";
-        return;
-      }
+      current_state.current_schedule_.unplanned_tasks_.erase(id);
     }
-    os << "<INVALID COMMAND>\n";
+    catch (...)
+    {
+      os << "<INVALID COMMAND>\n";
+    }
   }
   void unplannedForce(std::ostream& os, goltsov::State& current_state, const std::string& id)
   {
-    for (size_t i = 0; i < current_state.current_unplanned_tasks_.getSize(); ++i)
+    goltsov::Task task;
+    try
     {
-      if (current_state.current_unplanned_tasks_[i].id_ == id)
+      task = current_state.current_schedule_.unplanned_tasks_.at(id);
+      current_state.current_schedule_.unplanned_tasks_.erase(id);
+      size_t now_size_unplanned = current_state.current_schedule_.unplanned_tasks_.size();
+      RBTIterator< goltsov::DateTime, goltsov::Task > res = detail::pushProtectedTask(current_state, task);
+      if (res == current_state.current_schedule_.tasks_tree_.end())
       {
-        goltsov::Task task = current_state.current_unplanned_tasks_[i];
-        current_state.current_unplanned_tasks_.erase(i);
-        size_t now_size_unplanned = current_state.current_unplanned_tasks_.getSize();
-        RBTIterator< goltsov::DateTime, goltsov::Task > res = detail::pushProtectedTask(current_state, task);
-        if (res == current_state.current_schedule_.tasks_tree_.end())
-        {
-          os << "<FORCED ADD: " << task.title_ << ", NEW UNPLANNED: " << current_state.current_unplanned_tasks_.getSize() - now_size_unplanned << ">\n";
-        }
-        else
-        {
-          os << "<FORCED ADD FAILED: " << res->second.title_ << " allready scheduled at " << res->second.start_time_ << ' ' << res->second.end_time_ << ">\n";
-        }
-        return;
+        os << "<FORCED ADD: " << task.title_ << ", NEW UNPLANNED: " << current_state.current_schedule_.unplanned_tasks_.size() - now_size_unplanned << ">\n";
+      }
+      else
+      {
+        os << "<FORCED ADD FAILED: " << res->second.title_ << " allready scheduled at " << res->second.start_time_ << ' ' << res->second.end_time_ << ">\n";
       }
     }
+    catch (...)
+    {
+      os << "<NO TASK>\n";
+    }
   }
-  void mergeScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
+  void mergeScheduleOtherContext(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name, const std::string& context_name)
   {
-    
+    goltsov::Context context;
+    goltsov::Schedule schedule;
+    try
+    {
+      context = current_state.contexts_tree_.get(context_name)->second;
+    }
+    catch (...)
+    {
+      os << "<NO CONTEXT>\n";
+      return;
+    }
+    try
+    {
+      schedule = context.schedules_tree_.get(schedule_name)->second;
+    }
+    catch (...)
+    {
+      os << "<NO SCHEDULE>\n";
+      return;
+    }
+    std::pair< size_t, size_t > res = detail::mergeInterval(current_state, schedule.tasks_tree_.begin(), schedule.tasks_tree_.end());
+    os << "<MERGE DONE. Added: " << res.first << ", Conflicts: " << res.second << ">";
   }
-  void addScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
-  {}
-  void addForceScheduleOtherContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
-  {}
-  void switchSchedule(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
-  void switchContext(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
+  void addScheduleOtherContext(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name, const std::string& context_name)
+  {
+    goltsov::Context context;
+    goltsov::Schedule schedule;
+    try
+    {
+      context = current_state.contexts_tree_.get(context_name)->second;
+    }
+    catch (...)
+    {
+      os << "<NO CONTEXT>\n";
+      return;
+    }
+    try
+    {
+      schedule = context.schedules_tree_.get(schedule_name)->second;
+    }
+    catch (...)
+    {
+      os << "<NO SCHEDULE>\n";
+      return;
+    }
+    try
+    {
+      current_state.current_context_.schedules_tree_.get(schedule_name);
+      os << "<SCHEDULE ALLREADY EXISTS>\n";
+    }
+    catch (...)
+    {
+      current_state.current_context_.schedules_tree_.push(schedule_name, schedule);
+      os << "<ADD DONE. Added: " << schedule.tasks_tree_.size() << ", Conflicts: " << schedule.unplanned_tasks_.size() << ">\n";
+    }
+  }
+  void addForceScheduleOtherContext(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name, const std::string& context_name)
+  {
+    try
+    {
+      current_state.current_context_.schedules_tree_.get(schedule_name);
+      current_state.current_context_.schedules_tree_.drop(schedule_name);
+    }
+    catch (...)
+    {}
+    addScheduleOtherContext(os, current_state, schedule_name, context_name);
+  }
+  void switchSchedule(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name)
+  {
+    try
+    {
+      goltsov::Schedule schedule = current_state.current_context_.schedules_tree_.get(schedule_name)->second;
+      current_state.current_schedule_ = schedule;
+      os << "<SCHEDULE SWITCHED>\n";
+    }
+    catch (...)
+    {
+      os << "<NO SCHEDULE>\n";
+    }
+  }
+  void switchContext(std::ostream& os, goltsov::State& current_state, const std::string& context_name)
+  {
+    try
+    {
+      goltsov::Context context = current_state.contexts_tree_.get(context_name)->second;
+      current_state.current_context_ = context;
+      current_state.current_schedule_ = current_state.current_context_.schedules_tree_.begin()->second;
+      os << "<CONTEXT SWITCHED>\n";
+    }
+    catch (...)
+    {
+      os << "<NO CONTEXT>\n";
+    }
+  }
   void stats(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&)
   {}
   void newSchedule(std::ostream&, goltsov::State& current_state, const std::string&)

@@ -96,6 +96,7 @@ namespace detail
     friend class BSTIterator< Key, Value >;
     friend class BSTConstIterator< Key, Value >;
     NodeBST< Key, Value >* root_;
+    size_t size_;
   public:
     BSTree();
     ~BSTree();
@@ -112,6 +113,8 @@ namespace detail
     BSTIterator< Key, Value > find(Predicate);
 
     void swap(BSTree< Key, Value, Compare >&);
+
+    size_t size() const;
 
     BSTIterator< Key, Value > begin();
     BSTConstIterator< Key, Value > begin() const;
@@ -160,7 +163,8 @@ namespace detail
 
   template< class Key, class Value, class Compare >
   BSTree< Key, Value, Compare >::BSTree():
-    root_(nullptr)
+    root_(nullptr),
+    size_(0)
   {}
 
   template< class Key, class Value, class Compare >
@@ -277,6 +281,7 @@ namespace detail
     if (!current)
     {
       inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, nullptr, true, 1, 1};
+      size_ += 1;
       root_ = inserted;
     }
     while (!inserted)
@@ -286,6 +291,7 @@ namespace detail
         if (!current->left_)
         {
           inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, current, false, 1, 0};
+          size_ += 1;
           current->left_ = inserted;
         }
         else
@@ -298,6 +304,7 @@ namespace detail
         if (!current->right_)
         {
           inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, current, false, 1, 0};
+          size_ += 1;
           current->right_ = inserted;
         }
         else
@@ -429,6 +436,7 @@ namespace detail
         Value res_val = current->data_.second;
         bool res_is_black = current->is_black_;
         delete current;
+        size_ -= 1;
         NodeBST< Key, Value >* node = startHeightUpdate;
         while (node)
         {
@@ -486,6 +494,7 @@ namespace detail
       }
     }
     root_ = nullptr;
+    size_ = 0;
   }
 
   template< class Key, class Value, class Compare >
@@ -518,6 +527,12 @@ namespace detail
   void BSTree< Key, Value, Compare >::swap(BSTree< Key, Value, Compare >& other)
   {
     std::swap(root_, other.root_);
+  }
+
+  template< class Key, class Value, class Compare >
+  size_t BSTree< Key, Value, Compare >::size() const
+  {
+    return size_;
   }
 
   template< class Key, class Value, class Compare >
@@ -1063,6 +1078,8 @@ namespace goltsov
 
     void swap(RBTree< Key, Value, Compare >&);
 
+    size_t size() const;
+
     RBTIterator< Key, Value > begin();
     RBTConstIterator< Key, Value > begin() const;
     RBTIterator< Key, Value > end();
@@ -1133,6 +1150,11 @@ namespace goltsov
   void RBTree< Key, Value, Compare >::swap(RBTree< Key, Value, Compare >& other)
   {
     tree_.swap(other.tree_);
+  }
+  template< class Key, class Value, class Compare >
+  size_t RBTree< Key, Value, Compare >::size() const
+  {
+    return tree_.size();
   }
   template< class Key, class Value, class Compare >
   RBTIterator< Key, Value > RBTree< Key, Value, Compare >::begin()

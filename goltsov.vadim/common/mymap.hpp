@@ -17,7 +17,7 @@ namespace goltsov
   class Map
   {
   public:
-    Map() = default;
+    Map();
     Map(const Map&) = default;
     Map(Map&&) noexcept = default;
     ~Map() = default;
@@ -51,8 +51,14 @@ namespace goltsov
     void swap(Map< Key, Value >&) noexcept;
   private:
     goltsov::RBTree< Key, Value, std::less< Key > > data_;
+    size_t size_;
   };
 
+  template< class Key, class Value >
+  Map< Key, Value >::Map():
+    data_ (goltsov::RBTree< Key, Value, std::less< Key > > {}),
+    size_ (0)
+  {}
   template< class Key, class Value >
   Value& Map< Key, Value>::operator[](const Key& k)
   {
@@ -81,6 +87,7 @@ namespace goltsov
     try
     {
       MapIterator< Key, Value > res = data_.push(k_v_.first, k_v_.second);
+      size_ += 1;
       return {res, true};
     }
     catch (std::logic_error& e)
@@ -91,11 +98,13 @@ namespace goltsov
   template< class Key, class Value >
   void Map< Key, Value >::erase(const Key& k)
   {
+    size_ -= 1;
     data_.drop(k);
   }
   template< class Key, class Value >
   void Map< Key, Value >::clear()
   {
+    size_ = 0;
     data_.clear();
   }
   template< class Key, class Value >
@@ -125,6 +134,16 @@ namespace goltsov
   size_t Map< Key, Value >::count(const Key& k) const
   {
     return (contains(k) ? 1 : 0);
+  }
+  template< class Key, class Value >
+  bool Map< Key, Value >::empty() const
+  {
+    return size_ == 0;
+  }
+  template< class Key, class Value >
+  size_t Map< Key, Value >::size() const
+  {
+    return size_;
   }
   template< class Key, class Value >
   MapIterator<Key, Value> Map< Key, Value >::begin()

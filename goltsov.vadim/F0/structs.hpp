@@ -106,6 +106,7 @@ namespace goltsov
   {
     std::string name_schedule_;
     goltsov::RBTree< goltsov::DateTime, Task, detail::CompareTasks > tasks_tree_;
+    goltsov::Map< std::string, goltsov::Task > unplanned_tasks_;
   };
 
   struct Context
@@ -118,8 +119,7 @@ namespace goltsov
   {
     Schedule& current_schedule_;
     Context& current_context_;
-    topit::Vector< Task >& current_unplanned_tasks_;
-    goltsov::RBTree< std::string, std::pair< Context, Schedule >, std::less< std::string > > contexts_tree_;
+    goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
     goltsov::Map< std::string, goltsov::DateTime > id_start_time_;
   };
 }
