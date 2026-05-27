@@ -1,4 +1,6 @@
 #include <stdexcept>
+#include <iomanip>
+#include <fstream>
 #include "commands.hpp"
 #include "structs.hpp"
 
@@ -783,20 +785,102 @@ namespace goltsov
       os << "<NO CONTEXT>\n";
     }
   }
-  void stats(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&)
-  {}
-  void newSchedule(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
-  void newContext(std::ostream&, goltsov::State& current_state, const std::string&)
-  {}
-  void loadSchedule(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
-  {}
-  void saveSchedule(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
-  {}
-  void loadContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
-  {}
-  void saveContext(std::ostream&, goltsov::State& current_state, const std::string&, const std::string&)
-  {}
+  void stats(std::ostream& os, goltsov::State& current_state, const goltsov::DateTime& start_time, const goltsov::DateTime& end_time)
+  {
+    goltsov::Task a;
+    a.start_time_ = start_time;
+    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {a});
+    goltsov::TimeInterval busy_time {0, 0, 0, 0, 0, 0};
+    size_t count_tasks = 0;
+    try
+    {
+      for (; current != current_state.current_schedule_.tasks_tree_.end() && current->second.start_time_ <= end_time; ++current)
+      {
+        busy_time = busy_time + (std::max(end_time, current->second.end_time_) - current->second.start_time_);
+        count_tasks += 1;
+      }
+    }
+    catch (...)
+    {
+      os << "<INVALID COMMAND>\n";
+      return;
+    }
+    os << "<Tasks: " << count_tasks << ", Load: ";
+    os << std::fixed << std::setprecision(2) << (busy_time / (end_time - start_time)) * 100 << "%>\n";
+  }
+  void newSchedule(std::ostream& os, goltsov::State& current_state, const std::string& name_schedule)
+  {
+    current_state.current_context_.schedules_tree_.push(name_schedule, goltsov::Schedule {});
+  }
+  void newContext(std::ostream& os, goltsov::State& current_state, const std::string& name_context)
+  {
+    current_state.contexts_tree_.push(name_context, goltsov::Context {});
+  }
+  void loadSchedule(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name, const std::string& filename)
+  {
+    try
+    {
+      current_state.current_context_.schedules_tree_.get(schedule_name);
+      os << "<NAME IS OCCUPIED>\n";
+    }
+    catch (...)
+    {
+      goltsov::Schedule schedule;
+      schedule.name_schedule_ = schedule_name;
+      std::fstream inp_f (filename);
+      inp_f >> schedule;
+      current_state.current_context_.schedules_tree_.push(schedule_name, schedule);
+      current_state.current_schedule_ = current_state.current_context_.schedules_tree_.get(schedule_name)->second;
+      os << "<SCHEDULE LOADED>\n";
+    }
+  }
+  void saveSchedule(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name, const std::string& filename)
+  {
+    try
+    {
+      goltsov::Schedule schedule = current_state.current_context_.schedules_tree_.get(schedule_name)->second;
+      std::fstream out_f (filename);
+      out_f << schedule << '\n';
+      os << "<SCHEDULE SAVED>\n";
+    }
+    catch (...)
+    {
+      os << "<NO SUCH SCHEDULE>\n";
+    }
+  }
+  void loadContext(std::ostream& os, goltsov::State& current_state, const std::string& context_name, const std::string& filename)
+  {
+    try
+    {
+      goltsov::Context context = current_state.contexts_tree_.get(context_name)->second;
+      os << "<NAME IS OCCUPIED>\n";
+    }
+    catch (...)
+    {
+      goltsov::Context context;
+      context.name_context_ = context_name;
+      std::fstream inp_f (filename);
+      inp_f >> context;
+      current_state.contexts_tree_.push(context_name, context);
+      current_state.current_context_ = current_state.contexts_tree_.get(context_name)->second;
+      current_state.current_schedule_ = current_state.current_context_.schedules_tree_.begin()->second;
+      os << "<CONTEXT LOADED>\n";
+    }
+  }
+  void saveContext(std::ostream& os, goltsov::State& current_state, const std::string& context_name, const std::string& filename)
+  {
+    try
+    {
+      goltsov::Context context = current_state.contexts_tree_.get(context_name)->second;
+      std::fstream out_f (filename);
+      out_f << context << '\n';
+      os << "<CONTEXT SAVED>\n";
+    }
+    catch (...)
+    {
+      os << "<NO SUCH CONTEXT>\n";
+    }
+  }
   void findGap(std::ostream&, goltsov::State& current_state, const goltsov::TimeInterval&)
   {}
   void findGapOnInterval(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&)

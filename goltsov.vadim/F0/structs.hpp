@@ -64,6 +64,9 @@ namespace goltsov
     size_t years_, months_, days_;
     size_t hours_, minutes_, seconds_;
   };
+  TimeInterval operator-(const TimeInterval&, const TimeInterval&);
+  TimeInterval operator+(const TimeInterval&, const TimeInterval&);
+  double operator/(const TimeInterval&, const TimeInterval&);
   std::istream& operator>>(std::istream&, TimeInterval&);
   std::ostream& operator<<(std::ostream&, const TimeInterval&);
   bool operator<(const TimeInterval&, const TimeInterval&);
@@ -108,12 +111,16 @@ namespace goltsov
     goltsov::RBTree< goltsov::DateTime, Task, detail::CompareTasks > tasks_tree_;
     goltsov::Map< std::string, goltsov::Task > unplanned_tasks_;
   };
+  std::istream& operator>>(std::istream&, Schedule&);
+  std::ostream& operator<<(std::ostream&, Schedule&);
 
   struct Context
   {
     std::string name_context_;
     goltsov::RBTree< std::string, Schedule, std::less< std::string > > schedules_tree_;
   };
+  std::istream& operator>>(std::istream&, Context&);
+  std::ostream& operator<<(std::ostream&, Context&);
 
   struct State
   {
