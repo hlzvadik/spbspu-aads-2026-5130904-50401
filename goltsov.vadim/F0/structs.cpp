@@ -10,6 +10,7 @@ namespace detail
     {
       is.setstate(std::ios_base::failbit);
     }
+    return is;
   }
 
   bool CompareTasks::operator()(const goltsov::DateTime& lhs, const goltsov::DateTime& rhs)
@@ -144,14 +145,17 @@ namespace goltsov
   std::ostream& operator<<(std::ostream& os, const TimeInterval& a)
   {
     os << a.years_ << '-' << a.months_ << '-' << a.days_ << '_' << a.hours_ << ':' << a.minutes_ << ':' << a.seconds_;
+    return os;
   }
   std::ostream& operator<<(std::ostream& os, const DateTime& a)
   {
     os << a.year_ << '-' << a.month_ << '-' << a.day_ << '_' << a.hour_ << ':' << a.minute_ << ':' << a.second_;
+    return os;
   }
   std::ostream& operator<<(std::ostream& os, const Task& a)
   {
     os << "(id: " << a.id_ << " (" << a.start_time_ << " " << a.end_time_ << ") " << a.title_ << " (Prio: " << a.priority_ << ") (Is_protected: " << (a.is_protected_ ? 1 : 0) << ")";
+    return os;
   }
   std::ostream& operator<<(std::ostream& os, Schedule& a)
   {
@@ -163,6 +167,7 @@ namespace goltsov
           << it->second.start_time_ << ' ' << it->second.end_time_ << ' ' << it->second.priority_ << ' '
            << it->second.is_protected_;
     }
+    return os;
   }
   std::ostream& operator<<(std::ostream& os, Context& a)
   {
@@ -171,6 +176,7 @@ namespace goltsov
     {
       os << '\n' << it->second.name_schedule_ << ' ' << it->second;
     }
+    return os;
   }
   bool operator<(const TimeInterval& lhs, const TimeInterval& rhs)
   {
@@ -524,14 +530,4 @@ namespace goltsov
     }
     return static_cast< double > (lhs_seconds) / static_cast< double > (rhs_seconds);
   }
-  // State::State()
-  // {
-  //   goltsov::Schedule current_schedule;
-  //   goltsov::Context current_context;
-  //   contexts_tree_.push("Base context", current_context);
-  //   current_context_ = contexts_tree_.get("Base context")->second;
-  //   current_context.schedules_tree_.push("Base schedule", current_schedule);
-  //   current_schedule_ = current_context.schedules_tree_.get("Base schedule")->second;
-    
-  // }
 }

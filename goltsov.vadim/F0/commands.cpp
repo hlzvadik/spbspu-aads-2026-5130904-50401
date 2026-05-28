@@ -914,7 +914,7 @@ namespace goltsov
     {
       topit::Vector< std::string > a;
       a.pushBack(current_state.current_schedule_.name_schedule_);
-      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, current_state.current_time, current_state.current_schedule_.tasks_tree_.rfind([](goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > a){return 1;})->second.end_time_ + interval, interval, a);
+      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, current_state.current_time, current_state.current_schedule_.tasks_tree_.rfind([](const std::pair<goltsov::DateTime, goltsov::Task>& element){return true;})->second.end_time_ + interval, interval, a);
       os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
     }
     catch(const std::exception& e)
@@ -940,7 +940,7 @@ namespace goltsov
   {
     try
     {
-      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, current_state.current_time, current_state.current_schedule_.tasks_tree_.rfind([](goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > a){return 1;})->second.end_time_ + interval, interval, names_schedules);
+      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, current_state.current_time, current_state.current_schedule_.tasks_tree_.rfind([](const std::pair<goltsov::DateTime, goltsov::Task>& element){return true;})->second.end_time_ + interval, interval, names_schedules);
       os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
     }
     catch(const std::exception& e)

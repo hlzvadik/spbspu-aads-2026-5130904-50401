@@ -4,11 +4,14 @@
 #include <mymap.hpp>
 #include <myvector.hpp>
 
-struct goltsov::TimeInterval;
-struct goltsov::DateTime;
-struct goltsov::Task;
-struct goltsov::Schedule;
-struct goltsov::Context;
+namespace goltsov
+{
+  struct TimeInterval;
+  struct DateTime;
+  struct Task;
+  struct Schedule;
+  struct Context;
+}
 
 namespace detail
 {
