@@ -23,6 +23,12 @@ namespace detail
     bool operator()(const std::pair< goltsov::DateTime, goltsov::Task >&);
   };
 
+  struct FindDateTime
+  {
+    const goltsov::DateTime& a;
+    bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
+  };
+
   struct Delimeter
   {
     char expected;
@@ -110,6 +116,7 @@ namespace goltsov
     std::string name_schedule_;
     goltsov::RBTree< goltsov::DateTime, Task, detail::CompareTasks > tasks_tree_;
     goltsov::Map< std::string, goltsov::Task > unplanned_tasks_;
+    goltsov::Map< std::string, goltsov::DateTime > id_start_time_;
   };
   std::istream& operator>>(std::istream&, Schedule&);
   std::ostream& operator<<(std::ostream&, Schedule&);
@@ -127,7 +134,7 @@ namespace goltsov
     Schedule& current_schedule_;
     Context& current_context_;
     goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
-    goltsov::Map< std::string, goltsov::DateTime > id_start_time_;
+    goltsov::DateTime current_time;
   };
 }
 

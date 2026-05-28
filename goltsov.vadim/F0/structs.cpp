@@ -19,7 +19,12 @@ namespace detail
 
   bool FindTask::operator()(const std::pair< goltsov::DateTime, goltsov::Task >& current)
   {
-    return (current.second.start_time_ < a.left_boundary_time_);
+    return (current.second.end_time_ < a.left_boundary_time_);
+  }
+
+  bool FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& curent)
+  {
+    return curent.second.first <= a && a <= curent.second.second;
   }
 
   bool isLeapYear(const size_t& year)
@@ -519,4 +524,14 @@ namespace goltsov
     }
     return static_cast< double > (lhs_seconds) / static_cast< double > (rhs_seconds);
   }
+  // State::State()
+  // {
+  //   goltsov::Schedule current_schedule;
+  //   goltsov::Context current_context;
+  //   contexts_tree_.push("Base context", current_context);
+  //   current_context_ = contexts_tree_.get("Base context")->second;
+  //   current_context.schedules_tree_.push("Base schedule", current_schedule);
+  //   current_schedule_ = current_context.schedules_tree_.get("Base schedule")->second;
+    
+  // }
 }

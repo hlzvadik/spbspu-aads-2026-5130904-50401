@@ -12,6 +12,7 @@ namespace detail
   void pushUnplanned(goltsov::State&);
   goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State&, goltsov::Task&);
   std::pair< size_t, size_t > mergeInterval(goltsov::State&, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >);
+  std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const topit::Vector< std::string >&);
 }
 
 namespace goltsov
@@ -68,7 +69,6 @@ namespace goltsov
   void findGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&);
   void findCommonGap(std::ostream&, goltsov::State&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
   void findCommonGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
-  void exit(std::ostream&, goltsov::State&);
 }
 
 #endif

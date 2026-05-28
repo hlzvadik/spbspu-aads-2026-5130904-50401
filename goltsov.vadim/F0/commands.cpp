@@ -27,82 +27,81 @@ namespace detail
   }
   bool pushTask(goltsov::State& current_state, goltsov::Task& task, const goltsov::TimeInterval& duration)
   {
-    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {task});
-    if (current == current_state.current_schedule_.tasks_tree_.end() || current == current_state.current_schedule_.tasks_tree_.begin())
+    if (current_state.current_schedule_.tasks_tree_.size() == 0)
     {
-      if (current == current_state.current_schedule_.tasks_tree_.end() || ((* current).first) > task.left_boundary_time_ && ((* current).first) - task.left_boundary_time_ >= duration)
-      {
-        task.start_time_ = task.left_boundary_time_;
-        task.end_time_ = task.left_boundary_time_ + duration;
-        current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
-        current_state.id_start_time_[task.id_] = task.start_time_;
-        return true;
-      }
+      task.start_time_ = task.left_boundary_time_;
+      task.end_time_ = task.start_time_ + duration;
+      current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
+      current_state.current_schedule_.id_start_time_[task.id_] = task.start_time_;
+      return true;
+    }
+    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.rfind(detail::FindTask {task});
+    if (current == current_state.current_schedule_.tasks_tree_.end())
+    {
+      current = current_state.current_schedule_.tasks_tree_.begin();
+    }
+    else
+    {
+      current = current.next();
     }
     goltsov::DateTime start = task.left_boundary_time_;
-    while (current == current_state.current_schedule_.tasks_tree_.end() || (* current).first + duration < task.right_boundary_time_)
+    while (current != current_state.current_schedule_.tasks_tree_.end() && start + duration > current->second.start_time_ && start + duration <= task.right_boundary_time_)
     {
-      if (current == current_state.current_schedule_.tasks_tree_.end())
+      if (task.priority_ > current->second.priority_ && !current->second.is_protected_)
       {
-        if (start + duration <= task.right_boundary_time_)
-        {
-          task.start_time_ = start;
-          task.end_time_ = task.start_time_ + duration;
-          current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
-          current_state.id_start_time_[task.id_] = task.start_time_;
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-      }
-      else if (((* current).first) > task.left_boundary_time_ && ((* current).first) - std::max(task.left_boundary_time_, (* current.prev()).first) >= duration)
-      {
-        task.start_time_ = std::max(task.left_boundary_time_, (* current.prev()).first);
-        task.end_time_ = task.start_time_ + duration;
-        current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
-        current_state.id_start_time_[task.id_] = task.start_time_;
-        return true;
+        current_state.current_schedule_.unplanned_tasks_.insert({current->second.id_, current->second});
+        goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
+        ++current;
+        current_state.current_schedule_.tasks_tree_.drop(temp->first);
       }
       else
       {
-        if ((* current).second.is_protected_ || (* current).second.priority_ >= task.priority_)
-        {
-          start = (* current).second.end_time_;
-          current = current.next();
-        }
-        else
-        {
-          current_state.current_schedule_.unplanned_tasks_.insert({current->second.id_, current->second});
-          goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
-          current = current.next();
-          current_state.current_schedule_.tasks_tree_.drop((* temp).first);
-        }
+        start = current->second.right_boundary_time_;
       }
     }
-    return false;
+    if (current == current_state.current_schedule_.tasks_tree_.end() && start + duration <= task.right_boundary_time_
+        || current != current_state.current_schedule_.tasks_tree_.end() && start + duration <= current->second.start_time_ && start + duration <= task.right_boundary_time_)
+    {
+      task.start_time_ = start;
+      task.end_time_ = start + duration;
+      current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
+      current_state.current_schedule_.id_start_time_[task.id_] = task.start_time_;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
   goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State& current_state, goltsov::Task& task)
   {
-    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.find(detail::FindTask {task});
-    while (current != current_state.current_schedule_.tasks_tree_.end() && (* current).first < task.start_time_)
+    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_.tasks_tree_.rfind(detail::FindTask {task});
+    if (current == current_state.current_schedule_.tasks_tree_.end())
     {
-      if ((* current).second.is_protected_)
+      current = current_state.current_schedule_.tasks_tree_.begin();
+    }
+    else
+    {
+      current = current.next();
+    }
+    while (current != current_state.current_schedule_.tasks_tree_.end() && task.right_boundary_time_ > current->second.start_time_ && task.right_boundary_time_ <= task.right_boundary_time_)
+    {
+      if (current->second.is_protected_)
       {
-        detail::pushUnplanned(current_state);
         return current;
       }
       else
       {
         current_state.current_schedule_.unplanned_tasks_.insert({current->second.id_, current->second});
         goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > temp = current;
-        current = current.next();
-        current_state.current_schedule_.tasks_tree_.drop((* current).first);
+        ++current;
+        current_state.current_schedule_.tasks_tree_.drop(temp->first);
       }
     }
-    detail::pushTask(current_state, task, task.right_boundary_time_ - task.left_boundary_time_);
-    detail::pushUnplanned(current_state);
+    task.start_time_ = task.left_boundary_time_;
+    task.end_time_ = task.right_boundary_time_;
+    current_state.current_schedule_.tasks_tree_.push(task.start_time_, task);
+    current_state.current_schedule_.id_start_time_[task.id_] = task.start_time_;
     return current_state.current_schedule_.tasks_tree_.end();
   }
   void pushUnplanned(goltsov::State& current_state)
@@ -145,6 +144,34 @@ namespace detail
       }
     }
     return {added, conflicts};
+  }
+  std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State& current_state, const goltsov::DateTime& start_time, const goltsov::DateTime& end_time, const goltsov::TimeInterval& duration, const topit::Vector< std::string >& names_schedules)
+  {
+    goltsov::RBTree< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime >, std::less< goltsov::DateTime > > free_time;
+    free_time.push(start_time, {start_time, end_time});
+    for (size_t i = 0; i < names_schedules.getSize(); ++i)
+    {
+      goltsov::Schedule& current_schedule = current_state.current_context_.schedules_tree_.get(names_schedules[i])->second;
+      for (goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > it = current_schedule.tasks_tree_.begin(); it != current_schedule.tasks_tree_.end(); ++it)
+      {
+        goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > find_start = free_time.find(detail::FindDateTime {it->second.start_time_});
+        goltsov::DateTime start = find_start != free_time.end() ? find_start->second.second : it->second.start_time_;
+        goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > find_end = free_time.find(detail::FindDateTime {it->second.end_time_});
+        goltsov::DateTime end = find_end != free_time.end() ? find_end->second.first : it->second.end_time_;
+        if (end - start != goltsov::TimeInterval {0, 0, 0, 0, 0, 0})
+        {
+          free_time.push(start, {start, end});
+        }
+      }
+    }
+    for (goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > it = free_time.begin(); it != free_time.end(); ++it)
+    {
+      if (it->second.second - it->second.first >= duration)
+      {
+        return {it->second.first, it->second.first + duration};
+      }
+    }
+    throw std::runtime_error("<GAP DID NOT FOUND>");
   }
 }
 
@@ -566,7 +593,7 @@ namespace goltsov
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
-    exit(os, current_state);
+    is.setstate(std::ios_base::eofbit);
   }
 
   void add(std::ostream& os, goltsov::State& current_state, const std::string& id, const std::string& title, const std::string& description,
@@ -576,7 +603,7 @@ namespace goltsov
     bool is_planned = detail::pushTask(current_state, temp, duration);
     if (is_planned)
     {
-      goltsov::DateTime k = current_state.id_start_time_[id];
+      goltsov::DateTime k = current_state.current_schedule_.id_start_time_[id];
       os << "<TASK ADDED: Scheduled at " << current_state.current_schedule_.tasks_tree_.get(k)->second.start_time_ << ' ' << current_state.current_schedule_.tasks_tree_.get(k)->second.end_time_ << '\n';
     }
     else
@@ -602,7 +629,7 @@ namespace goltsov
   }
   void remove(std::ostream& os, goltsov::State& current_state, const std::string& id)
   {
-    goltsov::DateTime k = current_state.id_start_time_[id];
+    goltsov::DateTime k = current_state.current_schedule_.id_start_time_[id];
     current_state.current_schedule_.tasks_tree_.drop(k);
     os << "<TASK REMOVED: ID " << id << '\n';
   }
@@ -881,14 +908,56 @@ namespace goltsov
       os << "<NO SUCH CONTEXT>\n";
     }
   }
-  void findGap(std::ostream&, goltsov::State& current_state, const goltsov::TimeInterval&)
-  {}
-  void findGapOnInterval(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&)
-  {}
-  void findCommonGap(std::ostream&, goltsov::State& current_state, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&)
-  {}
-  void findCommonGapOnInterval(std::ostream&, goltsov::State& current_state, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&)
-  {}
-  void exit(std::ostream&, goltsov::State& current_state)
-  {}
+  void findGap(std::ostream& os, goltsov::State& current_state, const goltsov::TimeInterval& interval)
+  {
+    try
+    {
+      topit::Vector< std::string > a;
+      a.pushBack(current_state.current_schedule_.name_schedule_);
+      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, current_state.current_time, current_state.current_schedule_.tasks_tree_.rfind([](goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > a){return 1;})->second.end_time_ + interval, interval, a);
+      os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what();
+    }
+  }
+  void findGapOnInterval(std::ostream& os, goltsov::State& current_state, const goltsov::DateTime& start_time, const goltsov::DateTime& end_time, const goltsov::TimeInterval& interval)
+  {
+    try
+    {
+      topit::Vector< std::string > a;
+      a.pushBack(current_state.current_schedule_.name_schedule_);
+      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, start_time, end_time, interval, a);
+      os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what();
+    }
+  }
+  void findCommonGap(std::ostream& os, goltsov::State& current_state, const goltsov::TimeInterval& interval, const size_t& count_schedules, const topit::Vector< std::string >& names_schedules)
+  {
+    try
+    {
+      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, current_state.current_time, current_state.current_schedule_.tasks_tree_.rfind([](goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > a){return 1;})->second.end_time_ + interval, interval, names_schedules);
+      os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what();
+    }
+  }
+  void findCommonGapOnInterval(std::ostream& os, goltsov::State& current_state, const goltsov::DateTime& start_time, const goltsov::DateTime& end_time, const goltsov::TimeInterval& interval, const size_t& count_schedules, const topit::Vector< std::string >& names_schedules)
+  {
+    try
+    {
+      std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state, start_time, end_time, interval, names_schedules);
+      os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what();
+    }
+  }
 }
