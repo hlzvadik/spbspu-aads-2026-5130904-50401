@@ -134,8 +134,8 @@ namespace goltsov
 
   struct State
   {
-    Schedule& current_schedule_;
-    Context& current_context_;
+    Schedule* current_schedule_;
+    Context* current_context_;
     goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
     goltsov::DateTime current_time;
   };

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <mymap.hpp>
+#include <limits>
 #include "structs.hpp"
 #include "commands.hpp"
 
@@ -15,15 +16,18 @@ int main()
       return 0;
     }
     std::cin.clear();
+    std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     std::cout << "Incorrect format, correct format: \"YYYY-MM-DD_HH-MM-SS\". Enter again: ";
     std::cin >> current_time;
   }
-  goltsov::Schedule current_schedule;
-  goltsov::Context current_context;
+  goltsov::Schedule base_schedule;
+  base_schedule.name_schedule_ = "Base_schedule";
+  goltsov::Context base_context;
+  base_context.name_context_ = "Base_context";
   goltsov::RBTree< std::string, goltsov::Context, std::less< std::string > > contexts_tree {};
-  contexts_tree.push("Base context", current_context);
-  contexts_tree.get("Base context")->second.schedules_tree_.push("Base schedule", current_schedule);
-  goltsov::State current_state {contexts_tree.get("Base context")->second.schedules_tree_.get("Base schedule")->second, contexts_tree.get("Base context")->second, contexts_tree, current_time};
+  contexts_tree.push("Base_context", base_context);
+  contexts_tree.get("Base_context")->second.schedules_tree_.push("Base_schedule", base_schedule);
+  goltsov::State current_state {& contexts_tree.get("Base_context")->second.schedules_tree_.get("Base_schedule")->second, & contexts_tree.get("Base_context")->second, contexts_tree, current_time};
 
   goltsov::Map< std::string, void (*)(std::istream&, std::ostream&, goltsov::State&) > commands;
   commands["add"] = goltsov::parsingAdd;
@@ -51,15 +55,28 @@ int main()
   commands["find_common_gap"] = goltsov::parsingFindCommonGap;
   commands["find_common_gap_on_interval"] = goltsov::parsingFindCommonGapOnInterval;
   commands["exit"] = goltsov::parsingExit;
+  commands["list_schedules"] = goltsov::parsingListSchedules;
+  commands["list_contexts"] = goltsov::parsingListContexts;
 
   while(!std::cin.eof())
   {
     std::string command;
     std::cin >> command;
-    if (!commands.count(command))
+    if (!std::cin.fail())
     {
-      std::cout << "INCORRECT SYNTAX\n";
+      if (!commands.count(command))
+      {
+        std::cout << "INCORRECT SYNTAX\n";
+        continue;
+      }
+      try
+      {
+       commands[command](std::cin, std::cout, current_state);
+      }
+      catch(const std::exception& e)
+      {
+        std::cerr << e.what() << '\n';
+      }
     }
-    commands[command](std::cin, std::cout, current_state);
   }
 }

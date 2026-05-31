@@ -20,7 +20,7 @@ namespace detail
 
   bool FindTask::operator()(const std::pair< goltsov::DateTime, goltsov::Task >& current)
   {
-    return (current.second.end_time_ < a.left_boundary_time_);
+    return (current.second.end_time_ <= a.left_boundary_time_);
   }
 
   bool FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& curent)
@@ -62,6 +62,9 @@ namespace goltsov
     is >> years >> d_t{'-'} >> months >> d_t{'-'} >> days;
     is >> d_t{'_'};
     is >> hours >> d_t {':'} >> minutes >> d_t {':'} >> seconds;
+    a.years_ = years;
+    a.months_ = months;
+    a.days_ = days;
     a.hours_ = hours;
     a.minutes_ = minutes;
     a.seconds_ = seconds;
@@ -246,7 +249,7 @@ namespace goltsov
     }
     return lhs.second_ < rhs.second_;
   }
-  bool operator> (const DateTime& lhs, const DateTime& rhs)
+  bool operator>(const DateTime& lhs, const DateTime& rhs)
   {
     return rhs < lhs;
   }

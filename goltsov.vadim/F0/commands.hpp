@@ -11,6 +11,7 @@ namespace detail
   bool pushTask(goltsov::State&, goltsov::Task&, const goltsov::TimeInterval&);
   void pushUnplanned(goltsov::State&);
   goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State&, goltsov::Task&);
+  goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTaskForce(goltsov::State&, goltsov::Task&);
   std::pair< size_t, size_t > mergeInterval(goltsov::State&, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >);
   std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const topit::Vector< std::string >&);
 }
@@ -42,6 +43,8 @@ namespace goltsov
   void parsingFindCommonGap(std::istream&, std::ostream&, goltsov::State&);
   void parsingFindCommonGapOnInterval(std::istream&, std::ostream&, goltsov::State&);
   void parsingExit(std::istream&, std::ostream&, goltsov::State&);
+  void parsingListSchedules(std::istream&, std::ostream&, goltsov::State&);
+  void parsingListContexts(std::istream&, std::ostream&, goltsov::State&);
 
   void add(std::ostream&, goltsov::State&, const std::string&, const std::string&, const std::string&,
     const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&);
@@ -69,6 +72,8 @@ namespace goltsov
   void findGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&);
   void findCommonGap(std::ostream&, goltsov::State&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
   void findCommonGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
+  void listSchedules(std::ostream&, goltsov::State&);
+  void listContexts(std::ostream&, goltsov::State&);
 }
 
 #endif
