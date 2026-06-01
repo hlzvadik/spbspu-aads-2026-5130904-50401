@@ -77,7 +77,7 @@ namespace goltsov
     return (* data_.get(k)).second;
   }
   template< class Key, class Value >
-  const Value& Map< Key, Value >::at(const Key&) const
+  const Value& Map< Key, Value >::at(const Key& k) const
   {
     return (* data_.get(k)).second;
   }
@@ -92,7 +92,7 @@ namespace goltsov
     }
     catch (std::logic_error& e)
     {
-      return {data_.get(), false};
+      return {data_.end(), false};
     }
   }
   template< class Key, class Value >
@@ -113,7 +113,7 @@ namespace goltsov
     return data_.get(k);
   }
   template< class Key, class Value >
-  MapConstIterator<Key, Value> Map< Key, Value >::find(const Key&) const
+  MapConstIterator<Key, Value> Map< Key, Value >::find(const Key& k) const
   {
     return data_.get(k);
   }

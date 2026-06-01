@@ -20,14 +20,13 @@ int main()
     std::cout << "Incorrect format, correct format: \"YYYY-MM-DD_HH-MM-SS\". Enter again: ";
     std::cin >> current_time;
   }
-  goltsov::Schedule base_schedule;
-  base_schedule.name_schedule_ = "Base_schedule";
-  goltsov::Context base_context;
-  base_context.name_context_ = "Base_context";
-  goltsov::RBTree< std::string, goltsov::Context, std::less< std::string > > contexts_tree {};
-  contexts_tree.push("Base_context", base_context);
-  contexts_tree.get("Base_context")->second.schedules_tree_.push("Base_schedule", base_schedule);
-  goltsov::State current_state {& contexts_tree.get("Base_context")->second.schedules_tree_.get("Base_schedule")->second, & contexts_tree.get("Base_context")->second, contexts_tree, current_time};
+  goltsov::State current_state {nullptr, nullptr, goltsov::RBTree< std::string, goltsov::Context, std::less< std::string > > {}, current_time};
+  current_state.contexts_tree_.push("Base_context", goltsov::Context {});
+  current_state.contexts_tree_.get("Base_context")->second.name_context_ = "Base_context";
+  current_state.current_context_ = & current_state.contexts_tree_.get("Base_context")->second;
+  current_state.current_context_->schedules_tree_.push("Base_schedule", goltsov::Schedule {});
+  current_state.current_context_->schedules_tree_.get("Base_schedule")->second.name_schedule_ = "Base_schedule";
+  current_state.current_schedule_ = & current_state.current_context_->schedules_tree_.get("Base_schedule")->second;
 
   goltsov::Map< std::string, void (*)(std::istream&, std::ostream&, goltsov::State&) > commands;
   commands["add"] = goltsov::parsingAdd;

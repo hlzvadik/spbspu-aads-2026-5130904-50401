@@ -108,6 +108,7 @@ namespace detail
 
     NodeBST< Key, Value >* push(Key k, Value v);
     BSTIterator< Key, Value > get(const Key& k);
+    BSTConstIterator< Key, Value > get(const Key& k) const;
     std::tuple< NodeBST< Key, Value >*, Value, bool > drop(const Key& k);
     void clear();
     template< class Predicate >
@@ -358,6 +359,29 @@ namespace detail
   }
 
   template< class Key, class Value, class Compare >
+  BSTConstIterator< Key, Value > BSTree< Key, Value, Compare >::get(const Key& k) const
+  {
+    Compare comparator;
+    NodeBST< Key, Value >* current = root_;
+    while (current)
+    {
+      if (comparator(k, current->data_.first))
+      {
+        current = current->left_;
+      }
+      else if (comparator(current->data_.first, k))
+      {
+        current = current->right_;
+      }
+      else
+      {
+        return BSTIterator< Key, Value > (current);
+      }
+    }
+    throw std::logic_error("No such key");
+  }
+
+  template< class Key, class Value, class Compare >
   std::tuple< NodeBST< Key, Value >*, Value, bool > BSTree< Key, Value, Compare >::drop(const Key& k)
   {
     Compare comparator;
@@ -394,45 +418,135 @@ namespace detail
         else if (current->left_ && !current->right_)
         {
           NodeBST< Key, Value >* maxLeft = falRight(current->left_);
-          std::swap(maxLeft->data_, current->data_);
-          current = maxLeft;
+          NodeBST< Key, Value >* currParent = current->parent_;
+          NodeBST< Key, Value >* currLeft = current->left_;
+          NodeBST< Key, Value >* maxParent = maxLeft->parent_;
+          NodeBST< Key, Value >* maxLeftChild = maxLeft->left_;
+          std::swap(current->black_height_, maxLeft->black_height_);
+          std::swap(current->height_, maxLeft->height_);
+          std::swap(current->is_black_, maxLeft->is_black_);
+          maxLeft->parent_ = currParent;
+          if (currParent)
+          {
+            if (currParent->left_ == current) currParent->left_ = maxLeft;
+            else currParent->right_ = maxLeft;
+          }
+          else
+          {
+            root_ = maxLeft;
+          }
+          maxLeft->right_ = nullptr;
+          if (maxLeft == currLeft)
+          {
+            maxLeft->left_ = current;
+            current->parent_ = maxLeft;
+          }
+          else
+          {
+            maxLeft->left_ = currLeft;
+            if (currLeft) currLeft->parent_ = maxLeft;
+            current->parent_ = maxParent;
+            if (maxParent)
+            {
+              if (maxParent->left_ == maxLeft) maxParent->left_ = current;
+              else maxParent->right_ = current;
+            }
+          }
+          current->right_ = nullptr;
+          current->left_ = maxLeftChild;
+          if (maxLeftChild) maxLeftChild->parent_ = current;
           startHeightUpdate = current->parent_;
           if (current->parent_ && current->parent_->left_ == current)
           {
             current->parent_->left_ = current->left_;
-            current->left_->parent_ = current->parent_;
+            if (current->left_)
+            {
+              current->left_->parent_ = current->parent_;
+            }
           }
           else if (current->parent_)
           {
             current->parent_->right_ = current->left_;
-            current->left_->parent_ = current->parent_;
+            if (current->left_)
+            {
+              current->left_->parent_ = current->parent_;
+            }
           }
           else
           {
             root_ = current->left_;
-            current->left_->parent_ = nullptr;
+            if (current->left_)
+            {
+              current->left_->parent_ = nullptr;
+            }
           }
         }
         else
         {
           NodeBST< Key, Value >* minRight = falLeft(current->right_);
-          std::swap(minRight->data_, current->data_);
-          current = minRight;
+          NodeBST< Key, Value >* currParent = current->parent_;
+          NodeBST< Key, Value >* currLeft = current->left_;
+          NodeBST< Key, Value >* currRight = current->right_;
+          NodeBST< Key, Value >* minParent = minRight->parent_;
+          NodeBST< Key, Value >* minRightChild = minRight->right_;
+          std::swap(current->black_height_, minRight->black_height_);
+          std::swap(current->height_, minRight->height_);
+          std::swap(current->is_black_, minRight->is_black_);
+          minRight->parent_ = currParent;
+          if (currParent)
+          {
+            if (currParent->left_ == current) currParent->left_ = minRight;
+            else currParent->right_ = minRight;
+          }
+          else
+          {
+            root_ = minRight;
+          }
+          minRight->left_ = currLeft;
+          if (currLeft) currLeft->parent_ = minRight;
+          if (minRight == currRight)
+          {
+            minRight->right_ = current;
+            current->parent_ = minRight;
+          }
+          else
+          {
+            minRight->right_ = currRight;
+            if (currRight) currRight->parent_ = minRight;
+            current->parent_ = minParent;
+            if (minParent)
+            {
+              if (minParent->left_ == minRight) minParent->left_ = current;
+              else minParent->right_ = current;
+            }
+          }
+          current->left_ = nullptr;
+          current->right_ = minRightChild;
+          if (minRightChild) minRightChild->parent_ = current;
           startHeightUpdate = current->parent_;
           if (current->parent_ && current->parent_->left_ == current)
           {
             current->parent_->left_ = current->right_;
-            current->right_->parent_ = current->parent_;
+            if (current->right_)
+            {
+              current->right_->parent_ = current->parent_;
+            }
           }
           else if (current->parent_)
           {
             current->parent_->right_ = current->right_;
-            current->right_->parent_ = current->parent_;
+            if (current->right_)
+            {
+              current->right_->parent_ = current->parent_;
+            }
           }
           else
           {
             root_ = current->right_;
-            current->right_->parent_ = nullptr;
+            if (current->right_)
+            {
+              current->right_->parent_ = nullptr;
+            }
           }
         }
         NodeBST< Key, Value >* res_ptr = current->parent_;
@@ -508,7 +622,7 @@ namespace detail
     {
       return end();
     }
-    for (BSTIterator< Key, Value > current = begin(); current != end(); ++it)
+    for (BSTIterator< Key, Value > current = begin(); current != end(); ++current)
     {
       if (pred(* current))
       {
@@ -526,12 +640,16 @@ namespace detail
     {
       return end();
     }
-    for (BSTIterator< Key, Value > current = falRight(root_); current != begin(); --it)
+    for (BSTIterator< Key, Value > current = falRight(root_); current != begin(); --current)
     {
       if (pred(* current))
       {
         return current;
       }
+    }
+    if (pred(* begin()))
+    {
+      return begin();
     }
     return end();
   }
@@ -1091,6 +1209,7 @@ namespace goltsov
 
     RBTIterator< Key, Value > push(Key, Value);
     RBTIterator< Key, Value > get(const Key&);
+    RBTConstIterator< Key, Value > get(const Key&) const;
     Value drop(const Key&);
     void clear();
     template< class Predicate >
@@ -1147,6 +1266,11 @@ namespace goltsov
   }
   template< class Key, class Value, class Compare >
   RBTIterator< Key, Value > RBTree< Key, Value, Compare >::get(const Key& k)
+  {
+    return tree_.get(k);
+  }
+  template< class Key, class Value, class Compare >
+  RBTConstIterator< Key, Value > RBTree< Key, Value, Compare >::get(const Key& k) const
   {
     return tree_.get(k);
   }
@@ -1274,6 +1398,10 @@ namespace goltsov
   void RBTree< Key, Value, Compare >::makeBalanceAfterDrop(std::tuple< detail::NodeBST< Key, Value >*, Value, bool > dropedParent)
   {
     detail::NodeBST< Key, Value >* P = std::get< 0 >(dropedParent);
+    if (!P)
+    {
+      return;
+    }
     if (std::get< 2 >(dropedParent))
     {
       if (tree_.blackHeight(detail::BSTConstIterator< Key, Value > (P->left_)) < tree_.blackHeight(detail::BSTConstIterator< Key, Value > (P->right_)) && P->left_ && !P->left_->is_black_)
@@ -1290,92 +1418,95 @@ namespace goltsov
       }
       else
       {
-        detail::NodeBST< Key, Value >* B = (tree_.blackHeight(P->left_) < tree_.blackHeight(P->right_)) ? P->left_ : P->right_;
-        if (B->is_black_ && ((P->left_ == B && !B->left_->is_black_) || (P->right_ == B && !B->right_->is_black_)))
+        detail::NodeBST< Key, Value >* B = (tree_.blackHeight(P->left_) < tree_.blackHeight(P->right_)) ? P->right_ : P->left_;
+        if (B)
         {
-          if (P->left_ == B)
+          if (B->is_black_ && ((P->left_ == B && B->left_ && !B->left_->is_black_) || (P->right_ == B && B->right_ && !B->right_->is_black_)))
           {
-            tree_.rotateRight(B);
-            B->is_black_ = P->is_black_;
-            B->left_->is_black_ = true;
-            P->is_black_ = true;
-            P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-            P->black_height_ = std::max(P->left_ ? P->left_->black_height_ : 0, P->right_ ? P->right_->black_height_ : 0) + (P->is_black_ ? 1 : 0);
-            B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
-            B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
+            if (P->left_ == B)
+            {
+              tree_.rotateRight(B);
+              B->is_black_ = P->is_black_;
+              B->left_->is_black_ = true;
+              P->is_black_ = true;
+              P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
+              P->black_height_ = std::max(P->left_ ? P->left_->black_height_ : 0, P->right_ ? P->right_->black_height_ : 0) + (P->is_black_ ? 1 : 0);
+              B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
+              B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
+            }
+            else
+            {
+              tree_.rotateLeft(B);
+              B->is_black_ = P->is_black_;
+              B->right_->is_black_ = true;
+              P->is_black_ = true;
+              P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
+              P->black_height_ = std::max(P->left_ ? P->left_->black_height_ : 0, P->right_ ? P->right_->black_height_ : 0) + (P->is_black_ ? 1 : 0);
+              B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
+              B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
+            }
           }
-          else
+          else if (B->is_black_ && ((P->left_ == B && B->right_ && !B->right_->is_black_) || (P->right_ == B && B->left_ && !B->left_->is_black_)))
           {
-            tree_.rotateLeft(B);
-            B->is_black_ = P->is_black_;
-            B->right_->is_black_ = true;
-            P->is_black_ = true;
-            P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-            P->black_height_ = std::max(P->left_ ? P->left_->black_height_ : 0, P->right_ ? P->right_->black_height_ : 0) + (P->is_black_ ? 1 : 0);
-            B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
-            B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
+            if (P->left_ == B)
+            {
+              tree_.rotateLeft(B->right_);
+              B->is_black_ = false;
+              B->parent_->is_black_ = true;
+              B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
+              B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
+              B->parent_->height_ = std::max(B->parent_->left_ ? B->parent_->left_->height_ : 0, B->parent_->right_ ? B->parent_->right_->height_ : 0) + 1;
+              B->parent_->black_height_ = std::max(B->parent_->left_ ? B->parent_->left_->black_height_ : 0, B->parent_->right_ ? B->parent_->right_->black_height_ : 0) + (B->parent_->is_black_ ? 1 : 0);
+              makeBalanceAfterDrop(dropedParent);
+            }
+            else
+            {
+              tree_.rotateRight(B->left_);
+              B->is_black_ = false;
+              B->parent_->is_black_ = true;
+              B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
+              B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
+              B->parent_->height_ = std::max(B->parent_->left_ ? B->parent_->left_->height_ : 0, B->parent_->right_ ? B->parent_->right_->height_ : 0) + 1;
+              B->parent_->black_height_ = std::max(B->parent_->left_ ? B->parent_->left_->black_height_ : 0, B->parent_->right_ ? B->parent_->right_->black_height_ : 0) + (B->parent_->is_black_ ? 1 : 0);
+              makeBalanceAfterDrop(dropedParent);
+            }
           }
-        }
-        else if (B->is_black_ && ((P->left_ == B && !B->right_->is_black_) || (P->right_ == B && !B->left_->is_black_)))
-        {
-          if (P->left_ == B)
+          else if (!P->is_black_ && B->is_black_ && (!B->left_ || B->left_->is_black_) && (!B->right_ || B->right_->is_black_))
           {
-            tree_.rotateLeft(B->right_);
             B->is_black_ = false;
-            B->parent_->is_black_ = true;
-            B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
-            B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
-            B->parent_->height_ = std::max(B->parent_->left_ ? B->parent_->left_->height_ : 0, B->parent_->right_ ? B->parent_->right_->height_ : 0) + 1;
-            B->parent_->black_height_ = std::max(B->parent_->left_ ? B->parent_->left_->black_height_ : 0, B->parent_->right_ ? B->parent_->right_->black_height_ : 0) + (B->parent_->is_black_ ? 1 : 0);
-            makeBalanceAfterDrop(dropedParent);
+            B->black_height_ -= 1;
+            P->is_black_ = true;
           }
-          else
+          else if (P->is_black_ && !B->is_black_ && (!B->left_ || B->left_->is_black_) && (!B->right_ || B->right_->is_black_))
           {
-            tree_.rotateRight(B->left_);
+            if (P->left_ == B)
+            {
+              tree_.rotateRight(B);
+              B->is_black_ = true;
+              B->black_height_ += 1;
+              P->is_black_ = false;
+              P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
+              B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
+              makeBalanceAfterDrop(dropedParent);
+            }
+            else
+            {
+              tree_.rotateLeft(B);
+              B->is_black_ = true;
+              B->height_ += 1;
+              P->is_black_ = false;
+              P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
+              B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
+              makeBalanceAfterDrop(dropedParent);
+            }
+          }
+          else if (P->is_black_ && B->is_black_ && (!B->left_ || B->left_->is_black_) && (!B->right_ || B->right_->is_black_))
+          {
             B->is_black_ = false;
-            B->parent_->is_black_ = true;
-            B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
-            B->black_height_ = std::max(B->left_ ? B->left_->black_height_ : 0, B->right_ ? B->right_->black_height_ : 0) + (B->is_black_ ? 1 : 0);
-            B->parent_->height_ = std::max(B->parent_->left_ ? B->parent_->left_->height_ : 0, B->parent_->right_ ? B->parent_->right_->height_ : 0) + 1;
-            B->parent_->black_height_ = std::max(B->parent_->left_ ? B->parent_->left_->black_height_ : 0, B->parent_->right_ ? B->parent_->right_->black_height_ : 0) + (B->parent_->is_black_ ? 1 : 0);
-            makeBalanceAfterDrop(dropedParent);
+            B->black_height_ -= 1;
+            P->black_height_ -= 1;
+            makeBalanceAfterDrop({P->parent_, P->data_.second, true});
           }
-        }
-        else if (!P->is_black_ && B->is_black_ && (!B->left_ || B->left_->is_black_) && (!B->right_ || B->right_->is_black_))
-        {
-          B->is_black_ = false;
-          B->black_height_ -= 1;
-          P->is_black_ = true;
-        }
-        else if (P->is_black_ && !B->is_black_ && (!B->left_ || B->left_->is_black_) && (!B->right_ || B->right_->is_black_))
-        {
-          if (P->left_ == B)
-          {
-            tree_.rotateRight(B);
-            B->is_black_ = true;
-            B->black_height_ += 1;
-            P->is_black_ = false;
-            P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-            B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
-            makeBalanceAfterDrop(dropedParent);
-          }
-          else
-          {
-            tree_.rotateLeft(B);
-            B->is_black_ = true;
-            B->height_ += 1;
-            P->is_black_ = false;
-            P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-            B->height_ = std::max(B->left_ ? B->left_->height_ : 0, B->right_ ? B->right_->height_ : 0) + 1;
-            makeBalanceAfterDrop(dropedParent);
-          }
-        }
-        else if (P->is_black_ && B->is_black_ && (!B->left_ || B->left_->is_black_) && (!B->right_ || B->right_->is_black_))
-        {
-          B->is_black_ = false;
-          B->black_height_ -= 1;
-          P->black_height_ -= 1;
-          makeBalanceAfterDrop({P->parent_, P->data_.second, true});
         }
       }
     }
