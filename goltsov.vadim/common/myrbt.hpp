@@ -214,7 +214,8 @@ namespace detail
 
   template< class Key, class Value, class Compare >
   BSTree< Key, Value, Compare >::BSTree(const BSTree< Key, Value, Compare >& other):
-    root_(nullptr)
+    root_(nullptr),
+    size_(0)
   {
     NodeBST< Key, Value >* current = other.root_;
     if (!current)
@@ -225,6 +226,7 @@ namespace detail
     BSTree< Key, Value, Compare > new_tree;
     new_tree.root_ = new NodeBST< Key, Value >
       {current->data_, nullptr, nullptr, nullptr, current->is_black_, current->height_, current->black_height_};
+    new_tree.size_ = other.size_;
     NodeBST< Key, Value >* new_node = new_tree.root_;
     while (current)
     {
@@ -253,7 +255,8 @@ namespace detail
 
   template< class Key, class Value, class Compare >
   BSTree< Key, Value, Compare >::BSTree(BSTree< Key, Value, Compare >&& other):
-    root_(other.root_)
+    root_(other.root_),
+    size_(other.size_)
   {
     other.root_ = nullptr;
   }
@@ -658,6 +661,7 @@ namespace detail
   void BSTree< Key, Value, Compare >::swap(BSTree< Key, Value, Compare >& other)
   {
     std::swap(root_, other.root_);
+    std::swap(size_, other.size_);
   }
 
   template< class Key, class Value, class Compare >

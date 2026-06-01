@@ -151,34 +151,22 @@ namespace detail
   }
   std::pair< size_t, size_t > mergeInterval(goltsov::State& current_state, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > s, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > e)
   {
-    size_t added = 0;
-    size_t conflicts = 0;
+    size_t count_planned0 = current_state.current_schedule_->tasks_tree_.size();
     for (; s != e; ++s)
     {
       if (!s->second.is_protected_)
       {
-        if (pushTask(current_state, s->second, s->second.end_time_ - s->second.start_time_))
-        {
-          added += 1;
-        }
-        else
-        {
-          conflicts += 1;
-        }
+        pushTask(current_state, s->second, s->second.end_time_ - s->second.start_time_);
       }
       else
       {
-        if (pushProtectedTask(current_state, s->second) == current_state.current_schedule_->tasks_tree_.end())
-        {
-          added += 1;
-        }
-        else
-        {
-          conflicts += 1;
-        }
+        pushProtectedTask(current_state, s->second) == current_state.current_schedule_->tasks_tree_.end();
       }
     }
-    return {added, conflicts};
+    detail::pushUnplanned(current_state);
+    size_t count_unplanned = current_state.current_schedule_->tasks_tree_.size();
+    size_t count_planned1 = current_state.current_schedule_->tasks_tree_.size();
+    return {count_planned1 - count_planned0, count_unplanned};
   }
   std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State& current_state, const goltsov::DateTime& start_time, const goltsov::DateTime& end_time, const goltsov::TimeInterval& duration, const topit::Vector< std::string >& names_schedules)
   {
@@ -703,25 +691,8 @@ namespace goltsov
     {
       os << "<INVALID COMMAND>\n";
     }
-    size_t added = 0;
-    for (RBTIterator< goltsov::DateTime, goltsov::Task > it = other_schedule->tasks_tree_.begin(); it != other_schedule->tasks_tree_.end(); ++it)
-    {
-      if (it->second.is_protected_)
-      {
-        if (detail::pushTask(current_state, it->second, it->second.end_time_ - it->second.start_time_))
-        {
-          added += 1;
-        }
-      }
-      else
-      {
-        if (detail::pushProtectedTask(current_state, it->second) == other_schedule->tasks_tree_.end())
-        {
-          added += 1;
-        }
-      }
-    }
-    os << "<MERGE DONE. Added: " << added << ", Conflicts: " << current_state.current_schedule_->unplanned_tasks_.size() << ">\n";
+    std::pair< size_t, size_t > res = detail::mergeInterval(current_state, other_schedule->tasks_tree_.begin(), other_schedule->tasks_tree_.end());
+    os << "<MERGE DONE. Added: " << res.first << ", Conflicts: " << res.second << ">\n";
   }
   void showUnplanned(std::ostream& os, goltsov::State& current_state)
   {
@@ -799,7 +770,7 @@ namespace goltsov
       return;
     }
     std::pair< size_t, size_t > res = detail::mergeInterval(current_state, schedule.tasks_tree_.begin(), schedule.tasks_tree_.end());
-    os << "<MERGE DONE. Added: " << res.first << ", Conflicts: " << res.second << ">";
+    os << "<MERGE DONE. Added: " << res.first << ", Conflicts: " << res.second << ">\n";
   }
   void addScheduleOtherContext(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name, const std::string& context_name)
   {
@@ -836,14 +807,23 @@ namespace goltsov
   }
   void addForceScheduleOtherContext(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name, const std::string& context_name)
   {
+    bool is_current_schedule = false;
     try
     {
       current_state.current_context_->schedules_tree_.get(schedule_name);
-      current_state.current_context_->schedules_tree_.drop(schedule_name);
+      if (current_state.current_context_->name_context_ != context_name)
+      {
+        is_current_schedule = current_state.current_schedule_->name_schedule_ == schedule_name;
+        current_state.current_context_->schedules_tree_.drop(schedule_name);
+      }
     }
     catch (...)
     {}
     addScheduleOtherContext(os, current_state, schedule_name, context_name);
+    if (is_current_schedule)
+    {
+      current_state.current_schedule_ = & current_state.current_context_->schedules_tree_.get(schedule_name)->second;
+    }
   }
   void switchSchedule(std::ostream& os, goltsov::State& current_state, const std::string& schedule_name)
   {
