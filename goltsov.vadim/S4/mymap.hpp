@@ -104,7 +104,7 @@ namespace goltsov
     return data_.get(k);
   }
   template< class Key, class Value >
-  MapConstIterator<Key, Value> Map< Key, Value >::find(const Key&) const
+  MapConstIterator<Key, Value> Map< Key, Value >::find(const Key& k) const
   {
     return data_.get(k);
   }
