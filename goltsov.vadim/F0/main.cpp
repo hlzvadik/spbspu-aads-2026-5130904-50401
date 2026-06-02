@@ -65,6 +65,7 @@ int main()
     {
       if (!commands.count(command))
       {
+        std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
         std::cout << "INCORRECT SYNTAX\n";
         continue;
       }

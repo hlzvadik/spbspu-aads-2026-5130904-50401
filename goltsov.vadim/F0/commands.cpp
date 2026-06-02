@@ -854,12 +854,12 @@ namespace goltsov
   {
     goltsov::Task a;
     a.start_time_ = start_time;
-    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_->tasks_tree_.find(detail::FindTask {a});
+    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > current = current_state.current_schedule_->tasks_tree_.rfind(detail::FindTask {a});
     goltsov::TimeInterval busy_time {0, 0, 0, 0, 0, 0};
     size_t count_tasks = 0;
     try
     {
-      for (; current != current_state.current_schedule_->tasks_tree_.end() && current->second.start_time_ <= end_time; ++current)
+      for (; current != current_state.current_schedule_->tasks_tree_.end() && current->second.start_time_ < end_time; ++current)
       {
         busy_time = busy_time + (std::max(end_time, current->second.end_time_) - current->second.start_time_);
         count_tasks += 1;
@@ -908,7 +908,11 @@ namespace goltsov
     try
     {
       goltsov::Schedule schedule = current_state.current_context_->schedules_tree_.get(schedule_name)->second;
-      std::fstream out_f (filename);
+      std::fstream out_f (filename, std::ios::out | std::ios::trunc);
+      if (!out_f.is_open())
+      {
+        throw std::runtime_error("Cannot open file");
+      }
       out_f << schedule << '\n';
       os << "<SCHEDULE SAVED>\n";
     }
@@ -931,6 +935,7 @@ namespace goltsov
       std::fstream inp_f (filename);
       inp_f >> context;
       current_state.contexts_tree_.push(context_name, context);
+      current_state.contexts_tree_.get(context_name)->second.name_context_ = context_name;
       current_state.current_context_ = & current_state.contexts_tree_.get(context_name)->second;
       current_state.current_schedule_ = & current_state.current_context_->schedules_tree_.begin()->second;
       os << "<CONTEXT LOADED>\n";
@@ -941,7 +946,11 @@ namespace goltsov
     try
     {
       goltsov::Context context = current_state.contexts_tree_.get(context_name)->second;
-      std::fstream out_f (filename);
+      std::fstream out_f (filename, std::ios::out | std::ios::trunc);
+      if (!out_f.is_open())
+      {
+        throw std::runtime_error("Cannot open file");
+      }
       out_f << context << '\n';
       os << "<CONTEXT SAVED>\n";
     }

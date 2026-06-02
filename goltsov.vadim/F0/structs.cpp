@@ -129,6 +129,7 @@ namespace goltsov
       goltsov::Task task;
       is >> task;
       a.tasks_tree_.push(task.start_time_, task);
+      a.id_start_time_.insert({task.id_, task.start_time_});
     }
     return is;
   }
@@ -142,6 +143,7 @@ namespace goltsov
       std::string name_schedule;
       is >> name_schedule >> schedule;
       a.schedules_tree_.push(name_schedule, schedule);
+      a.schedules_tree_.get(name_schedule)->second.name_schedule_ = name_schedule;
     }
     return is;
   }
@@ -157,7 +159,10 @@ namespace goltsov
   }
   std::ostream& operator<<(std::ostream& os, const Task& a)
   {
-    os << "(id: " << a.id_ << " (" << a.start_time_ << " " << a.end_time_ << ") " << a.title_ << " (Prio: " << a.priority_ << ") (Is_protected: " << (a.is_protected_ ? 1 : 0) << ")";
+    os << "(id: " << a.id_ << ")" << " (title: " << a.title_ << ")" << " (description: " << a.description_ << ")"
+      << " (left_boundary_time: " << a.left_boundary_time_ << ")" << " (right_boundary_time: " << a.right_boundary_time_
+      << ")"<< " (start_time: " << a.start_time_ << ")" << " (end_time: " << a.end_time_ << ")" << " (priority: "
+      << a.priority_ << ")" << " (is_protected: " << (a.is_protected_ ? 1 : 0) << ")";
     return os;
   }
   std::ostream& operator<<(std::ostream& os, Schedule& a)
