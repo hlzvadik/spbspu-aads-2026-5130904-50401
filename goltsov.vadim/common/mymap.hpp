@@ -9,7 +9,7 @@ namespace goltsov
 {
   template< class Key, class Value >
   using MapIterator = RBTIterator< Key, Value >;
-  
+
   template< class Key, class Value >
   using MapConstIterator = RBTConstIterator< Key, Value >;
 
