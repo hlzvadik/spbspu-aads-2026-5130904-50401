@@ -12,8 +12,10 @@ namespace detail
   void pushUnplanned(goltsov::State&);
   goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State&, goltsov::Task&);
   goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTaskForce(goltsov::State&, goltsov::Task&);
-  std::pair< size_t, size_t > mergeInterval(goltsov::State&, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >);
-  std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const topit::Vector< std::string >&);
+  std::pair< size_t, size_t > mergeInterval(goltsov::State&, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >,
+    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >);
+  std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State&, const goltsov::DateTime&,
+    const goltsov::DateTime&, const goltsov::TimeInterval&, const topit::Vector< std::string >&);
 }
 
 namespace goltsov
@@ -69,9 +71,12 @@ namespace goltsov
   void loadContext(std::ostream&, goltsov::State&, const std::string&, const std::string&);
   void saveContext(std::ostream&, goltsov::State&, const std::string&, const std::string&);
   void findGap(std::ostream&, goltsov::State&, const goltsov::TimeInterval&);
-  void findGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&);
-  void findCommonGap(std::ostream&, goltsov::State&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
-  void findCommonGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
+  void findGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&,
+    const goltsov::TimeInterval&);
+  void findCommonGap(std::ostream&, goltsov::State&, const goltsov::TimeInterval&, const size_t&,
+    const topit::Vector< std::string >&);
+  void findCommonGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&,
+    const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
   void listSchedules(std::ostream&, goltsov::State&);
   void listContexts(std::ostream&, goltsov::State&);
 }

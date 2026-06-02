@@ -23,17 +23,20 @@ namespace detail
     return (current.second.end_time_ <= a.left_boundary_time_);
   }
 
-  bool FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& current)
+  bool FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime,
+    goltsov::DateTime > >& current)
   {
     return current.second.first <= a && a <= current.second.second;
   }
 
-  bool FindDateTime2::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& current)
+  bool FindDateTime2::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime,
+    goltsov::DateTime > >& current)
   {
     return current.second.second < a;
   }
 
-  bool FindDateTime3::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& current)
+  bool FindDateTime3::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime,
+    goltsov::DateTime > >& current)
   {
     return current.second.first > a;
   }
@@ -170,9 +173,9 @@ namespace goltsov
   std::ostream& operator<<(std::ostream& os, const Task& a)
   {
     os << "(id: " << a.id_ << ")" << " (title: " << a.title_ << ")" << " (description: " << a.description_ << ")"
-      << " (left_boundary_time: " << a.left_boundary_time_ << ")" << " (right_boundary_time: " << a.right_boundary_time_
-      << ")"<< " (start_time: " << a.start_time_ << ")" << " (end_time: " << a.end_time_ << ")" << " (priority: "
-      << a.priority_ << ")" << " (is_protected: " << (a.is_protected_ ? 1 : 0) << ")";
+      << " (left_boundary_time: " << a.left_boundary_time_ << ")" << " (right_boundary_time: "
+      << a.right_boundary_time_ << ")"<< " (start_time: " << a.start_time_ << ")" << " (end_time: " << a.end_time_
+      << ")" << " (priority: " << a.priority_ << ")" << " (is_protected: " << (a.is_protected_ ? 1 : 0) << ")";
     return os;
   }
   std::ostream& operator<<(std::ostream& os, Schedule& a)
@@ -190,7 +193,8 @@ namespace goltsov
   std::ostream& operator<<(std::ostream& os, Context& a)
   {
     os << a.schedules_tree_.size();
-    for (RBTIterator< std::string, goltsov::Schedule > it = a.schedules_tree_.begin(); it != a.schedules_tree_.end(); ++it)
+    for (RBTIterator< std::string, goltsov::Schedule > it = a.schedules_tree_.begin();
+      it != a.schedules_tree_.end(); ++it)
     {
       os << '\n' << it->second.name_schedule_ << ' ' << it->second;
     }
@@ -484,7 +488,8 @@ namespace goltsov
     long long month = static_cast< long long > (lhs.months_) + static_cast< long long > (rhs.months_) + carry_month;
     long long carry_year = month / 12;
     result.months_ = static_cast< size_t > (month % 12);
-    result.years_ = static_cast< size_t > (static_cast< long long > (lhs.years_) + static_cast< long long > (rhs.years_) + carry_year);
+    result.years_ = static_cast< size_t > (static_cast< long long > (lhs.years_)
+      + static_cast< long long > (rhs.years_) + carry_year);
     return result;
   }
   TimeInterval operator-(const TimeInterval& lhs, const TimeInterval& rhs)

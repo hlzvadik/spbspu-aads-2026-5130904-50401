@@ -20,7 +20,8 @@ int main()
     std::cout << "Incorrect format, correct format: \"YYYY-MM-DD_HH-MM-SS\". Enter again: ";
     std::cin >> current_time;
   }
-  goltsov::State current_state {nullptr, nullptr, goltsov::RBTree< std::string, goltsov::Context, std::less< std::string > > {}, current_time};
+  goltsov::State current_state {nullptr, nullptr, goltsov::RBTree< std::string, goltsov::Context,
+    std::less< std::string > > {}, current_time};
   current_state.contexts_tree_.push("Base_context", goltsov::Context {});
   current_state.contexts_tree_.get("Base_context")->second.name_context_ = "Base_context";
   current_state.current_context_ = & current_state.contexts_tree_.get("Base_context")->second;
