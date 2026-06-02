@@ -182,10 +182,10 @@ namespace detail
     return {count_planned1 - count_planned0, count_unplanned};
   }
 std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(
-    goltsov::State& current_state, 
-    const goltsov::DateTime& start_time, 
-    const goltsov::DateTime& end_time, 
-    const goltsov::TimeInterval& duration, 
+    goltsov::State& current_state,
+    const goltsov::DateTime& start_time,
+    const goltsov::DateTime& end_time,
+    const goltsov::TimeInterval& duration,
     const topit::Vector< std::string >& names_schedules)
   {
     topit::Vector< goltsov::Task > all_tasks;
@@ -193,7 +193,6 @@ std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(
     {
       goltsov::Schedule& current_schedule =
         current_state.current_context_->schedules_tree_.get(names_schedules[i])->second;
-      
       for (auto it = current_schedule.tasks_tree_.begin(); it != current_schedule.tasks_tree_.end(); ++it)
       {
         if (it->second.end_time_ > start_time && it->second.start_time_ < end_time)
