@@ -168,30 +168,59 @@ namespace detail
     size_t count_planned1 = current_state.current_schedule_->tasks_tree_.size();
     return {count_planned1 - count_planned0, count_unplanned};
   }
-  std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State& current_state, const goltsov::DateTime& start_time, const goltsov::DateTime& end_time, const goltsov::TimeInterval& duration, const topit::Vector< std::string >& names_schedules)
+std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(
+    goltsov::State& current_state, 
+    const goltsov::DateTime& start_time, 
+    const goltsov::DateTime& end_time, 
+    const goltsov::TimeInterval& duration, 
+    const topit::Vector< std::string >& names_schedules)
   {
-    goltsov::RBTree< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime >, std::less< goltsov::DateTime > > free_time;
-    free_time.push(start_time, {start_time, end_time});
+    topit::Vector< goltsov::Task > all_tasks;
     for (size_t i = 0; i < names_schedules.getSize(); ++i)
     {
       goltsov::Schedule& current_schedule = current_state.current_context_->schedules_tree_.get(names_schedules[i])->second;
-      for (goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > it = current_schedule.tasks_tree_.begin(); it != current_schedule.tasks_tree_.end(); ++it)
+      
+      for (auto it = current_schedule.tasks_tree_.begin(); it != current_schedule.tasks_tree_.end(); ++it)
       {
-        goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > find_start = free_time.find(detail::FindDateTime {it->second.start_time_});
-        goltsov::DateTime start = find_start != free_time.end() ? find_start->second.second : it->second.start_time_;
-        goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > find_end = free_time.find(detail::FindDateTime {it->second.end_time_});
-        goltsov::DateTime end = find_end != free_time.end() ? find_end->second.first : it->second.end_time_;
-        if (end - start != goltsov::TimeInterval {0, 0, 0, 0, 0, 0})
+        if (it->second.end_time_ > start_time && it->second.start_time_ < end_time)
         {
-          free_time.push(start, {start, end});
+          all_tasks.pushBack(it->second);
         }
       }
     }
-    for (goltsov::RBTIterator< goltsov::DateTime, std::pair< goltsov::DateTime, goltsov::DateTime > > it = free_time.begin(); it != free_time.end(); ++it)
+    for (size_t i = 0; i < all_tasks.getSize(); ++i)
     {
-      if (it->second.second - it->second.first >= duration)
+      for (size_t j = i + 1; j < all_tasks.getSize(); ++j)
       {
-        return {it->second.first, it->second.first + duration};
+        if (all_tasks[j].start_time_ < all_tasks[i].start_time_)
+        {
+          std::swap(all_tasks[i], all_tasks[j]);
+        }
+      }
+    }
+    goltsov::DateTime current = start_time;
+    for (size_t i = 0; i < all_tasks.getSize(); ++i)
+    {
+      goltsov::Task& task = all_tasks[i];
+      goltsov::DateTime task_start = (task.start_time_ < start_time) ? start_time : task.start_time_;
+      goltsov::DateTime task_end = (task.end_time_ > end_time) ? end_time : task.end_time_;
+      if (task_start > current)
+      {
+        if (task_start - current >= duration)
+        {
+          return { current, current + duration };
+        }
+      }
+      if (task_end > current)
+      {
+        current = task_end;
+      }
+    }
+    if (end_time > current)
+    {
+      if (end_time - current >= duration)
+      {
+        return { current, current + duration };
       }
     }
     throw std::runtime_error("<GAP DID NOT FOUND>");
@@ -608,7 +637,7 @@ namespace goltsov
       throw std::runtime_error("<INVALID COMMAND>");
     }
     names_schedules.pushBack(schedule_name);
-    findCommonGap(os, current_state, gap, count, names_schedules);
+    findCommonGapOnInterval(os, current_state, start_time, end_time, gap, count, names_schedules);
   }
   void parsingExit(std::istream& is, std::ostream& os, goltsov::State& current_state)
   {

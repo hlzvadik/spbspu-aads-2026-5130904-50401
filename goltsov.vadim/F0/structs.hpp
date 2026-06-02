@@ -32,6 +32,18 @@ namespace detail
     bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
   };
 
+  struct FindDateTime2
+  {
+    const goltsov::DateTime& a;
+    bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
+  };
+
+  struct FindDateTime3
+  {
+    const goltsov::DateTime& a;
+    bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
+  };
+
   struct Delimeter
   {
     char expected;

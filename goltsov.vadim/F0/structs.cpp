@@ -23,9 +23,19 @@ namespace detail
     return (current.second.end_time_ <= a.left_boundary_time_);
   }
 
-  bool FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& curent)
+  bool FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& current)
   {
-    return curent.second.first <= a && a <= curent.second.second;
+    return current.second.first <= a && a <= current.second.second;
+  }
+
+  bool FindDateTime2::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& current)
+  {
+    return current.second.second < a;
+  }
+
+  bool FindDateTime3::operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >& current)
+  {
+    return current.second.first > a;
   }
 
   bool isLeapYear(const size_t& year)
