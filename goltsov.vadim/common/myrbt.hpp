@@ -1,6 +1,7 @@
 #ifndef MYRBT_HPP
 #define MYRBT_HPP
 #include <iostream>
+#include <tuple>
 
 namespace detail
 {

@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <string>
 #include "my_hash_table.hpp"
-#include "../Common/myvector.hpp"
+#include <myvector.hpp>
 
 namespace goltsov
 {

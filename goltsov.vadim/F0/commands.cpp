@@ -63,9 +63,9 @@ namespace detail
         ++current;
       }
     }
-    if (current == current_state.current_schedule_->tasks_tree_.end() && start + duration <= task.right_boundary_time_
-        || current != current_state.current_schedule_->tasks_tree_.end()
-        && start + duration <= current->second.start_time_ && start + duration <= task.right_boundary_time_)
+    if ((current == current_state.current_schedule_->tasks_tree_.end() && start + duration <= task.right_boundary_time_)
+        || (current != current_state.current_schedule_->tasks_tree_.end())
+        && (start + duration <= current->second.start_time_ && start + duration <= task.right_boundary_time_))
     {
       task.start_time_ = start;
       task.end_time_ = start + duration;
@@ -652,7 +652,7 @@ namespace goltsov
     names_schedules.pushBack(schedule_name);
     findCommonGapOnInterval(os, current_state, start_time, end_time, gap, count, names_schedules);
   }
-  void parsingExit(std::istream& is, std::ostream& os, goltsov::State& current_state)
+  void parsingExit(std::istream& is, std::ostream&, goltsov::State&)
   {
     if (is.fail() || !detail::isEndOfLine(detail::skipSpaces(is)))
     {
@@ -1033,7 +1033,7 @@ namespace goltsov
       a.pushBack(current_state.current_schedule_->name_schedule_);
       std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state,
         current_state.current_time, current_state.current_schedule_->tasks_tree_.rfind(
-          [](const std::pair<goltsov::DateTime, goltsov::Task>& element){return true;})->second.end_time_ + interval,
+          [](const std::pair<goltsov::DateTime, goltsov::Task>&){return true;})->second.end_time_ + interval,
           interval, a);
       os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
     }
@@ -1065,7 +1065,7 @@ namespace goltsov
     {
       std::pair< goltsov::DateTime, goltsov::DateTime > gap = detail::findCommonGapInVector(current_state,
         current_state.current_time, current_state.current_schedule_->tasks_tree_.rfind(
-          [](const std::pair<goltsov::DateTime, goltsov::Task>& element){return true;})->second.end_time_ + interval,
+          [](const std::pair<goltsov::DateTime, goltsov::Task>&){return true;})->second.end_time_ + interval,
           interval, names_schedules);
       os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
     }

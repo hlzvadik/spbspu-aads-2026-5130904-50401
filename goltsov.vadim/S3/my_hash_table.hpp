@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <boost/uuid/detail/sha1.hpp>
-#include "../Common/mylist.hpp"
+#include <mylist.hpp>
 
 namespace goltsov
 {

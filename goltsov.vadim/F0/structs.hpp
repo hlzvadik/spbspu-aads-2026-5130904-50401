@@ -75,7 +75,7 @@ namespace detail
   };
 
   bool isLeapYear(const size_t& year);
-  static size_t getDaysInMonth(const size_t& year, const size_t& month);
+  size_t getDaysInMonth(const size_t& year, const size_t& month);
 }
 
 namespace goltsov

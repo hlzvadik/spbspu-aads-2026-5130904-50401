@@ -1,6 +1,9 @@
 #ifndef MYBST_HPP
 #define MYBST_HPP
 #include <cstddef>
+#include <utility>
+#include <stdexcept>
+#include <algorithm>
 
 namespace goltsov
 {

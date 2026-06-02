@@ -45,7 +45,7 @@ namespace detail
   {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
   }
-  static size_t getDaysInMonth(const size_t& year, const size_t& month)
+  size_t getDaysInMonth(const size_t& year, const size_t& month)
   {
     if (month == 2)
     {
@@ -420,7 +420,7 @@ namespace goltsov
       borrow_year_from_month++;
     }
     result.month_ = static_cast<size_t> (total_months);
-    if (result.year_ < borrow_year_from_month)
+    if (result.year_ < static_cast< size_t >(borrow_year_from_month))
     {
       throw std::logic_error("Resulting year would be negative");
     }
