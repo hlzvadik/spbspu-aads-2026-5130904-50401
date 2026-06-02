@@ -63,9 +63,9 @@ namespace detail
         ++current;
       }
     }
-    if ((current == current_state.current_schedule_->tasks_tree_.end() && start + duration <= task.right_boundary_time_)
-        || (current != current_state.current_schedule_->tasks_tree_.end())
-        && (start + duration <= current->second.start_time_ && start + duration <= task.right_boundary_time_))
+    if (((current == current_state.current_schedule_->tasks_tree_.end()) && (start + duration <= task.right_boundary_time_))
+        || ((current != current_state.current_schedule_->tasks_tree_.end())
+        && (start + duration <= current->second.start_time_ && start + duration <= task.right_boundary_time_)))
     {
       task.start_time_ = start;
       task.end_time_ = start + duration;
@@ -934,12 +934,12 @@ namespace goltsov
     os << "<Tasks: " << count_tasks << ", Load: ";
     os << std::fixed << std::setprecision(2) << (busy_time / (end_time - start_time)) * 100 << "%>\n";
   }
-  void newSchedule(std::ostream& os, goltsov::State& current_state, const std::string& name_schedule)
+  void newSchedule(std::ostream&, goltsov::State& current_state, const std::string& name_schedule)
   {
     current_state.current_context_->schedules_tree_.push(name_schedule, goltsov::Schedule {});
     current_state.current_context_->schedules_tree_.get(name_schedule)->second.name_schedule_ = name_schedule;
   }
-  void newContext(std::ostream& os, goltsov::State& current_state, const std::string& name_context)
+  void newContext(std::ostream&, goltsov::State& current_state, const std::string& name_context)
   {
     current_state.contexts_tree_.push(name_context, goltsov::Context {});
     current_state.contexts_tree_.get(name_context)->second.name_context_ = name_context;
@@ -1059,7 +1059,7 @@ namespace goltsov
     }
   }
   void findCommonGap(std::ostream& os, goltsov::State& current_state, const goltsov::TimeInterval& interval,
-    const size_t& count_schedules, const topit::Vector< std::string >& names_schedules)
+    const size_t&, const topit::Vector< std::string >& names_schedules)
   {
     try
     {
@@ -1075,7 +1075,7 @@ namespace goltsov
     }
   }
   void findCommonGapOnInterval(std::ostream& os, goltsov::State& current_state, const goltsov::DateTime& start_time,
-    const goltsov::DateTime& end_time, const goltsov::TimeInterval& interval, const size_t& count_schedules,
+    const goltsov::DateTime& end_time, const goltsov::TimeInterval& interval, const size_t&,
     const topit::Vector< std::string >& names_schedules)
   {
     try

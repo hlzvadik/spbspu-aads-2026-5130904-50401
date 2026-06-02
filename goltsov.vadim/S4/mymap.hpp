@@ -71,7 +71,7 @@ namespace goltsov
     return (* data_.get(k)).second;
   }
   template< class Key, class Value >
-  const Value& Map< Key, Value >::at(const Key&) const
+  const Value& Map< Key, Value >::at(const Key& k) const
   {
     return (* data_.get(k)).second;
   }

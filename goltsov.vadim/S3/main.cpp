@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "my_hash_table.hpp"
-#include "../Common/myvector.hpp"
+#include <myvector.hpp>
 #include "graph_functions.hpp"
 
 int main(int argc, char** argv)
