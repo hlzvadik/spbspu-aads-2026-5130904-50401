@@ -45,28 +45,17 @@ namespace goltsov
   {
     LIter< std::pair< std::string, List< size_t > > > i (nullptr);
     std::string name;
-    while (in >> name)
+    while (in >> name && !in.eof())
     {
       size += 1;
       List< size_t > numbers;
       size_t number = 0;
-      char next = in.peek();
-      if (next == '\n')
-      {
-        i = result.insert(i, {name, numbers});
-        continue;
-      }
       LIter< size_t > j (nullptr);
       while (in >> number && !in.eof())
       {
         j = numbers.insert(j, number);
-        char next = in.peek();
-        if (next == '\n')
-        {
-          break;
-        }
       }
-      if (!in.eof())
+      if (in.fail())
       {
         in.clear();
       }
