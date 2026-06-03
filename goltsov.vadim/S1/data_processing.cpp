@@ -58,9 +58,6 @@ std::ostream& goltsov::printResult(std::ostream& out, List< std::pair< std::stri
     return out;
   }
   LIter< std::pair< std::string, List< size_t > > > it = data.begin();
-  List< size_t > sums;
-  LIter< size_t > it_sums = sums.begin();
-  size_t n = 0;
   List< LIter< size_t > > list_its;
   LIter< LIter< size_t > > it_list_its = list_its.begin();
   out << (*it).first;
@@ -76,6 +73,9 @@ std::ostream& goltsov::printResult(std::ostream& out, List< std::pair< std::stri
   it = data.begin();
   bool all = 0;
   bool without_overflows = 1;
+  List< size_t > sums;
+  size_t n = 0;
+  LIter< size_t > it_sums = sums.begin();
   while (!all)
   {
     all = 1;
