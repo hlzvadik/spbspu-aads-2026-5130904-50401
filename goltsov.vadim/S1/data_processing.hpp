@@ -9,5 +9,9 @@ namespace goltsov
   void push_back(size_t** sums, size_t& n, size_t a);
   std::ostream& printResult(std::ostream& a, goltsov::List< std::pair< std::string,
     goltsov::List< size_t > > >& data, size_t size);
+  std::ostream& printResultNamesAndMakeListOfIterators(std::ostream& a, goltsov::List< std::pair< std::string,
+    goltsov::List< size_t > > >& data, size_t size, List< LIter< size_t > >& list_its);
+  std::ostream& printResultNumbersAndSums(std::ostream& a, goltsov::List< std::pair< std::string,
+    goltsov::List< size_t > > >& data, size_t size, List< LIter< size_t > >& list_its);
 }
 #endif
