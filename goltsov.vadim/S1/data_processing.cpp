@@ -58,33 +58,30 @@ std::ostream& goltsov::printResult(std::ostream& out, List< std::pair< std::stri
     return out;
   }
   List< LIter< size_t > > list_its;
-  printResultNamesAndMakeListOfIterators(out, data, size, list_its);
-  printResultNumbersAndSums(out, data, size, list_its);
+  printResultNamesAndMakeListOfIterators(out, data, list_its);
+  printResultNumbersAndSums(out, list_its);
   return out;
 }
 
 std::ostream& goltsov::printResultNamesAndMakeListOfIterators(std::ostream& out, goltsov::List< std::pair< std::string,
-  goltsov::List< size_t > > >& data, size_t size, List< LIter< size_t > >& list_its)
+  goltsov::List< size_t > > >& data, List< LIter< size_t > >& list_its)
 {
   LIter< std::pair< std::string, List< size_t > > > it = data.begin();
   LIter< LIter< size_t > > it_list_its = list_its.begin();
   out << (*it).first;
   it_list_its = list_its.insert(it_list_its, (*it).second.begin());
   ++it;
-  for (size_t i = 1; i < size; ++i)
+  for (; it != data.end(); ++it)
   {
     out << ' ' << (*it).first;
     it_list_its = list_its.insert(it_list_its, (*it).second.begin());
-    ++it;
   }
   out << '\n';
   return out;
 }
 
-std::ostream& goltsov::printResultNumbersAndSums(std::ostream& out, goltsov::List< std::pair< std::string,
-  goltsov::List< size_t > > >& data, size_t size, List< LIter< size_t > >& list_its)
+std::ostream& goltsov::printResultNumbersAndSums(std::ostream& out, List< LIter< size_t > >& list_its)
 {
-  LIter< std::pair< std::string, List< size_t > > > it = data.begin();
   bool all = 0;
   bool without_overflows = 1;
   List< size_t > sums;
