@@ -17,14 +17,14 @@ size_t goltsov::sumWithCheck(size_t a, size_t b)
 
 void goltsov::getData(std::istream& in, List< std::pair< std::string, List< size_t > > >& result, size_t& size)
 {
-  LIter< std::pair< std::string, List< size_t > > > i {};
+  LIter< std::pair< std::string, List< size_t > > > i{};
   std::string name;
   while (in >> name && !in.eof())
   {
     size += 1;
     List< size_t > numbers;
     size_t number = 0;
-    LIter< size_t > j {};
+    LIter< size_t > j{};
     while (in >> number && !in.eof())
     {
       j = numbers.insert(j, number);
