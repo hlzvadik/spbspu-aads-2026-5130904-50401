@@ -331,7 +331,7 @@ template< class T >
 goltsov::LIter< T > goltsov::List< T >::getLast() noexcept
 {
   LIter< T > now = begin();
-  while (now.hasNext() && now.next() != nullptr)
+  while (now.ptr_ != nullptr && now.next() != nullptr)
   {
     now = now.next();
   }
@@ -341,7 +341,7 @@ template< class T >
 goltsov::LCIter< T > goltsov::List< T >::getLast() const noexcept
 {
   LCIter< T > now = begin();
-  while (now.hasNext() && now.next() != nullptr)
+  while (now.ptr_ != nullptr && now.next() != nullptr)
   {
     now = now.next();
   }
