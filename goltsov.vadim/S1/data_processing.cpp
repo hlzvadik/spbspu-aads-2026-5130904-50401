@@ -1,204 +1,153 @@
-#include "data_processing.hpp"
 #include <iostream>
 #include <limits>
+#include "data_processing.hpp"
 
-namespace goltsov
+size_t goltsov::sumWithCheck(size_t a, size_t b)
 {
-  size_t sumWithCheck(size_t a, size_t b)
+  size_t max_size_t = std::numeric_limits< size_t >::max();
+  if (a <= max_size_t - b)
   {
-    size_t max_size_t = std::numeric_limits< size_t >::max();
-    if (a <= max_size_t - b)
-    {
-      return a + b;
-    }
-    else
-    {
-      throw(std::overflow_error("The sum is too big"));
-    }
+    return a + b;
   }
-
-  bool isCorrectNumber(const std::string& num)
+  else
   {
-    std::string max_num = std::to_string(std::numeric_limits< size_t >::max());
-    if (max_num.size() < num.size())
-    {
-      return false;
-    }
-    if (max_num.size() > num.size())
-    {
-      return true;
-    }
-    return num <= max_num;
+    throw(std::overflow_error("The sum is too big"));
   }
+}
 
-  size_t fromStringToST(const std::string& num)
+void goltsov::getData(std::istream& in, List< std::pair< std::string, List< size_t > > >& result, size_t& size)
+{
+  LIter< std::pair< std::string, List< size_t > > > i {};
+  std::string name;
+  while (in >> name && !in.eof())
   {
-    size_t result = 0;
-    for (size_t i = 0; i < num.size(); ++i)
+    size += 1;
+    List< size_t > numbers;
+    size_t number = 0;
+    LIter< size_t > j {};
+    while (in >> number && !in.eof())
     {
-      result = result * 10 + (num[i] - '0');
+      j = numbers.insert(j, number);
     }
-    return result;
+    if (in.fail())
+    {
+      in.clear();
+    }
+    i = result.insert(i, {name, numbers});
   }
+}
 
-  void getData(std::istream& in, List< std::pair< std::string, List< size_t > > >& result, size_t& size)
+void goltsov::push_back(size_t** sums, size_t& n, size_t a)
+{
+  size_t*new_sums = new size_t[n + 1];
+  for (size_t i = 0; i < n; ++i)
   {
-    LIter< std::pair< std::string, List< size_t > > > i (nullptr);
-    std::string name;
-    while (in >> name && !in.eof())
-    {
-      size += 1;
-      List< size_t > numbers;
-      size_t number = 0;
-      LIter< size_t > j (nullptr);
-      while (in >> number && !in.eof())
-      {
-        j = numbers.insert(j, number);
-      }
-      if (in.fail())
-      {
-        in.clear();
-      }
-      i = result.insert(i, {name, numbers});
-    }
+    new_sums[i] = sums[0][i];
   }
+  new_sums[n] = a;
+  delete[] (*sums);
+  sums[0] = new_sums;
+  n += 1;
+}
 
-  void push_back(size_t** sums, size_t& n, size_t a)
+std::ostream& goltsov::printResult(std::ostream& out, List< std::pair< std::string, List< size_t > > >& data, size_t size)
+{
+  if (size == 0)
   {
-    size_t* new_sums = new size_t[n + 1];
-    for (size_t i = 0; i < n; ++i)
-    {
-      new_sums[i] = sums[0][i];
-    }
-    new_sums[n] = a;
-    delete[] (* sums);
-    sums[0] = new_sums;
-    n += 1;
+    out << 0 << '\n';
+    return out;
   }
-
-  std::ostream& printResult(std::ostream& out, List< std::pair< std::string, List< size_t > > >& data, size_t size)
+  LIter< std::pair< std::string, List< size_t > > > it = data.begin();
+  List< size_t > sums;
+  LIter< size_t > it_sums = sums.begin();
+  size_t n = 0;
+  List< LIter< size_t > > list_its;
+  LIter< LIter< size_t > > it_list_its = list_its.begin();
+  out << (*it).first;
+  it_list_its = list_its.insert(it_list_its, (*it).second.begin());
+  ++it;
+  for (size_t i = 1; i < size; ++i)
   {
-    if (size == 0)
+    out << ' ' << (*it).first;
+    it_list_its = list_its.insert(it_list_its, (*it).second.begin());
+    ++it;
+  }
+  out << '\n';
+  it = data.begin();
+  bool all = 0;
+  bool without_overflows = 1;
+  while (!all)
+  {
+    all = 1;
+    size_t sum = 0;
+    for (LIter< LIter< size_t > > list_it = list_its.begin(); list_it != list_its.end(); ++list_it)
     {
-      out << 0 << '\n';
-      return out;
-    }
-    LIter< std::pair< std::string, List< size_t > > > it = data.begin();
-    size_t* sums = nullptr;
-    size_t n = 0;
-    LIter< size_t >* its = new LIter< size_t >[size];
-    try
-    {
-      out << (* it).first;
-      its[0] = (* it).second.begin();
-    }
-    catch (...)
-    {
-      delete[] its;
-      delete[] sums;
-      throw;
-    }
-    it = it.next();
-    for (size_t i = 1; i < size; ++i)
-    {
+      bool has_next;
       try
       {
-        out << ' ' << (* it).first;
-        its[i] = (* it).second.begin();
+        LIter< size_t > temp = (*list_it);
+        ++temp;
+        has_next = true;
       }
       catch (...)
       {
-        delete[] its;
-        delete[] sums;
-        throw;
+        has_next = false;
       }
-      it = it.next();
-    }
-    out << '\n';
-    it = data.begin();
-    bool all = 0;
-    bool without_overflows = 1;
-    while (!all)
-    {
-      all = 1;
-      size_t sum = 0;
-      for (size_t i = 0; i < size; ++i)
+      if (has_next)
       {
-        if (its[i].hasNext())
+        if (all == 1)
         {
-          if (all == 1)
-          {
-            out << (* its[i]);
-            try
-            {
-              sum = sumWithCheck(sum, (* its[i]));
-            }
-            catch (...)
-            {
-              without_overflows = 0;
-            }
-          }
-          else
-          {
-            out << ' ' << (* its[i]);
-            try
-            {
-              sum = sumWithCheck(sum, (* its[i]));
-            }
-            catch (...)
-            {
-              without_overflows = 0;
-            }
-          }
-          all = 0;
+          out << (*(*list_it));
           try
           {
-            its[i] = its[i].next();
+            sum = sumWithCheck(sum, (*(*list_it)));
           }
           catch (...)
           {
-            delete[] its;
-            delete[] sums;
-            throw;
+            without_overflows = 0;
           }
         }
-      }
-      if (!all)
-      {
-        try
+        else
         {
-          push_back(& sums, n, sum);
+          out << ' ' << (*(*list_it));
+          try
+          {
+            sum = sumWithCheck(sum, (*(*list_it)));
+          }
+          catch (...)
+          {
+            without_overflows = 0;
+          }
         }
-        catch (...)
-        {
-          delete[] sums;
-          delete[] its;
-          throw;
-        }
-        out << '\n';
+        all = 0;
+        ++(*list_it);
       }
     }
-    if (!without_overflows)
+    if (!all)
     {
-      delete[] its;
-      delete[] sums;
-      throw(std::overflow_error("The sum is too big"));
-    }
-    if (n != 0)
-    {
-      out << sums[0];
-      for (size_t i = 1; i < n; ++i)
-      {
-        out << ' ' << sums[i];
-      }
+      it_sums = sums.insert(it_sums, sum);
+      n += 1;
       out << '\n';
     }
-    else
-    {
-      std::cout << 0 << '\n';
-    }
-    delete[] its;
-    delete[] sums;
-    return out;
   }
+  if (!without_overflows)
+  {
+    throw(std::overflow_error("The sum is too big"));
+  }
+  if (n != 0)
+  {
+    out << (*sums.begin());
+    LIter< size_t > it = sums.begin();
+    ++it;
+    for (; it != sums.end(); ++it)
+    {
+      out << ' ' << (*it);
+    }
+    out << '\n';
+  }
+  else
+  {
+    std::cout << 0 << '\n';
+  }
+  return out;
 }
