@@ -98,13 +98,12 @@ namespace goltsov
     size_t size() const noexcept;
     bool empty() const noexcept;
   private:
-    size_t size_;
     detail::Node< T >* fake_;
+    size_t size_;
     detail::Node< T >* createFake();
     void rmFake() noexcept;
   };
 }
-
 
 template< class T >
 goltsov::LIter< T > goltsov::detail::makeLIterByPtr(Node< T >* p)
@@ -116,7 +115,6 @@ goltsov::LCIter< T > goltsov::detail::makeLCIterByPtr(const Node< T >* p)
 {
   return LCIter< T >(p);
 }
-
 template< class T >
 goltsov::LIter< T >::LIter() noexcept:
   ptr_(nullptr)
