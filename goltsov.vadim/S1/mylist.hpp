@@ -36,7 +36,8 @@ namespace goltsov
   {
   public:
     LIter() noexcept;
-    LIter< T > operator++();
+    LIter< T >& operator++();
+    LIter< T > operator++(int);
     T& operator*();
     T* operator->();
     bool operator==(const LIter< T >& other) const noexcept;
@@ -54,7 +55,8 @@ namespace goltsov
   {
   public:
     LCIter() noexcept;
-    LCIter< T > operator++();
+    LCIter< T >& operator++();
+    LCIter< T > operator++(int);
     const T& operator*() const;
     const T* operator->() const;
     bool operator==(const LCIter< T >& other) const noexcept;
@@ -85,6 +87,7 @@ namespace goltsov
     LIter< T > getLast() noexcept;
     LCIter< T > getLast() const noexcept;
     LIter< T > push_start(const T& a);
+    LIter< T > push_start(T&& a);
     void pop_start() noexcept;
     void pop_end() noexcept;
     LIter< T > insert(LIter< T > i, const T& a);
@@ -130,10 +133,17 @@ goltsov::LIter< T > goltsov::LIter< T >::next() const
   }
 }
 template< class T >
-goltsov::LIter< T > goltsov::LIter< T >::operator++()
+goltsov::LIter< T >& goltsov::LIter< T >::operator++()
 {
   (*this) = next();
   return (*this);
+}
+template< class T >
+goltsov::LIter< T > goltsov::LIter< T >::operator++(int)
+{
+  LIter< T > temp = (*this);
+  (*this) = next();
+  return temp;
 }
 template< class T >
 T& goltsov::LIter< T >::operator*()
@@ -190,10 +200,17 @@ goltsov::LCIter< T > goltsov::LCIter< T >::next() const
   }
 }
 template< class T >
-goltsov::LCIter< T > goltsov::LCIter< T >::operator++()
+goltsov::LCIter< T >& goltsov::LCIter< T >::operator++()
 {
   (*this) = next();
   return (*this);
+}
+template< class T >
+goltsov::LCIter< T > goltsov::LCIter< T >::operator++(int)
+{
+  LCIter< T > temp = (*this);
+  (*this) = next();
+  return temp;
 }
 template< class T >
 const T& goltsov::LCIter< T >::operator*() const
@@ -355,9 +372,16 @@ goltsov::LIter< T > goltsov::List< T >::push_start(const T& a)
   return LIter< T >(new_el);
 }
 template< class T >
+goltsov::LIter< T > goltsov::List< T >::push_start(T&& a)
+{
+  detail::Node< T >* new_el = new detail::Node< T > {std::move(a), fake_->next};
+  fake_->next = new_el;
+  return LIter< T >(new_el);
+}
+template< class T >
 void goltsov::List< T >::pop_start() noexcept
 {
-  if (begin() != LIter< T > (nullptr))
+  if (begin() != end())
   {
     detail::Node< T >* n = fake_->next->next;
     delete fake_->next;

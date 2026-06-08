@@ -11,7 +11,7 @@ size_t goltsov::sumWithCheck(size_t a, size_t b)
   }
   else
   {
-    throw(std::overflow_error("The sum is too big"));
+    throw std::overflow_error("The sum is too big");
   }
 }
 
@@ -35,19 +35,6 @@ void goltsov::getData(std::istream& in, List< std::pair< std::string, List< size
     }
     i = result.insert(i, {name, numbers});
   }
-}
-
-void goltsov::push_back(size_t** sums, size_t& n, size_t a)
-{
-  size_t*new_sums = new size_t[n + 1];
-  for (size_t i = 0; i < n; ++i)
-  {
-    new_sums[i] = sums[0][i];
-  }
-  new_sums[n] = a;
-  delete[] (*sums);
-  sums[0] = new_sums;
-  n += 1;
 }
 
 std::ostream& goltsov::printResult(std::ostream& out, List< std::pair< std::string, List< size_t > > >& data, size_t size)
@@ -143,7 +130,7 @@ std::ostream& goltsov::printResultNumbersAndSums(std::ostream& out, List< LIter<
   }
   if (!without_overflows)
   {
-    throw(std::overflow_error("The sum is too big"));
+    throw std::overflow_error("The sum is too big");
   }
   if (size_sums != 0)
   {
@@ -154,11 +141,10 @@ std::ostream& goltsov::printResultNumbersAndSums(std::ostream& out, List< LIter<
     {
       out << ' ' << (*it);
     }
-    out << '\n';
   }
   else
   {
-    std::cout << 0 << '\n';
+    std::cout << 0;
   }
   return out;
 }

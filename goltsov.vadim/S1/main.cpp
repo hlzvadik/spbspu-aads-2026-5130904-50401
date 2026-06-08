@@ -17,6 +17,7 @@ int main()
     try
     {
       goltsov::printResult(std::cout, data, size);
+      std::cout << '\n';
     }
     catch (const std::exception& e)
     {
@@ -28,6 +29,7 @@ int main()
   try
   {
     goltsov::printResult(std::cout, data, size);
+    std::cout << '\n';
   }
   catch (const std::exception& e)
   {
