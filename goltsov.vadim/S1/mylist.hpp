@@ -1,6 +1,7 @@
 #ifndef MYLIST_HPP
 #define MYLIST_HPP
 #include <stdexcept>
+#include <utility>
 
 namespace goltsov
 {
@@ -86,12 +87,12 @@ namespace goltsov
     LCIter< T > end() const noexcept;
     LIter< T > getLast() noexcept;
     LCIter< T > getLast() const noexcept;
-    LIter< T > push_start(const T& a);
-    LIter< T > push_start(T&& a);
+    template< class ValRef >
+    LIter< T > push_start(ValRef&& a);
     void pop_start() noexcept;
     void pop_end() noexcept;
-    LIter< T > insert(LIter< T > i, const T& a);
-    LIter< T > insert(LIter< T > i, T&& a);
+    template< class ValRef >
+    LIter< T > insert(LIter< T > i, ValRef&& a);
     void clear() noexcept;
   private:
     detail::Node< T >* fake_;
@@ -365,16 +366,10 @@ goltsov::LCIter< T > goltsov::List< T >::getLast() const noexcept
   return now;
 }
 template< class T >
-goltsov::LIter< T > goltsov::List< T >::push_start(const T& a)
+template< class ValRef >
+goltsov::LIter< T > goltsov::List< T >::push_start(ValRef&& a)
 {
-  detail::Node< T >* new_el = new detail::Node< T > {a, fake_->next};
-  fake_->next = new_el;
-  return LIter< T >(new_el);
-}
-template< class T >
-goltsov::LIter< T > goltsov::List< T >::push_start(T&& a)
-{
-  detail::Node< T >* new_el = new detail::Node< T > {std::move(a), fake_->next};
+  detail::Node< T >* new_el = new detail::Node< T > {std::forward< ValRef >(a), fake_->next};
   fake_->next = new_el;
   return LIter< T >(new_el);
 }
@@ -408,32 +403,17 @@ void goltsov::List< T >::pop_end() noexcept
   now->next = nullptr;
 }
 template< class T >
-goltsov::LIter< T > goltsov::List< T >::insert(LIter< T > i, const T& a)
+template< class ValRef >
+goltsov::LIter< T > goltsov::List< T >::insert(LIter< T > i, ValRef&& a)
 {
   if (i.ptr_ == nullptr)
   {
-    i = push_start(a);
+    i = push_start(std::forward< ValRef >(a));
     return LIter< T >(i);
   }
   else
   {
-    detail::Node< T >* new_el = new detail::Node< T > {a, i.next().ptr_};
-    i.ptr_->next = new_el;
-    i = i.ptr_->next;
-    return LIter< T >(i);
-  }
-}
-template< class T >
-goltsov::LIter< T > goltsov::List< T >::insert(LIter< T > i, T&& a)
-{
-  if (i.ptr_ == nullptr)
-  {
-    i = push_start(std::move(a));
-    return LIter< T >(i);
-  }
-  else
-  {
-    detail::Node< T >* new_el = new detail::Node< T > {std::move(a), i.next().ptr_};
+    detail::Node< T >* new_el = new detail::Node< T > {std::forward< ValRef >(a), i.next().ptr_};
     i.ptr_->next = new_el;
     i = i.ptr_->next;
     return LIter< T >(i);

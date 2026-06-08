@@ -33,7 +33,7 @@ void goltsov::getData(std::istream& in, List< std::pair< std::string, List< size
     {
       in.clear();
     }
-    i = result.insert(i, {name, numbers});
+    i = result.insert(i, std::pair< std::string, List< size_t > >{name, numbers});
   }
 }
 
