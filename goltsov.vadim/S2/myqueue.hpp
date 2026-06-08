@@ -28,96 +28,88 @@ namespace goltsov
   private:
     List< T > dates_;
     LIter< T > tail_;
-    size_t size_;
   };
 }
 
-namespace goltsov
+template< class T >
+goltsov::Queue< T >::Queue():
+  dates_(List< T > {}),
+  tail_(LIter< T > {})
+{}
+template< class T >
+void goltsov::Queue< T >::push(const T& rhs)
 {
-  template< class T >
-  Queue< T >::Queue():
-    dates_(List< T > {}),
-    tail_(LIter< T > {}),
-    size_(0)
-  {}
-  template< class T >
-  void Queue< T >::push(const T& rhs)
+  tail_ = dates_.insert(tail_, rhs);
+}
+template< class T >
+void goltsov::Queue< T >::push(T&& rhs)
+{
+  tail_ = dates_.insert(tail_, std::move(rhs));
+}
+template< class T >
+void goltsov::Queue< T >::pop()
+{
+  if (empty())
   {
-    tail_ = dates_.insert(tail_, rhs);
-    size_ += 1;
+    throw std::runtime_error("Queue is empty");
   }
-  template< class T >
-  void Queue< T >::push(T&& rhs)
+  dates_.pop_start();
+  if (empty())
   {
-    tail_ = dates_.insert(tail_, std::move(rhs));
-    size_ += 1;
-  }
-  template< class T >
-  void Queue< T >::pop()
-  {
-    if (empty())
-    {
-      throw std::runtime_error("Queue is empty");
-    }
-    dates_.pop_start();
-    size_--;
-    if (empty())
-    {
-      tail_ = LIter< T >();
-    }
-  }
-  template< class T >
-  T& Queue< T >::front()
-  {
-    if (empty())
-    {
-      throw std::runtime_error("Queue is empty");
-    }
-    return ( * dates_.begin());
-  }
-  template< class T >
-  const T& Queue< T >::front() const
-  {
-    if (empty())
-    {
-      throw std::runtime_error("Queue is empty");
-    }
-    return ( * dates_.begin());
-  }
-  template< class T >
-  T& Queue< T >::back()
-  {
-    if (empty())
-    {
-      throw std::runtime_error("Queue is empty");
-    }
-    return ( * tail_);
-  }
-  template< class T >
-  const T& Queue< T >::back() const
-  {
-    if (empty())
-    {
-      throw std::runtime_error("Queue is empty");
-    }
-    return ( * tail_);
-  }
-  template< class T >
-  bool Queue< T >::empty() const noexcept
-  {
-    return size_ == 0;
-  }
-  template< class T >
-  size_t Queue< T >::size() const noexcept
-  {
-    return size_;
-  }
-  template< class T >
-  void Queue< T >::clear()
-  {
-    dates_.clear();
-    size_ = 0;
     tail_ = LIter< T >();
   }
 }
+template< class T >
+T& goltsov::Queue< T >::front()
+{
+  if (empty())
+  {
+    throw std::runtime_error("Queue is empty");
+  }
+  return (*dates_.begin());
+}
+template< class T >
+const T& goltsov::Queue< T >::front() const
+{
+  if (empty())
+  {
+    throw std::runtime_error("Queue is empty");
+  }
+  return (*dates_.begin());
+}
+template< class T >
+T& goltsov::Queue< T >::back()
+{
+  if (empty())
+  {
+    throw std::runtime_error("Queue is empty");
+  }
+  return (*tail_);
+}
+template< class T >
+const T& goltsov::Queue< T >::back() const
+{
+  if (empty())
+  {
+    throw std::runtime_error("Queue is empty");
+  }
+  return (*tail_);
+}
+template< class T >
+bool goltsov::Queue< T >::empty() const noexcept
+{
+  return dates_.empty();
+}
+template< class T >
+size_t goltsov::Queue< T >::size() const noexcept
+{
+  return dates_.size();
+}
+template< class T >
+void goltsov::Queue< T >::clear()
+{
+  dates_.clear();
+  tail_ = LIter< T >();
+}
+
 #endif

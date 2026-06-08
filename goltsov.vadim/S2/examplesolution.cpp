@@ -1,147 +1,129 @@
+#include "examplesolution.hpp"
 #include <iostream>
 #include <string>
-#include "examplesolution.hpp"
 #include "myqueue.hpp"
 #include "mystack.hpp"
 #include "mathoperations.hpp"
 
-namespace goltsov
+long long int goltsov::priority(std::string a)
 {
-  long long int priority(std::string a)
+  if (a == "-" || a == "+")
   {
-    if (a == "-" || a == "+")
+    return 1;
+  }
+  else if (a == "%")
+  {
+    return 2;
+  }
+  else if (a == "*" || a == "/")
+  {
+    return 3;
+  }
+  else if (a == "##")
+  {
+    return 4;
+  }
+  else
+  {
+    return -1;
+  }
+}
+goltsov::Queue< std::string > goltsov::converToPostfix(goltsov::Queue< std::string > a)
+{
+  goltsov::Queue< std::string > postfix;
+  goltsov::Stack< std::string > op_and_br;
+  std::string prev = " ";
+  while (!a.empty())
+  {
+    if (isdigit(a.front()[0]))
     {
-      return 1;
+      if (prev != " " && isdigit(prev[0]))
+      {
+        throw std::logic_error("Bad input expression");
+      }
+      postfix.push(a.front());
     }
-    else if (a == "%")
+    else if (a.front() == "(")
     {
-      return 2;
+      if (prev != " " && (isdigit(prev[0]) || prev == ")"))
+      {
+        throw std::logic_error("Bad input expression");
+      }
+      op_and_br.push(a.front());
     }
-    else if (a == "*" || a == "/")
+    else if (a.front() == ")")
     {
-      return 3;
-    }
-    else if (a == "##")
-    {
-      return 4;
+      if ((prev != " " && !isdigit(prev[0])) || prev == "(")
+      {
+        throw std::logic_error("Bad input expression");
+      }
+      while (op_and_br.top() != "(" && !op_and_br.empty())
+      {
+        postfix.push(op_and_br.top());
+        op_and_br.pop();
+      }
+      if (op_and_br.empty())
+      {
+        throw std::logic_error("Bad input expression");
+      }
+      op_and_br.pop();
     }
     else
     {
-      return -1;
-    }
-  }
-
-  goltsov::Queue< std::string > converToPostfix(goltsov::Queue< std::string > a)
-  {
-    goltsov::Queue< std::string > postfix;
-    goltsov::Stack< std::string > op_and_br;
-    std::string prev = " ";
-    while (!a.empty())
-    {
-      if (isdigit(a.front()[0]))
+      if (prev != " " && !isdigit(prev[0]) && prev != ")")
       {
-        if (prev != " " && isdigit(prev[0]))
-        {
-          throw std::logic_error("Bad input expression");
-        }
-        postfix.push(a.front());
+        throw std::logic_error("Bad input expression");
       }
-      else if (a.front() == "(")
+      if (op_and_br.empty() || priority(a.front()) > priority(op_and_br.top()))
       {
-        if (prev != " " && (isdigit(prev[0]) || prev == ")"))
-        {
-          throw std::logic_error("Bad input expression");
-        }
         op_and_br.push(a.front());
       }
-      else if (a.front() == ")")
+      else
       {
-        if ((prev != " " && !isdigit(prev[0])) || prev == "(")
-        {
-          throw std::logic_error("Bad input expression");
-        }
-        while (op_and_br.top() != "(" && !op_and_br.empty())
+        while (!op_and_br.empty()
+          && (priority(a.front()) <= priority(op_and_br.top())) && op_and_br.top() != "(")
         {
           postfix.push(op_and_br.top());
           op_and_br.pop();
         }
-        if (op_and_br.empty())
-        {
-          throw std::logic_error("Bad input expression");
-        }
-        op_and_br.pop();
+        op_and_br.push(a.front());
       }
-      else
-      {
-        if (prev != " " && !isdigit(prev[0]) && prev != ")")
-        {
-          throw std::logic_error("Bad input expression");
-        }
-        if (op_and_br.empty() || priority(a.front()) > priority(op_and_br.top()))
-        {
-          op_and_br.push(a.front());
-        }
-        else
-        {
-          while (!op_and_br.empty()
-            && (priority(a.front()) <= priority(op_and_br.top())) && op_and_br.top() != "(")
-          {
-            postfix.push(op_and_br.top());
-            op_and_br.pop();
-          }
-          op_and_br.push(a.front());
-        }
-      }
-      prev = a.front();
-      a.pop();
     }
-    while (!op_and_br.empty())
-    {
-      postfix.push(op_and_br.top());
-      op_and_br.pop();
-    }
-
-    return postfix;
+    prev = a.front();
+    a.pop();
   }
-
-  long long int convertStringToLLI(std::string a)
+  while (!op_and_br.empty())
   {
-    long long int res = 0;
-    for (size_t i = 0; i < a.size(); ++i)
-    {
-      res = res * 10 + (a[i] - '0');
-    }
-    return res;
+    postfix.push(op_and_br.top());
+    op_and_br.pop();
   }
-
-  long long int eval(goltsov::Queue< std::string > postfix)
+  return postfix;
+}
+long long int goltsov::convertStringToLLI(std::string a)
+{
+  long long int res = 0;
+  for (size_t i = 0; i < a.size(); ++i)
   {
-    goltsov::Stack< long long int > result;
-    while (!postfix.empty())
+    res = res * 10 + (a[i] - '0');
+  }
+  return res;
+}
+long long int goltsov::eval(goltsov::Queue< std::string > postfix)
+{
+  goltsov::Stack< long long int > result;
+  while (!postfix.empty())
+  {
+    long long int a, b;
+    std::string operation;
+    if (isdigit(postfix.front()[0]))
     {
-      long long int a, b;
-      std::string operation;
-      while (!postfix.empty() && isdigit(postfix.front()[0]))
-      {
-        result.push(convertStringToLLI(postfix.front()));
-        postfix.pop();
-      }
-      try
-      {
-        operation = postfix.front();
-        postfix.pop();
-      }
-      catch (...)
-      {
-        if (result.size() != 1)
-        {
-          throw;
-        }
-        else
-        {
-          return result.top();
-        }
-      }
+      result.push(convertStringToLLI(postfix.front()));
+      postfix.pop();
+    }
+    else
+    {
+      operation = postfix.front();
+      postfix.pop();
       a = result.top();
       result.pop();
       b = result.top();
@@ -171,6 +153,13 @@ namespace goltsov
         result.push(goltsov::concatenation(b, a));
       }
     }
+  }
+  if (result.size() != 1)
+  {
+    throw;
+  }
+  else
+  {
     return result.top();
   }
 }
