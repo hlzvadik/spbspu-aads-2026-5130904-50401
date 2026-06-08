@@ -5,7 +5,7 @@
 #include "mystack.hpp"
 #include "mathoperations.hpp"
 
-long long int goltsov::priority(std::string a)
+long long int goltsov::detail::priority(std::string a)
 {
   if (a == "-" || a == "+")
   {
@@ -74,14 +74,14 @@ goltsov::Queue< std::string > goltsov::converToPostfix(goltsov::Queue< std::stri
       {
         throw std::logic_error("Bad input expression");
       }
-      if (op_and_br.empty() || priority(a.front()) > priority(op_and_br.top()))
+      if (op_and_br.empty() || detail::priority(a.front()) > detail::priority(op_and_br.top()))
       {
         op_and_br.push(a.front());
       }
       else
       {
         while (!op_and_br.empty()
-          && (priority(a.front()) <= priority(op_and_br.top())) && op_and_br.top() != "(")
+          && (detail::priority(a.front()) <= detail::priority(op_and_br.top())) && op_and_br.top() != "(")
         {
           postfix.push(op_and_br.top());
           op_and_br.pop();
@@ -99,29 +99,20 @@ goltsov::Queue< std::string > goltsov::converToPostfix(goltsov::Queue< std::stri
   }
   return postfix;
 }
-long long int goltsov::convertStringToLLI(std::string a)
-{
-  long long int res = 0;
-  for (size_t i = 0; i < a.size(); ++i)
-  {
-    res = res * 10 + (a[i] - '0');
-  }
-  return res;
-}
 long long int goltsov::eval(goltsov::Queue< std::string > postfix)
 {
   goltsov::Stack< long long int > result;
   while (!postfix.empty())
   {
-    long long int a, b;
-    std::string operation;
-    if (isdigit(postfix.front()[0]))
+    try
     {
-      result.push(convertStringToLLI(postfix.front()));
+      result.push(std::stoll(postfix.front()));
       postfix.pop();
     }
-    else
+    catch (...)
     {
+      long long int a, b;
+      std::string operation;
       operation = postfix.front();
       postfix.pop();
       a = result.top();

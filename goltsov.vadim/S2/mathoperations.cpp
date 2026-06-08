@@ -60,7 +60,7 @@ lli goltsov::concatenation(lli a, lli b)
   {
     res = addition(multiplication(a, pow(10, countDigitOfNumber(b))), b);
   }
-  catch(...)
+  catch (...)
   {
     throw std::overflow_error("Overflow concatenation");
   }

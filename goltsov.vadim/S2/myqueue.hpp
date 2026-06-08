@@ -20,8 +20,6 @@ namespace goltsov
     void pop();
     T& front();
     const T& front() const;
-    T& back();
-    const T& back() const;
     bool empty() const noexcept;
     size_t size() const noexcept;
     void clear();
@@ -76,24 +74,6 @@ const T& goltsov::Queue< T >::front() const
     throw std::runtime_error("Queue is empty");
   }
   return (*dates_.begin());
-}
-template< class T >
-T& goltsov::Queue< T >::back()
-{
-  if (empty())
-  {
-    throw std::runtime_error("Queue is empty");
-  }
-  return (*tail_);
-}
-template< class T >
-const T& goltsov::Queue< T >::back() const
-{
-  if (empty())
-  {
-    throw std::runtime_error("Queue is empty");
-  }
-  return (*tail_);
 }
 template< class T >
 bool goltsov::Queue< T >::empty() const noexcept
