@@ -279,6 +279,10 @@ goltsov::List< T >::List(const List< T >& other):
   size_(0)
 {
   fake_->next = nullptr;
+  if (!other.fake_)
+  {
+    return;
+  }
   if (!other.fake_->next)
   {
     return;
