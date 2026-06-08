@@ -11,22 +11,30 @@ namespace
   goltsov::Queue< std::string > getLine(std::istream& input)
   {
     goltsov::Queue< std::string > inf;
-    std::string a;
-    while (input && input.peek() != '\n' && input.peek() != EOF)
+    std::string line;
+    if (!std::getline(input, line))
     {
-      if (input.peek() == ' ' || input.peek() == '\t')
+      return inf;
+    }
+    std::string a;
+    for (size_t i = 0; i < line.size(); ++i)
+    {
+      if (line[i] == ' ' || line[i] == '\t')
       {
-        input.get();
+        if (!a.empty())
+        {
+          inf.push(a);
+          a.clear();
+        }
       }
       else
       {
-        input >> a;
-        inf.push(a);
+        a += line[i];
       }
     }
-    if (input.peek() == '\n')
+    if (!a.empty())
     {
-      input.get();
+      inf.push(a);
     }
     return inf;
   }

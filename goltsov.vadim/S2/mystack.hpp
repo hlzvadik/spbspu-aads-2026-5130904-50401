@@ -1,5 +1,6 @@
 #ifndef MYSTACK_HPP
 #define MYSTACK_HPP
+#include <utility>
 #include <mylist.hpp>
 
 namespace goltsov
@@ -8,39 +9,32 @@ namespace goltsov
   class Stack
   {
   public:
-    Stack();
+    Stack() = default;
     Stack(const Stack< T >& other) = default;
     Stack(Stack< T >&& other) = default;
     ~Stack() = default;
     Stack< T >& operator=(const Stack< T >& other) = default;
     Stack< T >& operator=(Stack< T >&& other) = default;
 
-    void push(const T&);
-    void push(T&&);
+    template< class ValRef >
+    void push(ValRef&&);
+
     void pop();
     T& top();
     const T& top() const;
     bool empty() const noexcept;
     size_t size() const noexcept;
-    void clear();
+    void clear() noexcept;
   private:
     List< T > dates_;
   };
 }
 
 template< class T >
-goltsov::Stack< T >::Stack():
-  dates_(goltsov::List< T > {})
-{}
-template< class T >
-void goltsov::Stack< T >::push(const T& rhs)
+template< class ValRef >
+void goltsov::Stack< T >::push(ValRef&& rhs)
 {
-  dates_.push_start(rhs);
-}
-template< class T >
-void goltsov::Stack< T >::push(T&& rhs)
-{
-  dates_.push_start(std::move(rhs));
+  dates_.push_start(std::forward< ValRef >(rhs));
 }
 template< class T >
 void goltsov::Stack< T >::pop()
@@ -80,7 +74,7 @@ size_t goltsov::Stack< T >::size() const noexcept
   return dates_.size();
 }
 template< class T >
-void goltsov::Stack< T >::clear()
+void goltsov::Stack< T >::clear() noexcept
 {
   dates_.clear();
 }

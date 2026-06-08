@@ -1,5 +1,6 @@
 #ifndef MYQUEUE_HPP
 #define MYQUEUE_HPP
+#include <utility>
 #include <mylist.hpp>
 
 namespace goltsov
@@ -8,21 +9,22 @@ namespace goltsov
   class Queue
   {
   public:
-    Queue();
+    Queue() = default;
     Queue(const Queue< T >& other) = default;
     Queue(Queue< T >&& other) = default;
     ~Queue() = default;
     Queue< T >& operator=(const Queue< T >& other) = default;
     Queue< T >& operator=(Queue< T >&& other) = default;
 
-    void push(const T& rhs);
-    void push(T&& rhs);
+    template< class ValRef >
+    void push(ValRef&&);
+
     void pop();
     T& front();
     const T& front() const;
     bool empty() const noexcept;
     size_t size() const noexcept;
-    void clear();
+    void clear() noexcept;
   private:
     List< T > dates_;
     LIter< T > tail_;
@@ -30,19 +32,10 @@ namespace goltsov
 }
 
 template< class T >
-goltsov::Queue< T >::Queue():
-  dates_(List< T > {}),
-  tail_(LIter< T > {})
-{}
-template< class T >
-void goltsov::Queue< T >::push(const T& rhs)
+template< class ValRef >
+void goltsov::Queue< T >::push(ValRef&& rhs)
 {
-  tail_ = dates_.insert(tail_, rhs);
-}
-template< class T >
-void goltsov::Queue< T >::push(T&& rhs)
-{
-  tail_ = dates_.insert(tail_, std::move(rhs));
+  tail_ = dates_.insert(tail_, std::forward< ValRef >(rhs));
 }
 template< class T >
 void goltsov::Queue< T >::pop()
@@ -86,7 +79,7 @@ size_t goltsov::Queue< T >::size() const noexcept
   return dates_.size();
 }
 template< class T >
-void goltsov::Queue< T >::clear()
+void goltsov::Queue< T >::clear() noexcept
 {
   dates_.clear();
   tail_ = LIter< T >();
