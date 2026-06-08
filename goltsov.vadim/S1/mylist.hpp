@@ -104,12 +104,12 @@ namespace goltsov
 template< class T >
 goltsov::LIter< T > goltsov::detail::makeLIterByPtr(Node< T >* p)
 {
-  return LIter< T > (p);
+  return LIter< T >(p);
 }
 template< class T >
 goltsov::LCIter< T > goltsov::detail::makeLCIterByPtr(const Node< T >* p)
 {
-  return LCIter< T > (p);
+  return LCIter< T >(p);
 }
 
 template< class T >
@@ -337,12 +337,12 @@ goltsov::LCIter< T > goltsov::List< T >::begin() const noexcept
 template< class T >
 goltsov::LIter< T > goltsov::List< T >::end() noexcept
 {
-  return LIter< T > (nullptr);
+  return LIter< T >(nullptr);
 }
 template< class T >
 goltsov::LCIter< T > goltsov::List< T >::end() const noexcept
 {
-  return LCIter< T > (nullptr);
+  return LCIter< T >(nullptr);
 }
 template< class T >
 goltsov::LIter< T > goltsov::List< T >::getLast() noexcept
