@@ -1,6 +1,6 @@
+#include "data_processing.hpp"
 #include <iostream>
 #include <limits>
-#include "data_processing.hpp"
 
 size_t goltsov::sumWithCheck(size_t a, size_t b)
 {
