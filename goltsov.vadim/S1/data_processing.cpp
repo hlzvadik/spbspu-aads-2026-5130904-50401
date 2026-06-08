@@ -41,11 +41,12 @@ std::ostream& goltsov::printResult(std::ostream& out, List< std::pair< std::stri
 {
   if (size == 0)
   {
-    out << 0 << '\n';
+    out << 0;
     return out;
   }
   List< LIter< size_t > > list_its;
   printResultNamesAndMakeListOfIterators(out, data, list_its);
+  out << '\n';
   printResultNumbersAndSums(out, list_its);
   return out;
 }
@@ -63,7 +64,6 @@ std::ostream& goltsov::printResultNamesAndMakeListOfIterators(std::ostream& out,
     out << ' ' << (*it).first;
     it_list_its = list_its.insert(it_list_its, (*it).second.begin());
   }
-  out << '\n';
   return out;
 }
 
