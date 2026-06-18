@@ -11,6 +11,7 @@ namespace goltsov
     std::istream& skipSpaces(std::istream&);
     bool isEndOfLine(std::istream&);
     bool pushTask(State&, Task&, const TimeInterval&);
+    bool pushSoftTask(State&, Task&, const TimeInterval&);
     void pushUnplanned(State&);
     RBTIterator< DateTime, Task > pushProtectedTask(State&, Task&);
     RBTIterator< DateTime, Task > pushProtectedTaskForce(State&, Task&);

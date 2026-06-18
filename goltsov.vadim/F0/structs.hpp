@@ -13,15 +13,18 @@ namespace goltsov
   struct Context;
   namespace detail
   {
-    struct CompareTasks
-    {
-      bool operator()(const goltsov::DateTime&, const goltsov::DateTime&);
-    };
-    struct FindTask
+    struct FindTaskHasETLessLB
     {
       const goltsov::Task& a;
       bool operator()(const std::pair< goltsov::DateTime, goltsov::Task >&);
     };
+    struct FindTaskHasEnoughET
+    {
+      const goltsov::Task& a;
+      const goltsov::TimeInterval& duration;
+      bool operator()(const std::pair< goltsov::DateTime, goltsov::Task >&);
+    };
+    
     struct FindDateTime
     {
       const goltsov::DateTime& a;

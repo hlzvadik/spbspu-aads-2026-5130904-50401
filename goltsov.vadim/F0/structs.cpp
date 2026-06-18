@@ -10,13 +10,13 @@ std::istream& goltsov::detail::operator>>(std::istream& is, const Delimeter& a)
   }
   return is;
 }
-bool goltsov::detail::CompareTasks::operator()(const DateTime& lhs, const DateTime& rhs)
-{
-  return lhs < rhs;
-}
-bool goltsov::detail::FindTask::operator()(const std::pair< DateTime, Task >& current)
+bool goltsov::detail::FindTaskHasETLessLB::operator()(const std::pair< DateTime, Task >& current)
 {
   return (current.second.end_time_ <= a.left_boundary_time_);
+}
+bool goltsov::detail::FindTaskHasEnoughET::operator()(const std::pair< DateTime, Task >& current)
+{
+  return (a.right_boundary_time_ >= current.second.end_time_ && a.right_boundary_time_ - current.second.end_time_ >= duration);
 }
 bool goltsov::detail::FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < DateTime,
   DateTime > >& current)

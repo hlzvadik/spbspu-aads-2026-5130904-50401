@@ -23,8 +23,7 @@ bool goltsov::detail::isEndOfLine(std::istream& is)
     return false;
   }
 }
-bool goltsov::detail::pushTask(State& current_state, Task& task,
-  const TimeInterval& duration)
+bool goltsov::detail::pushTask(State& current_state, Task& task, const TimeInterval& duration)
 {
   if (current_state.current_schedule_->tasks_.size() == 0)
   {
@@ -35,8 +34,7 @@ bool goltsov::detail::pushTask(State& current_state, Task& task,
     return true;
   }
   goltsov::MapIterator< DateTime, Task > current =
-    rfindByPredicate(*current_state.current_schedule_, FindTask {task});
-  std::cout << "1\n";
+    rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
   if (current == current_state.current_schedule_->tasks_.end())
   {
     current = current_state.current_schedule_->tasks_.begin();
@@ -79,11 +77,45 @@ bool goltsov::detail::pushTask(State& current_state, Task& task,
     return false;
   }
 }
+bool goltsov::detail::pushSoftTask(State& current_state, Task& task, const TimeInterval& duration)
+{;
+  if (current_state.current_schedule_->tasks_.empty())
+  {
+    task.start_time_ = task.left_boundary_time_;
+    task.end_time_ = task.start_time_ + duration;
+    current_state.current_schedule_->tasks_.insert({task.start_time_, task});
+    current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
+    return true;
+  }
+  MapIterator<DateTime, Task> current = rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
+  current = (current == current_state.current_schedule_->tasks_.end()) ?
+    current_state.current_schedule_->tasks_.begin() : current.next();
+  DateTime potential_start = task.left_boundary_time_;
+  while (current != current_state.current_schedule_->tasks_.end()
+    && potential_start + duration <= task.right_boundary_time_)
+  {
+    if (potential_start + duration <= current->second.start_time_)
+    {
+      break;
+    }
+    potential_start = current->second.end_time_;
+    ++current;
+  }
+  if (potential_start + duration <= task.right_boundary_time_)
+  {
+    task.start_time_ = potential_start;
+    task.end_time_ = potential_start + duration;
+    current_state.current_schedule_->tasks_.insert({task.start_time_, task});
+    current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
+    return true;
+  }
+  return pushTask(current_state, task, duration);
+}
 goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::pushProtectedTask(
   State& current_state, Task& task)
 {
   goltsov::MapIterator< DateTime, Task > current =
-    rfindByPredicate(*current_state.current_schedule_, FindTask{task});
+    rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
   if (current == current_state.current_schedule_->tasks_.end())
   {
     current = current_state.current_schedule_->tasks_.begin();
@@ -119,7 +151,7 @@ goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::pushPr
   State& current_state, Task& task)
 {
   goltsov::MapIterator< DateTime, Task > current =
-    rfindByPredicate(*current_state.current_schedule_, FindTask{task});
+    rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
   if (current == current_state.current_schedule_->tasks_.end())
   {
     current = current_state.current_schedule_->tasks_.begin();
@@ -153,7 +185,7 @@ void goltsov::detail::pushUnplanned(State& current_state)
       current_state.current_schedule_->unplanned_tasks_.begin();
       it != current_state.current_schedule_->unplanned_tasks_.end(); ++it)
     {
-      if (pushTask(current_state, it->second, it->second.end_time_ - it->second.start_time_))
+      if (pushSoftTask(current_state, it->second, it->second.end_time_ - it->second.start_time_))
       {
         current_state.current_schedule_->unplanned_tasks_.erase(it->second.id_);
         ++count_pushed;
@@ -170,7 +202,7 @@ std::pair< size_t, size_t > goltsov::detail::mergeInterval(State& current_state,
   {
     if (!s->second.is_protected_)
     {
-      pushTask(current_state, s->second, s->second.end_time_ - s->second.start_time_);
+      pushSoftTask(current_state, s->second, s->second.end_time_ - s->second.start_time_);
     }
     else
     {
@@ -708,8 +740,7 @@ void goltsov::add(std::ostream& os, State& current_state, const std::string& id,
 {
   Task temp{id, title, description, left_boundary_time, right_boundary_time, left_boundary_time,
     left_boundary_time + duration, priority, false};
-  std::cout << "1\n";
-  bool is_planned = detail::pushTask(current_state, temp, duration);
+  bool is_planned = detail::pushSoftTask(current_state, temp, duration);
   if (is_planned)
   {
     DateTime k = current_state.current_schedule_->id_start_time_[id];
@@ -940,7 +971,7 @@ void goltsov::stats(std::ostream& os, State& current_state, const DateTime& star
   Task a;
   a.start_time_ = start_time;
   goltsov::MapIterator< DateTime, Task > current =
-    detail::rfindByPredicate(*current_state.current_schedule_, detail::FindTask{a});
+    detail::rfindByPredicate(*current_state.current_schedule_, detail::FindTaskHasETLessLB{a});
   TimeInterval busy_time {0, 0, 0, 0, 0, 0};
   size_t count_tasks = 0;
   try
