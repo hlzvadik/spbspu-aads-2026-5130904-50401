@@ -11,75 +11,65 @@ namespace goltsov
   struct Task;
   struct Schedule;
   struct Context;
-}
-
-namespace detail
-{
-  struct CompareTasks
+  namespace detail
   {
-    bool operator()(const goltsov::DateTime&, const goltsov::DateTime&);
-  };
-
-  struct FindTask
-  {
-    const goltsov::Task& a;
-    bool operator()(const std::pair< goltsov::DateTime, goltsov::Task >&);
-  };
-
-  struct FindDateTime
-  {
-    const goltsov::DateTime& a;
-    bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
-  };
-
-  struct FindDateTime2
-  {
-    const goltsov::DateTime& a;
-    bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
-  };
-
-  struct FindDateTime3
-  {
-    const goltsov::DateTime& a;
-    bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
-  };
-
-  struct Delimeter
-  {
-    char expected;
-  };
-  std::istream& operator>>(std::istream&, const Delimeter&);
-
-  struct IOGuard
-  {
-    explicit IOGuard(std::basic_ios< char >& s):
-      s_(s),
-      precision_(s.precision()),
-      width_(s.width()),
-      flags_(s.flags()),
-      fill_(s.fill())
-    {}
-    ~IOGuard()
+    struct CompareTasks
     {
-      s_.precision(precision_);
-      s_.width(width_);
-      s_.flags(flags_);
-      s_.fill(fill_);
-    }
-  private:
-    std::basic_ios< char >& s_;
-    std::streamsize precision_;
-    std::streamsize width_;
-    std::basic_ios< char >::fmtflags flags_;
-    char fill_;
-  };
+      bool operator()(const goltsov::DateTime&, const goltsov::DateTime&);
+    };
+    struct FindTask
+    {
+      const goltsov::Task& a;
+      bool operator()(const std::pair< goltsov::DateTime, goltsov::Task >&);
+    };
+    struct FindDateTime
+    {
+      const goltsov::DateTime& a;
+      bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
+    };
+    struct FindDateTime2
+    {
+      const goltsov::DateTime& a;
+      bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
+    };
+    struct FindDateTime3
+    {
+      const goltsov::DateTime& a;
+      bool operator()(const std::pair< goltsov::DateTime, std::pair < goltsov::DateTime, goltsov::DateTime > >&);
+    };
+    struct Delimeter
+    {
+      char expected;
+    };
+    std::istream& operator>>(std::istream&, const Delimeter&);
+    struct IOGuard
+    {
+      explicit IOGuard(std::basic_ios< char >& s):
+        s_(s),
+        precision_(s.precision()),
+        width_(s.width()),
+        flags_(s.flags()),
+        fill_(s.fill())
+      {}
+      ~IOGuard()
+      {
+        s_.precision(precision_);
+        s_.width(width_);
+        s_.flags(flags_);
+        s_.fill(fill_);
+      }
+    private:
+      std::basic_ios< char >& s_;
+      std::streamsize precision_;
+      std::streamsize width_;
+      std::basic_ios< char >::fmtflags flags_;
+      char fill_;
+    };
+    bool isLeapYear(const size_t& year);
+    size_t getDaysInMonth(const size_t& year, const size_t& month);
+    long long TimeIntervalToSeconds(const TimeInterval& interval);
+  }
 
-  bool isLeapYear(const size_t& year);
-  size_t getDaysInMonth(const size_t& year, const size_t& month);
-}
-
-namespace goltsov
-{
   struct TimeInterval
   {
     size_t years_, months_, days_;
@@ -129,7 +119,7 @@ namespace goltsov
   struct Schedule
   {
     std::string name_schedule_;
-    goltsov::RBTree< goltsov::DateTime, Task, detail::CompareTasks > tasks_tree_;
+    goltsov::Map< DateTime, Task > tasks_;
     goltsov::Map< std::string, goltsov::Task > unplanned_tasks_;
     goltsov::Map< std::string, goltsov::DateTime > id_start_time_;
   };
@@ -139,7 +129,7 @@ namespace goltsov
   struct Context
   {
     std::string name_context_;
-    goltsov::RBTree< std::string, Schedule, std::less< std::string > > schedules_tree_;
+    goltsov::Map< std::string, Schedule > schedules_;
   };
   std::istream& operator>>(std::istream&, Context&);
   std::ostream& operator<<(std::ostream&, Context&);
@@ -148,7 +138,7 @@ namespace goltsov
   {
     Schedule* current_schedule_;
     Context* current_context_;
-    goltsov::RBTree< std::string, Context, std::less< std::string > > contexts_tree_;
+    goltsov::Map< std::string, Context > contexts_;
     goltsov::DateTime current_time;
   };
 }

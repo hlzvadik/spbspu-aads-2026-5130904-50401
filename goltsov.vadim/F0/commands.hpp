@@ -4,81 +4,85 @@
 #include <myvector.hpp>
 #include "structs.hpp"
 
-namespace detail
-{
-  std::istream& skipSpaces(std::istream&);
-  bool isEndOfLine(std::istream&);
-  bool pushTask(goltsov::State&, goltsov::Task&, const goltsov::TimeInterval&);
-  void pushUnplanned(goltsov::State&);
-  goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTask(goltsov::State&, goltsov::Task&);
-  goltsov::RBTIterator< goltsov::DateTime, goltsov::Task > pushProtectedTaskForce(goltsov::State&, goltsov::Task&);
-  std::pair< size_t, size_t > mergeInterval(goltsov::State&, goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >,
-    goltsov::RBTIterator< goltsov::DateTime, goltsov::Task >);
-  std::pair< goltsov::DateTime, goltsov::DateTime > findCommonGapInVector(goltsov::State&, const goltsov::DateTime&,
-    const goltsov::DateTime&, const goltsov::TimeInterval&, const topit::Vector< std::string >&);
-}
-
 namespace goltsov
 {
-  void parsingAdd(std::istream&, std::ostream&, goltsov::State&);
-  void parsingAddProtected(std::istream&, std::ostream&, goltsov::State&);
-  void parsingRemove(std::istream&, std::ostream&, goltsov::State&);
-  void parsingList(std::istream&, std::ostream&, goltsov::State&);
-  void parsingMerge(std::istream&, std::ostream&, goltsov::State&);
-  void parsingShowUnplanned(std::istream&, std::ostream&, goltsov::State&);
-  void parsingUnplannedRemove(std::istream&, std::ostream&, goltsov::State&);
-  void parsingUnplannedForce(std::istream&, std::ostream&, goltsov::State&);
-  void parsingMergeScheduleOtherContext(std::istream&, std::ostream&, goltsov::State&);
-  void parsingAddScheduleOtherContext(std::istream&, std::ostream&, goltsov::State&);
-  void parsingAddForceScheduleOtherContext(std::istream&, std::ostream&, goltsov::State&);
-  void parsingSwitchSchedule(std::istream&, std::ostream&, goltsov::State&);
-  void parsingSwitchContext(std::istream&, std::ostream&, goltsov::State&);
-  void parsingStats(std::istream&, std::ostream&, goltsov::State&);
-  void parsingNewSchedule(std::istream&, std::ostream&, goltsov::State&);
-  void parsingNewContext(std::istream&, std::ostream&, goltsov::State&);
-  void parsingLoadSchedule(std::istream&, std::ostream&, goltsov::State&);
-  void parsingSaveSchedule(std::istream&, std::ostream&, goltsov::State&);
-  void parsingLoadContext(std::istream&, std::ostream&, goltsov::State&);
-  void parsingSaveContext(std::istream&, std::ostream&, goltsov::State&);
-  void parsingFindGap(std::istream&, std::ostream&, goltsov::State&);
-  void parsingFindGapOnInterval(std::istream&, std::ostream&, goltsov::State&);
-  void parsingFindCommonGap(std::istream&, std::ostream&, goltsov::State&);
-  void parsingFindCommonGapOnInterval(std::istream&, std::ostream&, goltsov::State&);
-  void parsingExit(std::istream&, std::ostream&, goltsov::State&);
-  void parsingListSchedules(std::istream&, std::ostream&, goltsov::State&);
-  void parsingListContexts(std::istream&, std::ostream&, goltsov::State&);
+  namespace detail
+  {
+    std::istream& skipSpaces(std::istream&);
+    bool isEndOfLine(std::istream&);
+    bool pushTask(State&, Task&, const TimeInterval&);
+    void pushUnplanned(State&);
+    RBTIterator< DateTime, Task > pushProtectedTask(State&, Task&);
+    RBTIterator< DateTime, Task > pushProtectedTaskForce(State&, Task&);
+    std::pair< size_t, size_t > mergeInterval(State&, RBTIterator< DateTime, Task >,
+      RBTIterator< DateTime, Task >);
+    std::pair< DateTime, DateTime > findCommonGapInVector(State&, const DateTime&,
+      const DateTime&, const TimeInterval&, const topit::Vector< std::string >&);
+    template< class Predicate >
+    MapIterator< DateTime, Task > findByPredicate(Schedule&, Predicate);
+    template< class Predicate >
+    MapIterator< DateTime, Task > rfindByPredicate(Schedule&, Predicate);
+  }
 
-  void add(std::ostream&, goltsov::State&, const std::string&, const std::string&, const std::string&,
-    const goltsov::DateTime&, const goltsov::DateTime&, const goltsov::TimeInterval&, const size_t&);
-  void addProtected(std::ostream&, goltsov::State&, const std::string&, const std::string&, const std::string&,
-    const goltsov::DateTime&, const goltsov::DateTime&);
-  void remove(std::ostream&, goltsov::State&, const std::string&);
-  void list(std::ostream&, goltsov::State&);
-  void merge(std::ostream&, goltsov::State&, const std::string&);
-  void showUnplanned(std::ostream&, goltsov::State&);
-  void unplannedRemove(std::ostream&, goltsov::State&, const std::string&);
-  void unplannedForce(std::ostream&, goltsov::State&, const std::string&);
-  void mergeScheduleOtherContext(std::ostream&, goltsov::State&, const std::string&, const std::string&);
-  void addScheduleOtherContext(std::ostream&, goltsov::State&, const std::string&, const std::string&);
-  void addForceScheduleOtherContext(std::ostream&, goltsov::State&, const std::string&, const std::string&);
-  void switchSchedule(std::ostream&, goltsov::State&, const std::string&);
-  void switchContext(std::ostream&, goltsov::State&, const std::string&);
-  void stats(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&);
-  void newSchedule(std::ostream&, goltsov::State&, const std::string&);
-  void newContext(std::ostream&, goltsov::State&, const std::string&);
-  void loadSchedule(std::ostream&, goltsov::State&, const std::string&, const std::string&);
-  void saveSchedule(std::ostream&, goltsov::State&, const std::string&, const std::string&);
-  void loadContext(std::ostream&, goltsov::State&, const std::string&, const std::string&);
-  void saveContext(std::ostream&, goltsov::State&, const std::string&, const std::string&);
-  void findGap(std::ostream&, goltsov::State&, const goltsov::TimeInterval&);
-  void findGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&,
-    const goltsov::TimeInterval&);
-  void findCommonGap(std::ostream&, goltsov::State&, const goltsov::TimeInterval&, const size_t&,
+  void parsingAdd(std::istream&, std::ostream&, State&);
+  void parsingAddProtected(std::istream&, std::ostream&, State&);
+  void parsingRemove(std::istream&, std::ostream&, State&);
+  void parsingList(std::istream&, std::ostream&, State&);
+  void parsingMerge(std::istream&, std::ostream&, State&);
+  void parsingShowUnplanned(std::istream&, std::ostream&, State&);
+  void parsingUnplannedRemove(std::istream&, std::ostream&, State&);
+  void parsingUnplannedForce(std::istream&, std::ostream&, State&);
+  void parsingMergeScheduleOtherContext(std::istream&, std::ostream&, State&);
+  void parsingAddScheduleOtherContext(std::istream&, std::ostream&, State&);
+  void parsingAddForceScheduleOtherContext(std::istream&, std::ostream&, State&);
+  void parsingSwitchSchedule(std::istream&, std::ostream&, State&);
+  void parsingSwitchContext(std::istream&, std::ostream&, State&);
+  void parsingStats(std::istream&, std::ostream&, State&);
+  void parsingNewSchedule(std::istream&, std::ostream&, State&);
+  void parsingNewContext(std::istream&, std::ostream&, State&);
+  void parsingLoadSchedule(std::istream&, std::ostream&, State&);
+  void parsingSaveSchedule(std::istream&, std::ostream&, State&);
+  void parsingLoadContext(std::istream&, std::ostream&, State&);
+  void parsingSaveContext(std::istream&, std::ostream&, State&);
+  void parsingFindGap(std::istream&, std::ostream&, State&);
+  void parsingFindGapOnInterval(std::istream&, std::ostream&, State&);
+  void parsingFindCommonGap(std::istream&, std::ostream&, State&);
+  void parsingFindCommonGapOnInterval(std::istream&, std::ostream&, State&);
+  void parsingExit(std::istream&, std::ostream&, State&);
+  void parsingListSchedules(std::istream&, std::ostream&, State&);
+  void parsingListContexts(std::istream&, std::ostream&, State&);
+
+  void add(std::ostream&, State&, const std::string&, const std::string&, const std::string&,
+    const DateTime&, const DateTime&, const TimeInterval&, const size_t&);
+  void addProtected(std::ostream&, State&, const std::string&, const std::string&, const std::string&,
+    const DateTime&, const DateTime&);
+  void remove(std::ostream&, State&, const std::string&);
+  void list(std::ostream&, State&);
+  void merge(std::ostream&, State&, const std::string&);
+  void showUnplanned(std::ostream&, State&);
+  void unplannedRemove(std::ostream&, State&, const std::string&);
+  void unplannedForce(std::ostream&, State&, const std::string&);
+  void mergeScheduleOtherContext(std::ostream&, State&, const std::string&, const std::string&);
+  void addScheduleOtherContext(std::ostream&, State&, const std::string&, const std::string&);
+  void addForceScheduleOtherContext(std::ostream&, State&, const std::string&, const std::string&);
+  void switchSchedule(std::ostream&, State&, const std::string&);
+  void switchContext(std::ostream&, State&, const std::string&);
+  void stats(std::ostream&, State&, const DateTime&, const DateTime&);
+  void newSchedule(std::ostream&, State&, const std::string&);
+  void newContext(std::ostream&, State&, const std::string&);
+  void loadSchedule(std::ostream&, State&, const std::string&, const std::string&);
+  void saveSchedule(std::ostream&, State&, const std::string&, const std::string&);
+  void loadContext(std::ostream&, State&, const std::string&, const std::string&);
+  void saveContext(std::ostream&, State&, const std::string&, const std::string&);
+  void findGap(std::ostream&, State&, const TimeInterval&);
+  void findGapOnInterval(std::ostream&, State&, const DateTime&, const DateTime&,
+    const TimeInterval&);
+  void findCommonGap(std::ostream&, State&, const TimeInterval&, const size_t&,
     const topit::Vector< std::string >&);
-  void findCommonGapOnInterval(std::ostream&, goltsov::State&, const goltsov::DateTime&, const goltsov::DateTime&,
-    const goltsov::TimeInterval&, const size_t&, const topit::Vector< std::string >&);
-  void listSchedules(std::ostream&, goltsov::State&);
-  void listContexts(std::ostream&, goltsov::State&);
+  void findCommonGapOnInterval(std::ostream&, State&, const DateTime&, const DateTime&,
+    const TimeInterval&, const size_t&, const topit::Vector< std::string >&);
+  void listSchedules(std::ostream&, State&);
+  void listContexts(std::ostream&, State&);
 }
 
 #endif
