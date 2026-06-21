@@ -5,6 +5,13 @@
 
 namespace goltsov
 {
+  namespace detail
+  {
+    void sortStringVector(goltsov::Vector< std::string >& vec);
+    void sortSizeTVector(goltsov::Vector< size_t >& vec);
+    void sortPairStringSizeTVector(goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > >& vec);
+  }
+
   using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
     goltsov::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >,
     std::equal_to< std::pair< std::string, std::string > > >, goltsov::Sha1Hasher< std::string >,
@@ -33,9 +40,6 @@ namespace goltsov
   void mergeParsing(ht_graphs& g, std::istream& in);
   void extractParsing(ht_graphs& g, std::istream& in);
 
-  void sortStringVector(goltsov::Vector< std::string >& vec);
-  void sortSizeTVector(goltsov::Vector< size_t >& vec);
-  void sortPairStringSizeTVector(goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > >& vec);
   void read_graphs(std::istream& in, ht_graphs& graphs);
   void graphs(ht_graphs& graphs);
   void vertexes(ht_graphs& graphs, std::string name_graph);
