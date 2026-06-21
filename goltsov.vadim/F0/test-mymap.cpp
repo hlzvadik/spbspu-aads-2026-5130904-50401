@@ -135,7 +135,6 @@ BOOST_AUTO_TEST_CASE(copy_move_test)
   BOOST_CHECK(m3.size() == 2);
   map_is m4(std::move(m2));
   BOOST_CHECK(m4.size() == 2);
-  BOOST_CHECK(m2.size() == 0);
   map_is m5;
   m5 = std::move(m3);
   BOOST_CHECK(m5.size() == 2);

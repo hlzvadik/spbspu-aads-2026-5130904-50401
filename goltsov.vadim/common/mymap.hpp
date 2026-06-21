@@ -94,7 +94,8 @@ std::pair< goltsov::MapIterator< Key, Value >, bool > goltsov::Map< Key, Value >
   }
   catch (std::logic_error& e)
   {
-    return {data_.end(), false};
+    MapIterator< Key, Value > res = data_.get(k_v_.first);
+    return {res, false};
   }
 }
 template< class Key, class Value >
@@ -110,12 +111,26 @@ void goltsov::Map< Key, Value >::clear()
 template< class Key, class Value >
 goltsov::MapIterator< Key, Value > goltsov::Map< Key, Value >::find(const Key& k)
 {
-  return data_.get(k);
+  try
+  {
+    return data_.get(k);
+  }
+  catch (...)
+  {
+    return data_.end();
+  }
 }
 template< class Key, class Value >
 goltsov::MapConstIterator< Key, Value > goltsov::Map< Key, Value >::find(const Key& k) const
 {
-  return data_.get(k);
+  try
+  {
+    return data_.get(k);
+  }
+  catch (...)
+  {
+    return data_.end();
+  }
 }
 template< class Key, class Value >
 bool goltsov::Map< Key, Value >::contains(const Key& k) const

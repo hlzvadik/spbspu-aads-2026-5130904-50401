@@ -247,6 +247,7 @@ goltsov::detail::BSTree< Key, Value, Compare >::BSTree(BSTree< Key, Value, Compa
   size_(other.size_)
 {
   other.root_ = nullptr;
+  other.size_ = 0;
 }
 template< class Key, class Value, class Compare >
 goltsov::detail::BSTree< Key, Value, Compare >& goltsov::detail::BSTree< Key, Value, Compare >::operator=(
@@ -344,7 +345,7 @@ goltsov::detail::BSTIterator< Key, Value > goltsov::detail::BSTree< Key, Value, 
       return BSTIterator< Key, Value > (current);
     }
   }
-  throw std::logic_error("No such key");
+  throw std::out_of_range("No such key");
 }
 template< class Key, class Value, class Compare >
 goltsov::detail::BSTConstIterator< Key, Value > goltsov::detail::BSTree< Key, Value, Compare >::get(
@@ -367,7 +368,7 @@ goltsov::detail::BSTConstIterator< Key, Value > goltsov::detail::BSTree< Key, Va
       return BSTIterator< Key, Value > (current);
     }
   }
-  throw std::logic_error("No such key");
+  throw std::out_of_range("No such key");
 }
 template< class Key, class Value, class Compare >
 goltsov::detail::BSTIterator< Key, Value > goltsov::detail::BSTree< Key, Value, Compare >::getLast() noexcept
@@ -567,7 +568,7 @@ std::tuple< goltsov::detail::NodeBST< Key, Value >*, Value, bool >
       return {res_ptr, res_val, res_is_black};
     }
   }
-  throw std::runtime_error("Key is not in table");
+  throw std::out_of_range("Key is not in table");
 }
 template< class Key, class Value, class Compare >
 void goltsov::detail::BSTree< Key, Value, Compare >::clear()
@@ -1046,18 +1047,6 @@ const std::pair< Key, Value >* goltsov::detail::BSTConstIterator< Key, Value >::
 {
   return & (ptr_->data_);
 }
-// template< class Key, class Value >
-// bool operator==(const goltsov::detail::BSTConstIterator< Key, Value >& a,
-//   const goltsov::detail::BSTConstIterator< Key, Value >& b)
-// {
-//   return a.ptr_ == b.ptr_;
-// }
-// template< class Key, class Value >
-// bool operator!=(const goltsov::detail::BSTConstIterator< Key, Value >& a,
-//   const goltsov::detail::BSTConstIterator< Key, Value >& b)
-// {
-//   return !(a.ptr_ == b.ptr_);
-// }
 template< class Key, class Value >
 bool goltsov::detail::BSTIterator< Key, Value >::operator==(const BSTIterator< Key, Value >& other) const noexcept
 {
@@ -1250,6 +1239,16 @@ template< class Key, class Value, class Compare >
 size_t goltsov::RBTree< Key, Value, Compare >::height() const noexcept
 {
   return tree_.height();
+}
+template< class Key, class Value, class Compare >
+size_t goltsov::RBTree< Key, Value, Compare >::blackHeight(RBTConstIterator< Key, Value > it) const noexcept
+{
+  return tree_.blackHeight(it);
+}
+template< class Key, class Value, class Compare >
+size_t goltsov::RBTree< Key, Value, Compare >::blackHeight() const noexcept
+{
+  return tree_.blackHeight();
 }
 template< class Key, class Value, class Compare >
 void goltsov::RBTree< Key, Value, Compare >::makeBalanceAfterPush(detail::NodeBST< Key, Value >* pushed)

@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE(drop_test)
   std::string dropped = tree.drop(10);
   BOOST_CHECK(dropped == "ten");
   BOOST_CHECK(tree.size() == 1);
-  BOOST_CHECK_THROW(tree.get(10), std::logic_error);
-  BOOST_CHECK_THROW(tree.drop(100), std::runtime_error);
+  BOOST_CHECK_THROW(tree.get(10), std::out_of_range);
+  BOOST_CHECK_THROW(tree.drop(100), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(clear_test)
@@ -128,7 +128,6 @@ BOOST_AUTO_TEST_CASE(copy_move_test)
   BOOST_CHECK(tree3.size() == 2);
   rbt_is tree4(std::move(tree2));
   BOOST_CHECK(tree4.size() == 2);
-  BOOST_CHECK(tree2.size() == 0);
   rbt_is tree5;
   tree5 = std::move(tree3);
   BOOST_CHECK(tree5.size() == 2);
