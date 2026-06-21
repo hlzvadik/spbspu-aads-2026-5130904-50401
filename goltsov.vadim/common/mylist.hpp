@@ -335,8 +335,6 @@ goltsov::List< T >& goltsov::List< T >::operator=(List< T >&& other) noexcept
 {
   if (this != &other)
   {
-    fake_ = nullptr;
-    size_ = 0;
     swap(other);
   }
   return (*this);
