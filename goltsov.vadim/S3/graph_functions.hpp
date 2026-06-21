@@ -1,39 +1,23 @@
 #include <cstddef>
 #include <string>
+#include <myvector.hpp>
 #include "my_hash_table.hpp"
-#include "../Common/myvector.hpp"
 
 namespace goltsov
 {
-  struct EqualString
-  {
-    bool operator()(const std::string& a, const std::string& b)
-    {
-      return a == b;
-    }
-  };
-
-  struct EqualPairString
-  {
-    bool operator()(const std::pair< std::string, std::string >& a, const std::pair< std::string, std::string >& b)
-    {
-      return a.first == b.first && a.second == b.second;
-    }
-  };
-
   using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
-    topit::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, EqualPairString >,
-    goltsov::Sha1Hasher< std::string >, EqualString >;
+    topit::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >,
+    goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
 
   using ht_it_graphs = goltsov::HashTableIterator< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
-    topit::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, EqualPairString >,
-    goltsov::Sha1Hasher< std::string >, EqualString >;
+    topit::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >,
+    goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
 
     using ht_it_pairs = goltsov::HashTableIterator< std::pair< std::string, std::string >, topit::Vector< size_t >,
-      goltsov::Sha1Hasher< std::pair< std::string, std::string > >, EqualPairString >;
+      goltsov::Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >;
 
   using ht_functions = goltsov::HashTable< std::string, void (*)(ht_graphs&, std::istream&),
-    goltsov::Sha1Hasher< std::string >, EqualString >;
+    goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
 
   void graphsParsing(ht_graphs& g, std::istream& in);
   void vertexesParsing(ht_graphs& g, std::istream& in);

@@ -1,7 +1,7 @@
+#include "graph_functions.hpp"
 #include <iostream>
 #include <cstring>
 #include <fstream>
-#include "graph_functions.hpp"
 #include "my_hash_table.hpp"
 
 namespace goltsov
@@ -451,7 +451,7 @@ namespace goltsov
     topit::Vector< std::string > name_graphs;
     for (ht_it_graphs it = graphs.begin(); it != graphs.end(); ++it)
     {
-      name_graphs.pushBack(it.key());
+      name_graphs.pushBack(it->first);
     }
     sortStringVector(name_graphs);
     for (size_t i = 0; i < name_graphs.getSize(); ++i)
@@ -468,7 +468,7 @@ namespace goltsov
   void vertexes(ht_graphs& graphs, std::string name_graph)
   {
     bool has_output = false;
-    if (!graphs.has(name_graph))
+    if (!graphs.contains(name_graph))
     {
       has_output = true;
       std::cout << "<INVALID COMMAND>\n";
@@ -477,8 +477,8 @@ namespace goltsov
     topit::Vector< std::string > name_vertexes;
     for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
     {
-      name_vertexes.pushBack(it.key().first);
-      name_vertexes.pushBack(it.key().second);
+      name_vertexes.pushBack(it->first.first);
+      name_vertexes.pushBack(it->first.second);
     }
     sortStringVector(name_vertexes);
     for (size_t i = 0; i < name_vertexes.getSize(); ++i)
@@ -502,7 +502,7 @@ namespace goltsov
   void outbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex)
   {
     bool has_output = false;
-    if (!graphs.has(name_graph))
+    if (!graphs.contains(name_graph))
     {
       has_output = true;
       std::cout << "<INVALID COMMAND>\n";
@@ -512,12 +512,12 @@ namespace goltsov
     topit::Vector< std::pair< std::string, topit::Vector< size_t > > > name_weight_vertexes;
     for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
     {
-      if (it.key().first == name_vertex)
+      if (it->first.first == name_vertex)
       {
-        name_weight_vertexes.pushBack({it.key().second, it.value()});
+        name_weight_vertexes.pushBack({it->first.second, it->second});
         is_has_name = true;
       }
-      else if (it.key().second == name_vertex)
+      else if (it->first.second == name_vertex)
       {
         is_has_name = true;
       }
@@ -551,7 +551,7 @@ namespace goltsov
   void inbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex)
   {
     bool has_output = false;
-    if (!graphs.has(name_graph))
+    if (!graphs.contains(name_graph))
     {
       has_output = true;
       std::cout << "<INVALID COMMAND>\n";
@@ -561,12 +561,12 @@ namespace goltsov
     topit::Vector< std::pair< std::string, topit::Vector< size_t > > > name_weight_vertexes;
     for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
     {
-      if (it.key().second == name_vertex)
+      if (it->first.second == name_vertex)
       {
-        name_weight_vertexes.pushBack({it.key().first, it.value()});
+        name_weight_vertexes.pushBack({it->first.first, it->second});
         is_has_name = true;
       }
-      else if (it.key().first == name_vertex)
+      else if (it->first.first == name_vertex)
       {
         is_has_name = true;
       }
@@ -600,7 +600,7 @@ namespace goltsov
   void bind(ht_graphs& graphs, std::string name_graph, std::string name_vertex1,
     std::string name_vertex2, size_t weight)
   {
-    if (!graphs.has(name_graph))
+    if (!graphs.contains(name_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
@@ -611,12 +611,12 @@ namespace goltsov
   void cut(ht_graphs& graphs, std::string name_graph, std::string name_vertex1,
     std::string name_vertex2, size_t weight)
   {
-    if (!graphs.has(name_graph))
+    if (!graphs.contains(name_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs[name_graph].has({name_vertex1, name_vertex2}))
+    if (!graphs[name_graph].contains({name_vertex1, name_vertex2}))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
@@ -635,7 +635,7 @@ namespace goltsov
 
   void create(ht_graphs& graphs, std::string name_graph, size_t count, topit::Vector< std::string > vertexes_names)
   {
-    if (graphs.has(name_graph))
+    if (graphs.contains(name_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
@@ -649,56 +649,56 @@ namespace goltsov
 
   void merge(ht_graphs& graphs, std::string name_new_graph, std::string name_graph1, std::string name_graph2)
   {
-    if (graphs.has(name_new_graph))
+    if (graphs.contains(name_new_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs.has(name_graph1))
+    if (!graphs.contains(name_graph1))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs.has(name_graph2))
+    if (!graphs.contains(name_graph2))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
     for (ht_it_pairs it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
     {
-      graphs[name_new_graph][it.key()].pushBackRange(
-        graphs[name_graph1][it.key()].begin(), graphs[name_graph1][it.key()].getSize());
+      graphs[name_new_graph][it->first].pushBackRange(
+        graphs[name_graph1][it->first].begin(), graphs[name_graph1][it->first].getSize());
     }
     for (ht_it_pairs it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
     {
-      graphs[name_new_graph][it.key()].pushBackRange(
-        graphs[name_graph2][it.key()].begin(), graphs[name_graph2][it.key()].getSize());
+      graphs[name_new_graph][it->first].pushBackRange(
+        graphs[name_graph2][it->first].begin(), graphs[name_graph2][it->first].getSize());
     }
   }
 
   void extract(ht_graphs& graphs, std::string name_new_graph, std::string name_old_graph,
     size_t count_vertexes, topit::Vector< std::string > vertexes)
   {
-    if (graphs.has(name_new_graph))
+    if (graphs.contains(name_new_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
-    if (!graphs.has(name_old_graph))
+    if (!graphs.contains(name_old_graph))
     {
       std::cout << "<INVALID COMMAND>\n";
       return;
     }
     goltsov::HashTable< std::string, std::string, goltsov::Sha1Hasher< std::string >,
-      goltsov::EqualString > name_vertexes;
+      std::equal_to< std::string > > name_vertexes;
     for (ht_it_pairs it = graphs[name_old_graph].begin(); it != graphs[name_old_graph].end(); ++it)
     {
-      name_vertexes[it.key().first];
-      name_vertexes[it.key().second];
+      name_vertexes[it->first.first];
+      name_vertexes[it->first.second];
     }
     for (size_t i = 0; i < count_vertexes; ++i)
     {
-      if (!name_vertexes.has(vertexes[i]))
+      if (!name_vertexes.contains(vertexes[i]))
       {
         std::cout << "<INVALID COMMAND>\n";
         return;
@@ -708,7 +708,7 @@ namespace goltsov
     {
       for (size_t j = 0; j < count_vertexes; ++j)
       {
-        if (i != j && graphs[name_old_graph].has({vertexes[i], vertexes[j]}))
+        if (i != j && graphs[name_old_graph].contains({vertexes[i], vertexes[j]}))
         {
           graphs[name_new_graph][{vertexes[i], vertexes[j]}].pushBackRange(
             graphs[name_old_graph][{vertexes[i], vertexes[j]}].begin(),
