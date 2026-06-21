@@ -474,8 +474,7 @@ namespace goltsov
   {
     if (!graphs.contains(name_graph))
     {
-      std::cout << "<INVALID COMMAND>";
-      return;
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     goltsov::Vector< std::string > name_vertexes;
     for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
@@ -501,8 +500,7 @@ namespace goltsov
   {
     if (!graphs.contains(name_graph))
     {
-      std::cout << "<INVALID COMMAND>";
-      return;
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     bool is_has_name = false;
     goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > > name_weight_vertexes;
@@ -520,14 +518,13 @@ namespace goltsov
     }
     if (!is_has_name)
     {
-      std::cout << "<INVALID COMMAND>";
-      return;
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     sortPairStringSizeTVector(name_weight_vertexes);
     if (name_weight_vertexes.getSize() && name_weight_vertexes[0].second.getSize())
     {
       std::cout << name_weight_vertexes[0].first;
-      for (size_t j = 1; j < name_weight_vertexes[0].second.getSize(); ++j)
+      for (size_t j = 0; j < name_weight_vertexes[0].second.getSize(); ++j)
       {
         std::cout << " " << name_weight_vertexes[0].second[j];
       }
@@ -550,8 +547,7 @@ namespace goltsov
   {
     if (!graphs.contains(name_graph))
     {
-      std::cout << "<INVALID COMMAND>";
-      return;
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     bool is_has_name = false;
     goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > > name_weight_vertexes;
@@ -569,8 +565,7 @@ namespace goltsov
     }
     if (!is_has_name)
     {
-      std::cout << "<INVALID COMMAND>";
-      return;
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     sortPairStringSizeTVector(name_weight_vertexes);
     if (name_weight_vertexes.getSize() && name_weight_vertexes[0].second.getSize())
@@ -581,7 +576,7 @@ namespace goltsov
         std::cout << " " << name_weight_vertexes[0].second[j];
       }
     }
-    for (size_t i = 0; i < name_weight_vertexes.getSize(); ++i)
+    for (size_t i = 1; i < name_weight_vertexes.getSize(); ++i)
     {
       if (name_weight_vertexes[i].second.getSize())
       {
@@ -600,7 +595,7 @@ namespace goltsov
   {
     if (!graphs.contains(name_graph))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     graphs[name_graph][{name_vertex1, name_vertex2}].pushBack(weight);
   }
@@ -610,11 +605,11 @@ namespace goltsov
   {
     if (!graphs.contains(name_graph))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     if (!graphs[name_graph].contains({name_vertex1, name_vertex2}))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     for (size_t i = 0; i < graphs[name_graph][{name_vertex1, name_vertex2}].getSize(); ++i)
     {
@@ -624,14 +619,14 @@ namespace goltsov
         return;
       }
     }
-    throw std::runtime_error("<INVALID COMMAND");
+    throw std::runtime_error("<INVALID COMMAND>");
   }
 
   void create(ht_graphs& graphs, std::string name_graph, size_t count, goltsov::Vector< std::string > vertexes_names)
   {
     if (graphs.contains(name_graph))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     graphs[name_graph];
     for (size_t i = 0; i < count; ++i)
@@ -644,15 +639,15 @@ namespace goltsov
   {
     if (graphs.contains(name_new_graph))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     if (!graphs.contains(name_graph1))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     if (!graphs.contains(name_graph2))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     for (ht_it_pairs it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
     {
@@ -671,11 +666,11 @@ namespace goltsov
   {
     if (graphs.contains(name_new_graph))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     if (!graphs.contains(name_old_graph))
     {
-      throw std::runtime_error("<INVALID COMMAND");
+      throw std::runtime_error("<INVALID COMMAND>");
     }
     goltsov::HashTable< std::string, std::string, goltsov::Sha1Hasher< std::string >,
       std::equal_to< std::string > > name_vertexes;
@@ -688,7 +683,7 @@ namespace goltsov
     {
       if (!name_vertexes.contains(vertexes[i]))
       {
-        throw std::runtime_error("<INVALID COMMAND");
+        throw std::runtime_error("<INVALID COMMAND>");
       }
     }
     for (size_t i = 0; i < count_vertexes; ++i)
