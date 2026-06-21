@@ -45,11 +45,10 @@ BOOST_AUTO_TEST_CASE(insert_test)
   ht_ci4 t;
   t.insert(std::pair< char, int >{'a', 1});
   BOOST_CHECK(t['a'] == 1);
-  BOOST_CHECK_THROW(t.insert(std::pair< char, int >{'a', 1}), std::logic_error);
+  BOOST_CHECK((t.insert(std::pair< char, int >{'a', 1})) == (std::pair< ht_ci4_it, bool >{t.begin(), false}));
   int q = 2;
   t.insert(std::pair< char, int >{'b', q});
   BOOST_CHECK(t['b'] == q);
-  BOOST_CHECK_THROW(t.insert(std::pair< char, int >{'b', q}), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(erase_test)

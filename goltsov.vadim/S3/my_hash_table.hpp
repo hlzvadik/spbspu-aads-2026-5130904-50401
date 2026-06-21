@@ -164,7 +164,6 @@ namespace goltsov
     size_t size_bucket_;
     detail::Bucket< Key, Value >* data_;
     List< detail::NodeHashTable< Key, Value > > overflow_;
-    size_t countBackets() const noexcept;
   };
 }
 
@@ -414,7 +413,7 @@ namespace goltsov
     {
       if ((*it_now).is_valid && e(it_now->data.first, data.first))
       {
-        return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), false};
+        return {HashTableIterator< Key, Value, Hash, Equal >(this, countBuckets(), 0, it_now), false};
       }
       if (!(*it_now).is_valid && i_in_list == overflow_.end())
       {
@@ -439,7 +438,7 @@ namespace goltsov
       (*i_in_list).data = std::forward< std::pair< TypeKey, TypeValue > >(data);
       (*i_in_list).is_valid = true;
       count_valid_++;
-      return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, i_in_list), true};
+      return {HashTableIterator< Key, Value, Hash, Equal >(this, countBuckets(), 0, i_in_list), true};
     }
     else
     {
@@ -447,7 +446,7 @@ namespace goltsov
         std::forward< std::pair< TypeKey, TypeValue > >(data).first,
         std::forward< std::pair< TypeKey, TypeValue > >(data).second, true));
       count_valid_++;
-      return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), true};
+      return {HashTableIterator< Key, Value, Hash, Equal >(this, countBuckets(), 0, it_now), true};
     }
   }
 
@@ -521,7 +520,7 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal >
-  size_t HashTable< Key, Value, Hash, Equal >::countBackets() const noexcept
+  size_t HashTable< Key, Value, Hash, Equal >::countBuckets() const noexcept
   {
     return count_buckets_;
   }
@@ -577,7 +576,7 @@ namespace goltsov
     }
     else
     {
-      throw std::out_of_range("No key in table");
+      throw std::logic_error("No key in table");
     }
   }
 
@@ -755,7 +754,7 @@ namespace goltsov
         ++it;
         if (it != hash_table_->overflow_.end() && (*it).is_valid)
         {
-          return HashTableIterator(hash_table_, hash_table_->countBackets(), 0, it);
+          return HashTableIterator(hash_table_, hash_table_->countBuckets(), 0, it);
         }
       }
       return hash_table_->end();
@@ -877,7 +876,7 @@ namespace goltsov
         ++it;
         if (it != hash_table_->overflow_.end() && (*it).is_valid)
         {
-          return HashTableConstIterator(hash_table_, hash_table_->countBackets(), 0, it);
+          return HashTableConstIterator(hash_table_, hash_table_->countBuckets(), 0, it);
         }
       }
       return hash_table_->cend();
@@ -906,7 +905,7 @@ namespace goltsov
       {
         if ((*it).is_valid)
         {
-          return HashTableConstIterator(hash_table_, hash_table_->countBackets(), 0, it);
+          return HashTableConstIterator(hash_table_, hash_table_->countBuckets(), 0, it);
         }
         ++it;
       }
