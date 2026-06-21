@@ -24,7 +24,6 @@ namespace goltsov
       const goltsov::TimeInterval& duration;
       bool operator()(const std::pair< goltsov::DateTime, goltsov::Task >&);
     };
-    
     struct FindDateTime
     {
       const goltsov::DateTime& a;
