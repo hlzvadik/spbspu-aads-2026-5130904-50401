@@ -101,10 +101,6 @@ namespace goltsov
       BSTConstIterator< Key, Value > getLast() const noexcept;
       std::tuple< NodeBST< Key, Value >*, Value, bool > drop(const Key&);
       void clear();
-      template< class Predicate >
-      BSTIterator< Key, Value > find(Predicate);
-      template< class Predicate >
-      BSTIterator< Key, Value > rfind(Predicate);
       void swap(BSTree< Key, Value, Compare >&);
       size_t size() const;
       BSTIterator< Key, Value > begin();
@@ -614,44 +610,6 @@ void goltsov::detail::BSTree< Key, Value, Compare >::clear()
   }
   root_ = nullptr;
   size_ = 0;
-}
-template< class Key, class Value, class Compare >
-template< class Predicate >
-goltsov::detail::BSTIterator< Key, Value > goltsov::detail::BSTree< Key, Value, Compare >::find(Predicate pred)
-{
-  if (!root_)
-  {
-    return end();
-  }
-  for (BSTIterator< Key, Value > current = begin(); current != end(); ++current)
-  {
-    if (pred(* current))
-    {
-      return current;
-    }
-  }
-  return end();
-}
-template< class Key, class Value, class Compare >
-template< class Predicate >
-goltsov::detail::BSTIterator< Key, Value > goltsov::detail::BSTree< Key, Value, Compare >::rfind(Predicate pred)
-{
-  if (!root_)
-  {
-    return end();
-  }
-  for (BSTIterator< Key, Value > current = falRight(root_); current != begin(); --current)
-  {
-    if (pred(* current))
-    {
-      return current;
-    }
-  }
-  if (pred(* begin()))
-  {
-    return begin();
-  }
-  return end();
 }
 template< class Key, class Value, class Compare >
 void goltsov::detail::BSTree< Key, Value, Compare >::swap(BSTree< Key, Value, Compare >& other)
@@ -1175,10 +1133,6 @@ namespace goltsov
     RBTConstIterator< Key, Value > getLast() const noexcept;
     Value drop(const Key&);
     void clear();
-    template< class Predicate >
-    RBTIterator< Key, Value > find(Predicate);
-    template< class Predicate >
-    RBTIterator< Key, Value > rfind(Predicate);
     void swap(RBTree< Key, Value, Compare >&);
     size_t size() const;
     RBTIterator< Key, Value > begin();
@@ -1256,18 +1210,6 @@ template< class Key, class Value, class Compare >
 void goltsov::RBTree< Key, Value, Compare >::clear()
 {
   tree_.clear();
-}
-template< class Key, class Value, class Compare >
-template< class Predicate >
-goltsov::RBTIterator< Key, Value > goltsov::RBTree< Key, Value, Compare >::find(Predicate pred)
-{
-  return tree_.find(pred);
-}
-template< class Key, class Value, class Compare >
-template< class Predicate >
-goltsov::RBTIterator< Key, Value > goltsov::RBTree< Key, Value, Compare >::rfind(Predicate pred)
-{
-  return tree_.rfind(pred);
 }
 template< class Key, class Value, class Compare >
 void goltsov::RBTree< Key, Value, Compare >::swap(RBTree< Key, Value, Compare >& other)
