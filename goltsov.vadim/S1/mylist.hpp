@@ -33,6 +33,8 @@ namespace goltsov
 namespace goltsov
 {
   template< class T >
+  class LCIter;
+  template< class T >
   class LIter
   {
   public:
@@ -43,6 +45,7 @@ namespace goltsov
     T* operator->();
     bool operator==(const LIter< T >& other) const noexcept;
     bool operator!=(const LIter< T >& other) const noexcept;
+    operator LCIter< T >() const noexcept;
   private:
     friend class List< T >;
     friend LIter< T > detail::makeLIterByPtr< T >(Node< T >* p);
@@ -58,12 +61,13 @@ namespace goltsov
     LCIter() noexcept;
     LCIter< T >& operator++();
     LCIter< T > operator++(int);
-    const T& operator*() const;
-    const T* operator->() const;
+    const T& operator*();
+    const T* operator->();
     bool operator==(const LCIter< T >& other) const noexcept;
     bool operator!=(const LCIter< T >& other) const noexcept;
   private:
     friend class List< T >;
+    friend class LIter< T >;
     friend LCIter< T > detail::makeLCIterByPtr< T >(const Node< T >* p);
     const detail::Node< T >* ptr_;
     LCIter(const detail::Node< T >* p) noexcept;
@@ -94,13 +98,18 @@ namespace goltsov
     template< class ValRef >
     LIter< T > insert(LIter< T > i, ValRef&& a);
     void clear() noexcept;
+
+    size_t size() const noexcept;
+    bool empty() const noexcept;
+
+    void swap(List&) noexcept;
   private:
     detail::Node< T >* fake_;
+    size_t size_;
     detail::Node< T >* createFake();
     void rmFake() noexcept;
   };
 }
-
 
 template< class T >
 goltsov::LIter< T > goltsov::detail::makeLIterByPtr(Node< T >* p)
@@ -112,7 +121,6 @@ goltsov::LCIter< T > goltsov::detail::makeLCIterByPtr(const Node< T >* p)
 {
   return LCIter< T >(p);
 }
-
 template< class T >
 goltsov::LIter< T >::LIter() noexcept:
   ptr_(nullptr)
@@ -163,7 +171,7 @@ T* goltsov::LIter< T >::operator->()
 {
   if (ptr_)
   {
-    return ptr_;
+    return &(ptr_->value);
   }
   else
   {
@@ -179,6 +187,11 @@ template< class T >
 bool goltsov::LIter< T >::operator!=(const LIter< T >& other) const noexcept
 {
   return !((*this) == other);
+}
+template< class T >
+goltsov::LIter< T >::operator LCIter< T >() const noexcept
+{
+  return LCIter< T >(ptr_);
 }
 template< class T >
 goltsov::LCIter< T >::LCIter() noexcept:
@@ -214,7 +227,7 @@ goltsov::LCIter< T > goltsov::LCIter< T >::operator++(int)
   return temp;
 }
 template< class T >
-const T& goltsov::LCIter< T >::operator*() const
+const T& goltsov::LCIter< T >::operator*()
 {
   if (ptr_)
   {
@@ -226,11 +239,11 @@ const T& goltsov::LCIter< T >::operator*() const
   }
 }
 template< class T >
-const T* goltsov::LCIter< T >::operator->() const
+const T* goltsov::LCIter< T >::operator->()
 {
   if (ptr_)
   {
-    return ptr_;
+    return &(ptr_->value);
   }
   else
   {
@@ -260,7 +273,8 @@ void goltsov::List< T >::rmFake() noexcept
 }
 template< class T >
 goltsov::List< T >::List():
-  fake_(createFake())
+  fake_(createFake()),
+  size_(0)
 {
   fake_->next = nullptr;
 }
@@ -272,9 +286,14 @@ goltsov::List< T >::~List() noexcept
 }
 template< class T >
 goltsov::List< T >::List(const List< T >& other):
-  fake_(createFake())
+  fake_(createFake()),
+  size_(0)
 {
   fake_->next = nullptr;
+  if (!other.fake_)
+  {
+    return;
+  }
   if (!other.fake_->next)
   {
     return;
@@ -287,9 +306,10 @@ goltsov::List< T >::List(const List< T >& other):
 }
 template< class T >
 goltsov::List< T >::List(List< T >&& other) noexcept:
-  fake_(other.fake_)
+  fake_(nullptr),
+  size_(0)
 {
-  other.fake_ = nullptr;
+  swap(other);
 }
 template< class T >
 goltsov::List< T >& goltsov::List< T >::operator=(const List< T >& other)
@@ -298,18 +318,14 @@ goltsov::List< T >& goltsov::List< T >::operator=(const List< T >& other)
   {
     clear();
     fake_->next = nullptr;
-    if (other.fake_->next)
+    if (!other.fake_->next)
     {
-      detail::Node< T >* now_old = other.fake_->next;
-      detail::Node< T >* now_new = new detail::Node< T > {now_old->value, nullptr};
-      fake_->next = now_new;
-      now_old = now_old->next;
-      while (now_old != nullptr)
-      {
-        now_new->next = new detail::Node< T > {now_old->value, nullptr};
-        now_new = now_new->next;
-        now_old = now_old->next;
-      }
+      return (*this);
+    }
+    LIter< T > i = begin();
+    for (LCIter< T > it = other.begin(); it != other.end(); ++it)
+    {
+      i = insert(i, (*it));
     }
   }
   return (*this);
@@ -317,11 +333,11 @@ goltsov::List< T >& goltsov::List< T >::operator=(const List< T >& other)
 template< class T >
 goltsov::List< T >& goltsov::List< T >::operator=(List< T >&& other) noexcept
 {
-  if (this != & other)
+  if (this != &other)
   {
-    detail::Node< T >* temp = fake_;
-    fake_ = other.fake_;
-    other.fake_ = temp;
+    fake_ = nullptr;
+    size_ = 0;
+    swap(other);
   }
   return (*this);
 }
@@ -371,6 +387,7 @@ goltsov::LIter< T > goltsov::List< T >::push_start(ValRef&& a)
 {
   detail::Node< T >* new_el = new detail::Node< T > {std::forward< ValRef >(a), fake_->next};
   fake_->next = new_el;
+  size_++;
   return LIter< T >(new_el);
 }
 template< class T >
@@ -378,9 +395,10 @@ void goltsov::List< T >::pop_start() noexcept
 {
   if (begin() != end())
   {
-    detail::Node< T >* n = fake_->next->next;
+    detail::Node< T >* temp = fake_->next->next;
     delete fake_->next;
-    fake_->next = n;
+    fake_->next = temp;
+    size_--;
   }
   else
   {
@@ -400,6 +418,7 @@ void goltsov::List< T >::pop_end() noexcept
     now = now->next;
   }
   delete now->next;
+  size_--;
   now->next = nullptr;
 }
 template< class T >
@@ -414,6 +433,7 @@ goltsov::LIter< T > goltsov::List< T >::insert(LIter< T > i, ValRef&& a)
   else
   {
     detail::Node< T >* new_el = new detail::Node< T > {std::forward< ValRef >(a), i.next().ptr_};
+    size_++;
     i.ptr_->next = new_el;
     i = i.ptr_->next;
     return LIter< T >(i);
@@ -428,6 +448,23 @@ void goltsov::List< T >::clear() noexcept
     fake_->next = temp->next;
     delete temp;
   }
+  size_ = 0;
+}
+template< class T >
+size_t goltsov::List< T >::size() const noexcept
+{
+  return size_;
+}
+template< class T >
+bool goltsov::List< T >::empty() const noexcept
+{
+  return size() == 0;
+}
+template< class T >
+void goltsov::List< T >::swap(List& other) noexcept
+{
+  std::swap(fake_, other.fake_);
+  std::swap(size_, other.size_);
 }
 
 #endif
