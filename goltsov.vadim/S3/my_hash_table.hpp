@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <mylist.hpp>
 #include <boost/uuid/detail/sha1.hpp>
+#include <utility>
 
 namespace goltsov
 {
@@ -134,8 +135,8 @@ namespace goltsov
     HashTable< Key, Value, Hash, Equal >& operator=(const HashTable< Key, Value, Hash, Equal >&);
     HashTable< Key, Value, Hash, Equal >& operator=(HashTable< Key, Value, Hash, Equal >&&);
     void swap(HashTable< Key, Value, Hash, Equal >&) noexcept;
-    std::pair< HashTableIterator< Key, Value, Hash, Equal >, bool > insert(const std::pair< Key, Value >&);
-    std::pair< HashTableIterator< Key, Value, Hash, Equal >, bool > insert(std::pair< Key, Value >&&);
+    template< class TypeKey, class TypeValue >
+    std::pair< HashTableIterator< Key, Value, Hash, Equal >, bool > insert(std::pair< TypeKey, TypeValue >&&);
     size_t erase(const Key&);
     void rehash(const size_t&, const size_t&);
     void clear();
@@ -295,7 +296,7 @@ namespace goltsov
       HashTable< Key, Value, Hash, Equal > new_table(other.count_buckets_, other.size_bucket_);
       for (HashTableConstIterator< Key, Value, Hash, Equal > it = other.cbegin(); it != other.cend(); ++it)
       {
-        new_table.insert({it->first, it->second});
+        new_table.insert(std::pair{it->first, it->second});
       }
       swap(new_table);
     }
@@ -384,12 +385,14 @@ namespace goltsov
   }
 
   template< class Key, class Value, class Hash, class Equal >
+  template< class TypeKey, class TypeValue >
   std::pair< HashTableIterator< Key, Value, Hash, Equal >, bool >
-    HashTable< Key, Value, Hash, Equal >::insert(const std::pair< Key, Value >& data)
+    HashTable< Key, Value, Hash, Equal >::insert(std::pair< TypeKey, TypeValue >&& data)
   {
     Hash hasher;
     Equal e;
     size_t ind = hasher(data.first) % count_buckets_;
+    size_t i_in_bucket = size_bucket_;
     for (size_t i = 0; i < size_bucket_; ++i)
     {
       if (data_[ind].node[i].is_valid && e(data_[ind].node[i].data.first, data.first))
@@ -397,29 +400,23 @@ namespace goltsov
         return {HashTableIterator< Key, Value, Hash, Equal >(this, ind, i,
           LIter< detail::NodeHashTable< Key, Value > >()), false};
       }
-      if (!data_[ind].node[i].is_valid)
+      else if (!data_[ind].node[i].is_valid && i_in_bucket == size_bucket_)
       {
-        data_[ind].node[i].data = data;
-        data_[ind].node[i].is_valid = true;
-        count_valid_++;
-        return {HashTableIterator< Key, Value, Hash, Equal >(this, ind, i,
-          LIter< detail::NodeHashTable< Key, Value > >()), true};
+        i_in_bucket = i;
       }
     }
     LIter< detail::NodeHashTable< Key, Value > > it_now = overflow_.begin();
     LIter< detail::NodeHashTable< Key, Value > > it_now_prev = it_now;
+    LIter< detail::NodeHashTable< Key, Value > > i_in_list = overflow_.end();
     while (it_now != overflow_.end())
     {
       if ((*it_now).is_valid && e(it_now->data.first, data.first))
       {
         return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), false};
       }
-      if (!(*it_now).is_valid)
+      if (!(*it_now).is_valid && i_in_list == overflow_.end())
       {
-        (*it_now).data = data;
-        (*it_now).is_valid = true;
-        count_valid_++;
-        return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), true};
+        i_in_list = it_now;
       }
       ++it_now;
       if (it_now != overflow_.end())
@@ -427,58 +424,29 @@ namespace goltsov
         it_now_prev = it_now;
       }
     }
-    it_now = overflow_.insert(it_now_prev, {data, true});
-    count_valid_++;
-    return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), true};
-  }
-  template< class Key, class Value, class Hash, class Equal >
-  std::pair< HashTableIterator< Key, Value, Hash, Equal >, bool >
-    HashTable< Key, Value, Hash, Equal >::insert(std::pair< Key, Value >&& data)
-  {
-    Hash hasher;
-    Equal e;
-    size_t ind = hasher(data.first) % count_buckets_;
-    for (size_t i = 0; i < size_bucket_; ++i)
+    if (i_in_bucket != size_bucket_)
     {
-      if (data_[ind].node[i].is_valid && e(data_[ind].node[i].data.first, data.first))
-      {
-        return {HashTableIterator< Key, Value, Hash, Equal >(this, ind, i,
-          LIter< detail::NodeHashTable< Key, Value > >()), false};
-      }
-      if (!data_[ind].node[i].is_valid)
-      {
-        data_[ind].node[i].data = std::move(data);
-        data_[ind].node[i].is_valid = true;
-        count_valid_++;
-        return {HashTableIterator< Key, Value, Hash, Equal >(this, ind, i,
-          LIter< detail::NodeHashTable< Key, Value > >()), true};
-      }
+      data_[ind].node[i_in_bucket].data = std::forward< std::pair< TypeKey, TypeValue > >(data);
+      data_[ind].node[i_in_bucket].is_valid = true;
+      count_valid_++;
+      return {HashTableIterator< Key, Value, Hash, Equal >(this, ind, i_in_bucket,
+        LIter< detail::NodeHashTable< Key, Value > >()), true};
     }
-    LIter< detail::NodeHashTable< Key, Value > > it_now = overflow_.begin();
-    LIter< detail::NodeHashTable< Key, Value > > it_now_prev = it_now;
-    while (it_now != overflow_.end())
+    else if (i_in_list != overflow_.end())
     {
-      if ((*it_now).is_valid && e(it_now->data.first, data.first))
-      {
-        return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), false};
-      }
-      if (!(*it_now).is_valid)
-      {
-        it_now->data = std::move(data);
-        it_now->is_valid = true;
-        count_valid_++;
-        return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), true};
-      }
-      ++it_now;
-      if (it_now != overflow_.end())
-      {
-        it_now_prev = it_now;
-      }
+      (*i_in_list).data = std::forward< std::pair< TypeKey, TypeValue > >(data);
+      (*i_in_list).is_valid = true;
+      count_valid_++;
+      return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, i_in_list), true};
     }
-    it_now = overflow_.insert(it_now_prev, detail::NodeHashTable<Key, Value>(std::move(data.first),
-      std::move(data.second), true));
-    count_valid_++;
-    return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), true};
+    else
+    {
+      it_now = overflow_.insert(it_now_prev, detail::NodeHashTable< Key, Value >(
+        std::forward< std::pair< TypeKey, TypeValue > >(data).first, 
+        std::forward< std::pair< TypeKey, TypeValue > >(data).second, true));
+      count_valid_++;
+      return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), true};
+    }
   }
 
   template< class Key, class Value, class Hash, class Equal >
@@ -516,7 +484,7 @@ namespace goltsov
     HashTable< Key, Value, Hash, Equal > new_table(new_size, new_capacity);
     for (HashTableIterator< Key, Value, Hash, Equal > it = begin(); it != end(); ++it)
     {
-      new_table.insert({it->first, it->second});
+      new_table.insert(std::pair{it->first, it->second});
     }
     this->swap(new_table);
   }
@@ -690,7 +658,7 @@ namespace goltsov
     }
     else
     {
-      insert({key, Value{}});
+      insert(std::pair{key, Value{}});
       return at(key);
     }
   }
