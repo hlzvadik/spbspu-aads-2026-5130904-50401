@@ -220,7 +220,7 @@ namespace goltsov
     NodeHashTable< Key, Value >::NodeHashTable():
       is_valid(false)
     {}
-    
+
     template< class Key, class Value >
     NodeHashTable< Key, Value >::NodeHashTable(const Key& k, const Value& v, bool valid):
       data({k, v}),
@@ -444,7 +444,7 @@ namespace goltsov
     else
     {
       it_now = overflow_.insert(it_now_prev, detail::NodeHashTable< Key, Value >(
-        std::forward< std::pair< TypeKey, TypeValue > >(data).first, 
+        std::forward< std::pair< TypeKey, TypeValue > >(data).first,
         std::forward< std::pair< TypeKey, TypeValue > >(data).second, true));
       count_valid_++;
       return {HashTableIterator< Key, Value, Hash, Equal >(this, countBackets(), 0, it_now), true};
