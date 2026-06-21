@@ -298,7 +298,7 @@ namespace goltsov
       HashTable< Key, Value, Hash, Equal > new_table(other.count_buckets_, other.size_bucket_);
       for (HashTableConstIterator< Key, Value, Hash, Equal > it = other.cbegin(); it != other.cend(); ++it)
       {
-        new_table.insert(std::pair{it->first, it->second});
+        new_table.insert(std::pair< Key, Value >{it->first, it->second});
       }
       swap(new_table);
     }
@@ -486,7 +486,7 @@ namespace goltsov
     HashTable< Key, Value, Hash, Equal > new_table(new_size, new_capacity);
     for (HashTableIterator< Key, Value, Hash, Equal > it = begin(); it != end(); ++it)
     {
-      new_table.insert(std::pair{it->first, it->second});
+      new_table.insert(std::pair< Key, Value >{it->first, it->second});
     }
     this->swap(new_table);
   }
@@ -652,7 +652,7 @@ namespace goltsov
     }
     else
     {
-      insert(std::pair{key, Value{}});
+      insert(std::pair< Key, Value >{key, Value{}});
       return at(key);
     }
   }

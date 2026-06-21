@@ -43,19 +43,19 @@ BOOST_AUTO_TEST_CASE(swap_test)
 BOOST_AUTO_TEST_CASE(insert_test)
 {
   ht_ci4 t;
-  t.insert(std::pair{'a', 1});
+  t.insert(std::pair< char, int >{'a', 1});
   BOOST_CHECK(t['a'] == 1);
-  BOOST_CHECK_THROW(t.insert(std::pair{'a', 1}), std::logic_error);
+  BOOST_CHECK_THROW(t.insert(std::pair< char, int >{'a', 1}), std::logic_error);
   int q = 2;
-  t.insert(std::pair{'b', q});
+  t.insert(std::pair< char, int >{'b', q});
   BOOST_CHECK(t['b'] == q);
-  BOOST_CHECK_THROW(t.insert(std::pair{'b', q}), std::logic_error);
+  BOOST_CHECK_THROW(t.insert(std::pair< char, int >{'b', q}), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(erase_test)
 {
   ht_ci4 t;
-  t.insert(std::pair{'a', 1});
+  t.insert(std::pair< char, int >{'a', 1});
   BOOST_CHECK(t.erase('a') && !t.contains('a'));
   BOOST_CHECK(t.erase('a') == 0);
 }

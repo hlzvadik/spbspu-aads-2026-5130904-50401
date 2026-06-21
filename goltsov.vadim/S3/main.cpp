@@ -13,22 +13,27 @@ int main(int argc, char** argv)
     return 1;
   }
   std::fstream file_in (argv[1]);
-
   goltsov::ht_graphs graphs(10, 10);
-
   goltsov::read_graphs(file_in, graphs);
-
   goltsov::ht_functions functions_graph(10, 4);
-  functions_graph.insert(std::pair{"graphs", goltsov::graphsParsing});
-  functions_graph.insert(std::pair{"vertexes", goltsov::vertexesParsing});
-  functions_graph.insert(std::pair{"outbound", goltsov::outboundParsing});
-  functions_graph.insert(std::pair{"inbound", goltsov::inboundParsing});
-  functions_graph.insert(std::pair{"bind", goltsov::bindParsing});
-  functions_graph.insert(std::pair{"cut", goltsov::cutParsing});
-  functions_graph.insert(std::pair{"create", goltsov::createParsing});
-  functions_graph.insert(std::pair{"merge", goltsov::mergeParsing});
-  functions_graph.insert(std::pair{"extract", goltsov::extractParsing});
-
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"graphs", goltsov::graphsParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"vertexes", goltsov::vertexesParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"outbound", goltsov::outboundParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"inbound", goltsov::inboundParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"bind", goltsov::bindParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"cut", goltsov::cutParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"create", goltsov::createParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"merge", goltsov::mergeParsing});
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+    {"extract", goltsov::extractParsing});
   std::string command;
   while (std::cin >> command)
   {
@@ -49,5 +54,4 @@ int main(int argc, char** argv)
       }
     }
   }
-
 }
