@@ -10,22 +10,22 @@ BOOST_AUTO_TEST_SUITE(HashTable_suite)
 BOOST_AUTO_TEST_CASE(constructor_test)
 {
   ht_ci4 t;
-  BOOST_CHECK(t.size() == 1 && t.countValid() == 0 && t.count() == 1);
+  BOOST_CHECK(t.size() == 1 && t.count() == 0 && t.countBuckets() == 1);
   t['a'] = 1;
   t['b'] = 2;
   ht_ci4 t1 (t);
-  BOOST_CHECK(t1.size() == 1 && t1.countValid() == 2 && t1.count() == 1);
+  BOOST_CHECK(t1.size() == 1 && t1.count() == 2 && t1.countBuckets() == 1);
   ht_ci4 t2 (std::move(t));
-  BOOST_CHECK(t2.size() == 1 && t2.countValid() == 2 && t2.count() == 1);
+  BOOST_CHECK(t2.size() == 1 && t2.count() == 2 && t2.countBuckets() == 1);
   ht_ci4 t3;
   t3['a'] = 1;
   t3['b'] = 2;
   ht_ci4 t4 = t3;
-  BOOST_CHECK(t4.size() == 1 && t4.countValid() == 2 && t4.count() == 1);
+  BOOST_CHECK(t4.size() == 1 && t4.count() == 2 && t4.countBuckets() == 1);
   ht_ci4 t5 = std::move(t3);
-  BOOST_CHECK(t5.size() == 1 && t5.countValid() == 2 && t5.count() == 1);
+  BOOST_CHECK(t5.size() == 1 && t5.count() == 2 && t5.countBuckets() == 1);
   ht_ci4 t6 (5, 4);
-  BOOST_CHECK(t6.size() == 20 && t6.countValid() == 0 && t6.count() == 5);
+  BOOST_CHECK(t6.size() == 20 && t6.count() == 0 && t6.countBuckets() == 5);
 }
 
 BOOST_AUTO_TEST_CASE(swap_test)
@@ -36,26 +36,26 @@ BOOST_AUTO_TEST_CASE(swap_test)
   ht_ci4 t1 (2, 2);
   t1['a'] = 1;
   t.swap(t1);
-  BOOST_CHECK(t1.size() == 1 && t1.countValid() == 2 && t1.count() == 1
-    && t.size() == 4 && t.countValid() == 1 && t.count() == 2);
+  BOOST_CHECK(t1.size() == 1 && t1.count() == 2 && t1.countBuckets() == 1
+    && t.size() == 4 && t.count() == 1 && t.countBuckets() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(insert_test)
 {
   ht_ci4 t;
-  t.insert({'a', 1});
+  t.insert(std::pair{'a', 1});
   BOOST_CHECK(t['a'] == 1);
-  BOOST_CHECK_THROW(t.insert({'a', 1}), std::logic_error);
+  BOOST_CHECK_THROW(t.insert(std::pair{'a', 1}), std::logic_error);
   int q = 2;
-  t.insert({'b', q});
+  t.insert(std::pair{'b', q});
   BOOST_CHECK(t['b'] == q);
-  BOOST_CHECK_THROW(t.insert({'b', q}), std::logic_error);
+  BOOST_CHECK_THROW(t.insert(std::pair{'b', q}), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(erase_test)
 {
   ht_ci4 t;
-  t.insert({'a', 1});
+  t.insert(std::pair{'a', 1});
   BOOST_CHECK(t.erase('a') && !t.contains('a'));
   BOOST_CHECK(t.erase('a') == 0);
 }
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(recontainsh_test)
   ht_ci4 t;
   t['a'] = 1;
   t.rehash(4, 10);
-  BOOST_CHECK(t.size() == 40 && t.count() == 4 && t['a'] == 1);
+  BOOST_CHECK(t.size() == 40 && t.countBuckets() == 4 && t['a'] == 1);
 }
 
 BOOST_AUTO_TEST_CASE(clear_test)
@@ -74,15 +74,15 @@ BOOST_AUTO_TEST_CASE(clear_test)
   t['a'] = 1;
   t['b'] = 2;
   t.clear();
-  BOOST_CHECK(t.count() == 4 && t.countValid() == 0);
+  BOOST_CHECK(t.countBuckets() == 4 && t.count() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(size_count_countValid_capacity_test)
+BOOST_AUTO_TEST_CASE(size_countBuckets_count_capacity_test)
 {
   ht_ci4 t (4, 4);
   t['a'] = 1;
   t['b'] = 2;
-  BOOST_CHECK(t.size() == 16 && t.count() == 4 && t.countValid() == 2 && t.capacity() == 4);
+  BOOST_CHECK(t.size() == 16 && t.countBuckets() == 4 && t.count() == 2 && t.capacity() == 4);
 }
 
 BOOST_AUTO_TEST_CASE(contains_test)
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(begin_test)
   const ht_ci4 tc1 = t1;
   BOOST_CHECK(t.begin()->second == 1 && t.begin()->first == 'a' && t.begin() != t.end()
     && t1.begin() == t1.end());
-  BOOST_CHECK(tc.begin()->second == 1 && tc.begin()->first == 'a' && tc.begin() != tc.end()
-    && tc1.begin() == tc1.end());
+  BOOST_CHECK(tc.cbegin()->second == 1 && tc.cbegin()->first == 'a' && tc.cbegin() != tc.cend()
+    && tc1.cbegin() == tc1.cend());
 }
 
 BOOST_AUTO_TEST_CASE(end_test)
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(end_test)
   const ht_ci4 tc = t;
   const ht_ci4 tc1 = t1;
   BOOST_CHECK(t.begin() != t.end() && t1.begin() == t1.end());
-  BOOST_CHECK(tc.begin() != t.end() && tc1.begin() == tc1.end());
+  BOOST_CHECK(tc.cbegin() != t.cend() && tc1.cbegin() == tc1.cend());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(constructor_test)
   t['a'] = 1;
   ht_ci4_it i = t.begin();
   const ht_ci4 t1 = t;
-  ht_ci4_cit ci = t1.begin();
+  ht_ci4_cit ci = t1.cbegin();
   BOOST_CHECK(i->second == 1 && ci->second == 1);
 }
 
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(key_value_test)
   t['a'] = 1;
   ht_ci4_it i = t.begin();
   const ht_ci4 t1 = t;
-  ht_ci4_cit ci = t1.begin();
+  ht_ci4_cit ci = t1.cbegin();
   BOOST_CHECK(i->second == 1 && ci->second == 1 && i->first == 'a' && ci->first == 'a');
 }
 
@@ -164,8 +164,8 @@ BOOST_AUTO_TEST_CASE(operator_plus_plus_test)
   t['a'] = 1;
   ht_ci4_it i = t.begin();
   const ht_ci4 t1 = t;
-  ht_ci4_cit ci = t1.begin();
-  BOOST_CHECK(++i == t.end() && ++ci == t1.end());
+  ht_ci4_cit ci = t1.cbegin();
+  BOOST_CHECK(++i == t.end() && ++ci == t1.cend());
 }
 
 BOOST_AUTO_TEST_CASE(dereference_operators_test)
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(dereference_operators_test)
   t['a'] = 1;
   ht_ci4_it i = t.begin();
   const ht_ci4 t1 = t;
-  ht_ci4_cit ci = t1.begin();
+  ht_ci4_cit ci = t1.cbegin();
   BOOST_CHECK((* i).second == 1 && i->second == 1 && (* ci).second == 1 && ci->second == 1);
 }
 

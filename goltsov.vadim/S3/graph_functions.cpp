@@ -4,11 +4,11 @@
 #include <fstream>
 #include "my_hash_table.hpp"
 
-namespace goltsov
+namespace
 {
   void skipSpaces(std::istream& in)
   {
-    while(in.peek() == ' ')
+    while (in.peek() == ' ')
     {
       char a;
       in.get(a);
@@ -23,7 +23,10 @@ namespace goltsov
     }
     return false;
   }
+}
 
+namespace goltsov
+{
   void graphsParsing(ht_graphs& g, std::istream& in)
   {
     skipSpaces(in);
@@ -433,7 +436,7 @@ namespace goltsov
   {
     std::string name_graph;
     size_t count_vertexes;
-    while(in >> name_graph >> count_vertexes)
+    while (in >> name_graph >> count_vertexes)
     {
       graphs[name_graph];
       for (size_t i = 0; i < count_vertexes; ++i)

@@ -30,7 +30,7 @@ int main(int argc, char** argv)
   functions_graph.insert(std::pair{"extract", goltsov::extractParsing});
 
   std::string command;
-  while(std::cin >> command)
+  while (std::cin >> command)
   {
     if (!functions_graph.contains(command))
     {

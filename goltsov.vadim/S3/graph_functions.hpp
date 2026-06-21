@@ -6,15 +6,19 @@
 namespace goltsov
 {
   using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
-    goltsov::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >,
-    goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
+    goltsov::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >,
+    std::equal_to< std::pair< std::string, std::string > > >, goltsov::Sha1Hasher< std::string >,
+    std::equal_to< std::string > >;
 
-  using ht_it_graphs = goltsov::HashTableIterator< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
-    goltsov::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >,
+  using ht_it_graphs = goltsov::HashTableIterator< std::string,
+    goltsov::HashTable< std::pair< std::string, std::string >, goltsov::Vector< size_t >,
+    goltsov::Sha1Hasher< std::pair< std::string, std::string > >,
+    std::equal_to< std::pair< std::string, std::string > > >,
     goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
 
     using ht_it_pairs = goltsov::HashTableIterator< std::pair< std::string, std::string >, goltsov::Vector< size_t >,
-      goltsov::Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >;
+      goltsov::Sha1Hasher< std::pair< std::string, std::string > >,
+      std::equal_to< std::pair< std::string, std::string > > >;
 
   using ht_functions = goltsov::HashTable< std::string, void (*)(ht_graphs&, std::istream&),
     goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
