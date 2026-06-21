@@ -586,7 +586,7 @@ goltsov::HashTableIterator< Key, Value, Hash, Equal >
   return end();
 }
 template< class Key, class Value, class Hash, class Equal >
-goltsov::HashTableConstIterator< Key, Value, Hash, Equal > 
+goltsov::HashTableConstIterator< Key, Value, Hash, Equal >
   goltsov::HashTable< Key, Value, Hash, Equal >::find(const Key& key) const
 {
   Hash hasher;
