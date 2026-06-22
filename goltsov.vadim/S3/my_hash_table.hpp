@@ -988,7 +988,7 @@ goltsov::HashTableIterator< Key, Value, Hash, Equal > goltsov::detail::makeIncon
 {
   return HashTableIterator< Key, Value, Hash, Equal >{
     const_cast< HashTable< Key, Value, Hash, Equal >* >(it.hash_table_), it.ind_, it.ind_Bucket_,
-    detal::makeInconstantLIter(it.overflow_iterator_)};
+    detail::makeInconstantLIter(it.overflow_iterator_)};
 }
 
 #endif
