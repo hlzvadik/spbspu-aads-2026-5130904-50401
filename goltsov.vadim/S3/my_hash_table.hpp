@@ -701,7 +701,8 @@ goltsov::HashTableIterator< Key, Value, Hash, Equal >::HashTableIterator() noexc
   overflow_iterator_(LIter< detail::NodeHashTable< Key, Value > >())
 {}
 template< class Key, class Value, class Hash, class Equal >
-goltsov::HashTableIterator< Key, Value, Hash, Equal >::HashTableIterator(HashTable< Key, Value, Hash, Equal >* hash_table,
+goltsov::HashTableIterator< Key, Value, Hash, Equal >::HashTableIterator(
+  HashTable< Key, Value, Hash, Equal >* hash_table,
   size_t ind, size_t ind_Bucket, LIter< detail::NodeHashTable< Key, Value > > overflow_it) noexcept:
   hash_table_(hash_table),
   ind_(ind),
