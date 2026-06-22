@@ -12,47 +12,44 @@ namespace goltsov
     void sortPairStringSizeTVector(goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > >&);
   }
 
-  using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
-    goltsov::Vector< size_t >, goltsov::Sha1Hasher< std::pair< std::string, std::string > >,
-    std::equal_to< std::pair< std::string, std::string > > >, goltsov::Sha1Hasher< std::string >,
+  using pairs_vertexes_t = HashTable< std::pair< std::string, std::string >, Vector< size_t >,
+      Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >;
+
+  using graphs_t = HashTable< std::string, pairs_vertexes_t, Sha1Hasher< std::string >,
     std::equal_to< std::string > >;
 
-  using ht_it_graphs = goltsov::HashTableIterator< std::string,
-    goltsov::HashTable< std::pair< std::string, std::string >, goltsov::Vector< size_t >,
-    goltsov::Sha1Hasher< std::pair< std::string, std::string > >,
-    std::equal_to< std::pair< std::string, std::string > > >,
+  using graphs_iter_t = HashTableIterator< std::string, pairs_vertexes_t, Sha1Hasher< std::string >,
+    std::equal_to< std::string > >;
+
+  using pairs_vertexes_iter_t = HashTableIterator< std::pair< std::string, std::string >, Vector< size_t >,
+      Sha1Hasher< std::pair< std::string, std::string > >, std::equal_to< std::pair< std::string, std::string > > >;
+
+  using ht_graphs_functions = goltsov::HashTable< std::string, void (*)(graphs_t&, std::istream&),
     goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
 
-    using ht_it_pairs = goltsov::HashTableIterator< std::pair< std::string, std::string >, goltsov::Vector< size_t >,
-      goltsov::Sha1Hasher< std::pair< std::string, std::string > >,
-      std::equal_to< std::pair< std::string, std::string > > >;
+  void graphsParsing(graphs_t&, std::istream&);
+  void vertexesParsing(graphs_t&, std::istream&);
+  void outboundParsing(graphs_t&, std::istream&);
+  void inboundParsing(graphs_t&, std::istream&);
+  void bindParsing(graphs_t&, std::istream&);
+  void cutParsing(graphs_t&, std::istream&);
+  void createParsing(graphs_t&, std::istream&);
+  void mergeParsing(graphs_t&, std::istream&);
+  void extractParsing(graphs_t&, std::istream&);
 
-  using ht_functions = goltsov::HashTable< std::string, void (*)(ht_graphs&, std::istream&),
-    goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
-
-  void graphsParsing(ht_graphs&, std::istream&);
-  void vertexesParsing(ht_graphs&, std::istream&);
-  void outboundParsing(ht_graphs&, std::istream&);
-  void inboundParsing(ht_graphs&, std::istream&);
-  void bindParsing(ht_graphs&, std::istream&);
-  void cutParsing(ht_graphs&, std::istream&);
-  void createParsing(ht_graphs&, std::istream&);
-  void mergeParsing(ht_graphs&, std::istream&);
-  void extractParsing(ht_graphs&, std::istream&);
-
-  void read_graphs(std::istream&, ht_graphs&);
-  void graphs(ht_graphs&);
-  void vertexes(ht_graphs&, std::string);
-  void outbound(ht_graphs&, std::string, std::string);
-  void inbound(ht_graphs&, std::string, std::string);
-  void bind(ht_graphs&, std::string,
+  void read_graphs(std::istream&, graphs_t&);
+  void graphs(graphs_t&);
+  void vertexes(graphs_t&, std::string);
+  void outbound(graphs_t&, std::string, std::string);
+  void inbound(graphs_t&, std::string, std::string);
+  void bind(graphs_t&, std::string,
     std::string, std::string, size_t);
-  void cut(ht_graphs&, std::string,
+  void cut(graphs_t&, std::string,
     std::string, std::string, size_t);
-  void create(ht_graphs&, std::string,
+  void create(graphs_t&, std::string,
     size_t, goltsov::Vector< std::string >);
-  void merge(ht_graphs&, std::string,
+  void merge(graphs_t&, std::string,
     std::string, std::string);
-  void extract(ht_graphs&, std::string, std::string,
+  void extract(graphs_t&, std::string, std::string,
     size_t, goltsov::Vector< std::string >);
 }

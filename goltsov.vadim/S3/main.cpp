@@ -13,26 +13,26 @@ int main(int argc, char** argv)
     return 1;
   }
   std::fstream file_in (argv[1]);
-  goltsov::ht_graphs graphs(10, 10);
+  goltsov::graphs_t graphs(10, 10);
   goltsov::read_graphs(file_in, graphs);
-  goltsov::ht_functions functions_graph(10, 4);
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  goltsov::ht_graphs_functions functions_graph(10, 4);
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"graphs", goltsov::graphsParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"vertexes", goltsov::vertexesParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"outbound", goltsov::outboundParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"inbound", goltsov::inboundParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"bind", goltsov::bindParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"cut", goltsov::cutParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"create", goltsov::createParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"merge", goltsov::mergeParsing});
-  functions_graph.insert(std::pair< std::string, void (*)(goltsov::ht_graphs&, std::istream&) >
+  functions_graph.insert(std::pair< std::string, void (*)(goltsov::graphs_t&, std::istream&) >
     {"extract", goltsov::extractParsing});
   std::string command;
   while (std::cin >> command)
@@ -53,9 +53,12 @@ int main(int argc, char** argv)
         {
           std::cin.clear();
         }
+        if (std::cin.peek() != '\n')
+        {
+          std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+        }
         std::cout << "<INVALID COMMAND>\n";
       }
     }
-    std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
   }
 }

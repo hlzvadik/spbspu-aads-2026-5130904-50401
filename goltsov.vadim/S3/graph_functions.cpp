@@ -66,22 +66,23 @@ void goltsov::detail::sortPairStringSizeTVector(goltsov::Vector< std::pair< std:
   }
 }
 
-void goltsov::graphsParsing(ht_graphs& g, std::istream&)
+void goltsov::graphsParsing(graphs_t& g, std::istream&)
 {
   graphs(g);
   std::cout << '\n';
 }
-void goltsov::vertexesParsing(ht_graphs& g, std::istream& in)
+void goltsov::vertexesParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   if (!(in >> graph_name))
   {
+    in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     throw std::runtime_error("<INVALID COMMAND>");
   }
   vertexes(g, graph_name);
   std::cout << '\n';
 }
-void goltsov::outboundParsing(ht_graphs& g, std::istream& in)
+void goltsov::outboundParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   std::string vertexe_name;
@@ -92,7 +93,7 @@ void goltsov::outboundParsing(ht_graphs& g, std::istream& in)
   outbound(g, graph_name, vertexe_name);
   std::cout << '\n';
 }
-void goltsov::inboundParsing(ht_graphs& g, std::istream& in)
+void goltsov::inboundParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   std::string vertexe_name;
@@ -103,7 +104,7 @@ void goltsov::inboundParsing(ht_graphs& g, std::istream& in)
   inbound(g, graph_name, vertexe_name);
   std::cout << '\n';
 }
-void goltsov::bindParsing(ht_graphs& g, std::istream& in)
+void goltsov::bindParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   std::string vertexe_a, vertexe_b;
@@ -114,7 +115,7 @@ void goltsov::bindParsing(ht_graphs& g, std::istream& in)
   }
   bind(g, graph_name, vertexe_a, vertexe_b, weight);
 }
-void goltsov::cutParsing(ht_graphs& g, std::istream& in)
+void goltsov::cutParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   std::string vertexe_a, vertexe_b;
@@ -125,7 +126,7 @@ void goltsov::cutParsing(ht_graphs& g, std::istream& in)
   }
   cut(g, graph_name, vertexe_a, vertexe_b, weight);
 }
-void goltsov::createParsing(ht_graphs& g, std::istream& in)
+void goltsov::createParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   size_t count;
@@ -145,7 +146,7 @@ void goltsov::createParsing(ht_graphs& g, std::istream& in)
   }
   create(g, graph_name, count, vertexes_names);
 }
-void goltsov::mergeParsing(ht_graphs& g, std::istream& in)
+void goltsov::mergeParsing(graphs_t& g, std::istream& in)
 {
   std::string new_graph;
   std::string old_graph_1, old_graph_2;
@@ -155,7 +156,7 @@ void goltsov::mergeParsing(ht_graphs& g, std::istream& in)
   }
   merge(g, new_graph, old_graph_1, old_graph_2);
 }
-void goltsov::extractParsing(ht_graphs& g, std::istream& in)
+void goltsov::extractParsing(graphs_t& g, std::istream& in)
 {
   std::string new_graph;
   std::string old_graph;
@@ -176,7 +177,7 @@ void goltsov::extractParsing(ht_graphs& g, std::istream& in)
   }
   extract(g, new_graph, old_graph, count, vertexes_names);
 }
-void goltsov::read_graphs(std::istream& in, ht_graphs& graphs)
+void goltsov::read_graphs(std::istream& in, graphs_t& graphs)
 {
   std::string name_graph;
   size_t count_vertexes;
@@ -195,10 +196,10 @@ void goltsov::read_graphs(std::istream& in, ht_graphs& graphs)
     }
   }
 }
-void goltsov::graphs(ht_graphs& graphs)
+void goltsov::graphs(graphs_t& graphs)
 {
   goltsov::Vector< std::string > name_graphs;
-  for (ht_it_graphs it = graphs.begin(); it != graphs.end(); ++it)
+  for (graphs_iter_t it = graphs.begin(); it != graphs.end(); ++it)
   {
     name_graphs.pushBack(it->first);
   }
@@ -212,14 +213,14 @@ void goltsov::graphs(ht_graphs& graphs)
     std::cout << '\n' << name_graphs[i];
   }
 }
-void goltsov::vertexes(ht_graphs& graphs, std::string name_graph)
+void goltsov::vertexes(graphs_t& graphs, std::string name_graph)
 {
   if (!graphs.contains(name_graph))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
   goltsov::Vector< std::string > name_vertexes;
-  for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
+  for (pairs_vertexes_iter_t it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
   {
     name_vertexes.pushBack(it->first.first);
     name_vertexes.pushBack(it->first.second);
@@ -237,7 +238,7 @@ void goltsov::vertexes(ht_graphs& graphs, std::string name_graph)
     }
   }
 }
-void goltsov::outbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex)
+void goltsov::outbound(graphs_t& graphs, std::string name_graph, std::string name_vertex)
 {
   if (!graphs.contains(name_graph))
   {
@@ -245,7 +246,7 @@ void goltsov::outbound(ht_graphs& graphs, std::string name_graph, std::string na
   }
   bool is_has_name = false;
   goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > > name_weight_vertexes;
-  for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
+  for (pairs_vertexes_iter_t it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
   {
     if (it->first.first == name_vertex)
     {
@@ -283,7 +284,7 @@ void goltsov::outbound(ht_graphs& graphs, std::string name_graph, std::string na
     }
   }
 }
-void goltsov::inbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex)
+void goltsov::inbound(graphs_t& graphs, std::string name_graph, std::string name_vertex)
 {
   if (!graphs.contains(name_graph))
   {
@@ -291,7 +292,7 @@ void goltsov::inbound(ht_graphs& graphs, std::string name_graph, std::string nam
   }
   bool is_has_name = false;
   goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > > name_weight_vertexes;
-  for (ht_it_pairs it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
+  for (pairs_vertexes_iter_t it = graphs[name_graph].begin(); it != graphs[name_graph].end(); ++it)
   {
     if (it->first.second == name_vertex)
     {
@@ -329,7 +330,7 @@ void goltsov::inbound(ht_graphs& graphs, std::string name_graph, std::string nam
     }
   }
 }
-void goltsov::bind(ht_graphs& graphs, std::string name_graph, std::string name_vertex1,
+void goltsov::bind(graphs_t& graphs, std::string name_graph, std::string name_vertex1,
   std::string name_vertex2, size_t weight)
 {
   if (!graphs.contains(name_graph))
@@ -338,7 +339,7 @@ void goltsov::bind(ht_graphs& graphs, std::string name_graph, std::string name_v
   }
   graphs[name_graph][{name_vertex1, name_vertex2}].pushBack(weight);
 }
-void goltsov::cut(ht_graphs& graphs, std::string name_graph, std::string name_vertex1,
+void goltsov::cut(graphs_t& graphs, std::string name_graph, std::string name_vertex1,
   std::string name_vertex2, size_t weight)
 {
   if (!graphs.contains(name_graph))
@@ -359,7 +360,7 @@ void goltsov::cut(ht_graphs& graphs, std::string name_graph, std::string name_ve
   }
   throw std::runtime_error("<INVALID COMMAND>");
 }
-void goltsov::create(ht_graphs& graphs, std::string name_graph, size_t count, goltsov::Vector< std::string > vertexes_names)
+void goltsov::create(graphs_t& graphs, std::string name_graph, size_t count, goltsov::Vector< std::string > vertexes_names)
 {
   if (graphs.contains(name_graph))
   {
@@ -371,7 +372,7 @@ void goltsov::create(ht_graphs& graphs, std::string name_graph, size_t count, go
     graphs[name_graph][{vertexes_names[i], vertexes_names[0]}];
   }
 }
-void goltsov::merge(ht_graphs& graphs, std::string name_new_graph, std::string name_graph1, std::string name_graph2)
+void goltsov::merge(graphs_t& graphs, std::string name_new_graph, std::string name_graph1, std::string name_graph2)
 {
   if (graphs.contains(name_new_graph))
   {
@@ -385,18 +386,18 @@ void goltsov::merge(ht_graphs& graphs, std::string name_new_graph, std::string n
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
-  for (ht_it_pairs it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
+  for (pairs_vertexes_iter_t it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
   {
     graphs[name_new_graph][it->first].pushBackRange(
       graphs[name_graph1][it->first].begin(), graphs[name_graph1][it->first].getSize());
   }
-  for (ht_it_pairs it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
+  for (pairs_vertexes_iter_t it = graphs[name_graph1].begin(); it != graphs[name_graph1].end(); ++it)
   {
     graphs[name_new_graph][it->first].pushBackRange(
       graphs[name_graph2][it->first].begin(), graphs[name_graph2][it->first].getSize());
   }
 }
-void goltsov::extract(ht_graphs& graphs, std::string name_new_graph, std::string name_old_graph,
+void goltsov::extract(graphs_t& graphs, std::string name_new_graph, std::string name_old_graph,
   size_t count_vertexes, goltsov::Vector< std::string > vertexes)
 {
   if (graphs.contains(name_new_graph))
@@ -409,7 +410,7 @@ void goltsov::extract(ht_graphs& graphs, std::string name_new_graph, std::string
   }
   goltsov::HashTable< std::string, std::string, goltsov::Sha1Hasher< std::string >,
     std::equal_to< std::string > > name_vertexes;
-  for (ht_it_pairs it = graphs[name_old_graph].begin(); it != graphs[name_old_graph].end(); ++it)
+  for (pairs_vertexes_iter_t it = graphs[name_old_graph].begin(); it != graphs[name_old_graph].end(); ++it)
   {
     name_vertexes[it->first.first];
     name_vertexes[it->first.second];
