@@ -53,10 +53,7 @@ int main(int argc, char** argv)
         {
           std::cin.clear();
         }
-        if (std::cin.peek() != '\n')
-        {
-          std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-        }
+        std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
         std::cout << "<INVALID COMMAND>\n";
       }
     }
