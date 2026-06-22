@@ -41,6 +41,8 @@ namespace goltsov
     template< class Key, class Value, class Hash, class Equal >
     HashTableIterator< Key, Value, Hash, Equal > makeInconstantHashTableIterator(
       HashTableConstIterator< Key, Value, Hash, Equal >);
+    template< class T >
+    LIter< T > makeInconstantLIter(LCIter< T >);
   }
 }
 
@@ -988,7 +990,7 @@ goltsov::HashTableIterator< Key, Value, Hash, Equal > goltsov::detail::makeIncon
 {
   return HashTableIterator< Key, Value, Hash, Equal >{
     const_cast< HashTable< Key, Value, Hash, Equal >* >(it.hash_table_), it.ind_, it.ind_Bucket_,
-    detail::makeInconstantLIter(it.overflow_iterator_)};
+    makeInconstantLIter(it.overflow_iterator_)};
 }
 
 #endif
