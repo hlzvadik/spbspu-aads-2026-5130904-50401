@@ -596,7 +596,9 @@ template< class Key, class Value, class Hash, class Equal >
 goltsov::HashTableIterator< Key, Value, Hash, Equal >
   goltsov::HashTable< Key, Value, Hash, Equal >::find(const Key& key)
 {
-  return makeInconstantHashTableIterator((const_cast< const HashTable< Key, Value, Hash, Equal > >(*this)).find(key));
+  return detail::makeInconstantHashTableIterator(
+    (const_cast< const HashTable< Key, Value, Hash, Equal > >(*this)).find(key)
+  );
 }
 template< class Key, class Value, class Hash, class Equal >
 goltsov::HashTableConstIterator< Key, Value, Hash, Equal >
