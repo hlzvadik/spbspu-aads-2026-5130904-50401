@@ -76,7 +76,6 @@ void goltsov::vertexesParsing(graphs_t& g, std::istream& in)
   std::string graph_name;
   if (!(in >> graph_name))
   {
-    in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     throw std::runtime_error("<INVALID COMMAND>");
   }
   vertexes(g, graph_name);
