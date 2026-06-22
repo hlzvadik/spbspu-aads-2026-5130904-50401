@@ -27,6 +27,8 @@ namespace goltsov
     LIter< T > makeLIterByPtr(Node< T >* p);
     template< class T >
     LCIter< T > makeLCIterByPtr(const Node< T >* p);
+    template< class T >
+    LIter< T > makeInconstantLIter(LCIter< T >);
   }
 }
 
@@ -49,6 +51,7 @@ namespace goltsov
   private:
     friend class List< T >;
     friend LIter< T > detail::makeLIterByPtr< T >(Node< T >* p);
+    friend LIter< T > detail::makeInconstantLIter< T >(LCIter< T >);
     detail::Node< T >* ptr_;
     LIter(detail::Node< T >* p) noexcept;
     LIter< T > next() const;
@@ -69,6 +72,7 @@ namespace goltsov
     friend class List< T >;
     friend class LIter< T >;
     friend LCIter< T > detail::makeLCIterByPtr< T >(const Node< T >* p);
+    friend LIter< T > detail::makeInconstantLIter< T >(LCIter< T >);
     const detail::Node< T >* ptr_;
     LCIter(const detail::Node< T >* p) noexcept;
     LCIter< T > next() const;
@@ -463,6 +467,11 @@ void goltsov::List< T >::swap(List& other) noexcept
 {
   std::swap(fake_, other.fake_);
   std::swap(size_, other.size_);
+}
+template< class T >
+goltsov::LIter< T > goltsov::detail::makeInconstantLIter(LCIter< T > it)
+{
+  return LIter< T >{const_cast< Node< T >* >(it.ptr_)};
 }
 
 #endif
