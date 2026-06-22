@@ -7,9 +7,9 @@ namespace goltsov
 {
   namespace detail
   {
-    void sortStringVector(goltsov::Vector< std::string >& vec);
-    void sortSizeTVector(goltsov::Vector< size_t >& vec);
-    void sortPairStringSizeTVector(goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > >& vec);
+    void sortStringVector(goltsov::Vector< std::string >&);
+    void sortSizeTVector(goltsov::Vector< size_t >&);
+    void sortPairStringSizeTVector(goltsov::Vector< std::pair< std::string, goltsov::Vector< size_t > > >&);
   }
 
   using ht_graphs = goltsov::HashTable< std::string, goltsov::HashTable< std::pair< std::string, std::string >,
@@ -30,29 +30,29 @@ namespace goltsov
   using ht_functions = goltsov::HashTable< std::string, void (*)(ht_graphs&, std::istream&),
     goltsov::Sha1Hasher< std::string >, std::equal_to< std::string > >;
 
-  void graphsParsing(ht_graphs& g, std::istream& in);
-  void vertexesParsing(ht_graphs& g, std::istream& in);
-  void outboundParsing(ht_graphs& g, std::istream& in);
-  void inboundParsing(ht_graphs& g, std::istream& in);
-  void bindParsing(ht_graphs& g, std::istream& in);
-  void cutParsing(ht_graphs& g, std::istream& in);
-  void createParsing(ht_graphs& g, std::istream& in);
-  void mergeParsing(ht_graphs& g, std::istream& in);
-  void extractParsing(ht_graphs& g, std::istream& in);
+  void graphsParsing(ht_graphs&, std::istream&);
+  void vertexesParsing(ht_graphs&, std::istream&);
+  void outboundParsing(ht_graphs&, std::istream&);
+  void inboundParsing(ht_graphs&, std::istream&);
+  void bindParsing(ht_graphs&, std::istream&);
+  void cutParsing(ht_graphs&, std::istream&);
+  void createParsing(ht_graphs&, std::istream&);
+  void mergeParsing(ht_graphs&, std::istream&);
+  void extractParsing(ht_graphs&, std::istream&);
 
-  void read_graphs(std::istream& in, ht_graphs& graphs);
-  void graphs(ht_graphs& graphs);
-  void vertexes(ht_graphs& graphs, std::string name_graph);
-  void outbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex);
-  void inbound(ht_graphs& graphs, std::string name_graph, std::string name_vertex);
-  void bind(ht_graphs& graphs, std::string name_graph,
-    std::string name_vertex1, std::string name_vertex2, size_t weight);
-  void cut(ht_graphs& graphs, std::string name_graph,
-    std::string name_vertex1, std::string name_vertex2, size_t weight);
-  void create(ht_graphs& graphs, std::string name_graph,
-    size_t count, goltsov::Vector< std::string > vertexes_names);
-  void merge(ht_graphs& graphs, std::string name_new_graph,
-    std::string name_graph1, std::string name_graph2);
-  void extract(ht_graphs& graphs, std::string name_new_graph, std::string name_old_graph,
-    size_t count_vertexes, goltsov::Vector< std::string > vertexes);
+  void read_graphs(std::istream&, ht_graphs&);
+  void graphs(ht_graphs&);
+  void vertexes(ht_graphs&, std::string);
+  void outbound(ht_graphs&, std::string, std::string);
+  void inbound(ht_graphs&, std::string, std::string);
+  void bind(ht_graphs&, std::string,
+    std::string, std::string, size_t);
+  void cut(ht_graphs&, std::string,
+    std::string, std::string, size_t);
+  void create(ht_graphs&, std::string,
+    size_t, goltsov::Vector< std::string >);
+  void merge(ht_graphs&, std::string,
+    std::string, std::string);
+  void extract(ht_graphs&, std::string, std::string,
+    size_t, goltsov::Vector< std::string >);
 }

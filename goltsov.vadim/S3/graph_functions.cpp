@@ -66,7 +66,7 @@ void goltsov::detail::sortPairStringSizeTVector(goltsov::Vector< std::pair< std:
   }
 }
 
-void goltsov::graphsParsing(ht_graphs& g, std::istream& in)
+void goltsov::graphsParsing(ht_graphs& g, std::istream&)
 {
   graphs(g);
   std::cout << '\n';
