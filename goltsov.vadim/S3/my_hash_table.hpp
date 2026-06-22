@@ -8,6 +8,16 @@
 
 namespace goltsov
 {
+  template< class Key, class Value, class Hash, class Equal >
+  class HashTable;
+  template< class Key, class Value, class Hash, class Equal >
+  class HashTableConstIterator;
+  template< class Key, class Value, class Hash, class Equal >
+  class HashTableIterator;
+}
+
+namespace goltsov
+{
   namespace detail
   {
     template< class Key, class Value >
@@ -28,6 +38,9 @@ namespace goltsov
       ~Bucket();
       void init(size_t capacity);
     };
+    template< class Key, class Value, class Hash, class Equal >
+    HashTableIterator< Key, Value, Hash, Equal > makeInconstantHashTableIterator(
+      HashTableConstIterator< Key, Value, Hash, Equal >);
   }
 }
 
@@ -53,13 +66,6 @@ namespace goltsov
 namespace goltsov
 {
   template< class Key, class Value, class Hash, class Equal >
-  class HashTable;
-  template< class Key, class Value, class Hash, class Equal >
-  class HashTableConstIterator;
-  template< class Key, class Value, class Hash, class Equal >
-  class HashTableIterator;
-  template< class Key, class Value, class Hash, class Equal >
-
   class HashTableIterator
   {
   public:
@@ -90,6 +96,9 @@ namespace goltsov
     friend bool operator==(const HashTableConstIterator< K, V, H, E >&, const HashTableIterator< K, V, H, E >&);
     template< class K, class V, class H, class E >
     friend bool operator!=(const HashTableConstIterator< K, V, H, E >&, const HashTableIterator< K, V, H, E >&);
+    friend HashTableIterator< Key, Value, Hash, Equal >
+      detail::makeInconstantHashTableIterator< Key, Value, Hash, Equal >(
+      HashTableConstIterator< Key, Value, Hash, Equal > it);
   };
 
   template< class Key, class Value, class Hash, class Equal >
@@ -123,6 +132,9 @@ namespace goltsov
     friend bool operator==(const HashTableConstIterator< K, V, H, E >&, const HashTableIterator< K, V, H, E >&);
     template< class K, class V, class H, class E >
     friend bool operator!=(const HashTableConstIterator< K, V, H, E >&, const HashTableIterator< K, V, H, E >&);
+    friend HashTableIterator< Key, Value, Hash, Equal >
+      detail::makeInconstantHashTableIterator< Key, Value, Hash, Equal >(
+      HashTableConstIterator< Key, Value, Hash, Equal >);
   };
 
   template< class Key, class Value, class Hash, class Equal >
@@ -584,32 +596,7 @@ template< class Key, class Value, class Hash, class Equal >
 goltsov::HashTableIterator< Key, Value, Hash, Equal >
   goltsov::HashTable< Key, Value, Hash, Equal >::find(const Key& key)
 {
-  Hash hasher;
-  Equal e;
-  if (count_buckets_ == 0)
-  {
-    return end();
-  }
-  size_t ind = hasher(key) % count_buckets_;
-  for (size_t i = 0; i < size_bucket_; ++i)
-  {
-    if (data_[ind].node[i].is_valid && e(key, data_[ind].node[i].data.first))
-    {
-      return HashTableIterator< Key, Value, Hash, Equal >(this,
-        ind, i, LIter< detail::NodeHashTable< Key, Value > >());
-    }
-  }
-  LIter< detail::NodeHashTable< Key, Value > > it = overflow_.begin();
-  while (it != overflow_.end())
-  {
-    if ((*it).is_valid && e(key, it->data.first))
-    {
-      return HashTableIterator< Key, Value, Hash, Equal >(this,
-        count_buckets_, 0, it);
-    }
-    ++it;
-  }
-  return end();
+  return makeInconstantHashTableIterator((const_cast< const HashTable< Key, Value, Hash, Equal > >(*this)).find(key));
 }
 template< class Key, class Value, class Hash, class Equal >
 goltsov::HashTableConstIterator< Key, Value, Hash, Equal >
@@ -663,27 +650,7 @@ const Value& goltsov::HashTable< Key, Value, Hash, Equal >::operator[](const Key
 template< class Key, class Value, class Hash, class Equal >
 goltsov::HashTableIterator< Key, Value, Hash, Equal > goltsov::HashTable< Key, Value, Hash, Equal >::begin()
 {
-  for (size_t i = 0; i < count_buckets_; ++i)
-  {
-    for (size_t j = 0; j < size_bucket_; ++j)
-    {
-      if (data_[i].node[j].is_valid)
-      {
-        return HashTableIterator< Key, Value, Hash, Equal >(this, i, j,
-          LIter< detail::NodeHashTable< Key, Value > >());
-      }
-    }
-  }
-  LIter< detail::NodeHashTable< Key, Value > > overflow_now = overflow_.begin();
-  while (overflow_now != overflow_.end())
-  {
-    if ((*overflow_now).is_valid)
-    {
-      return HashTableIterator< Key, Value, Hash, Equal >(this, count_buckets_, 0, overflow_now);
-    }
-    ++overflow_now;
-  }
-  return end();
+  return detail::makeInconstantHashTableIterator(cbegin());
 }
 template< class Key, class Value, class Hash, class Equal >
 goltsov::HashTableIterator< Key, Value, Hash, Equal > goltsov::HashTable< Key, Value, Hash, Equal >::end()
@@ -1012,6 +979,14 @@ bool goltsov::operator!=(const HashTableConstIterator< Key, Value, Hash, Equal >
   const HashTableIterator< Key, Value, Hash, Equal >& rhs)
 {
   return !(rhs == lhs);
+}
+template< class Key, class Value, class Hash, class Equal >
+goltsov::HashTableIterator< Key, Value, Hash, Equal > goltsov::detail::makeInconstantHashTableIterator(
+  HashTableConstIterator< Key, Value, Hash, Equal > it)
+{
+  return HashTableIterator< Key, Value, Hash, Equal >{
+    const_cast< HashTable< Key, Value, Hash, Equal >* >(it.hash_table_), it.ind_, it.ind_Bucket_,
+    makeInconstantLIter(it.overflow_iterator_)};
 }
 
 #endif
