@@ -59,6 +59,7 @@ namespace goltsov
   template< class Key, class Value, class Hash, class Equal >
   class HashTableIterator;
   template< class Key, class Value, class Hash, class Equal >
+
   class HashTableIterator
   {
   public:
@@ -165,6 +166,31 @@ namespace goltsov
     detail::Bucket< Key, Value >* data_;
     List< detail::NodeHashTable< Key, Value > > overflow_;
   };
+
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator==(const HashTableIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableIterator< Key, Value, Hash, Equal >& rhs);
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator!=(const HashTableIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableIterator< Key, Value, Hash, Equal >& rhs);
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator==(const HashTableConstIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableConstIterator< Key, Value, Hash, Equal >& rhs);
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator!=(const HashTableConstIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableConstIterator< Key, Value, Hash, Equal >& rhs);
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator==(const HashTableIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableConstIterator< Key, Value, Hash, Equal >& rhs);
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator!=(const HashTableIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableConstIterator< Key, Value, Hash, Equal >& rhs);
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator==(const HashTableConstIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableIterator< Key, Value, Hash, Equal >& rhs);
+  template< class Key, class Value, class Hash, class Equal >
+  bool operator!=(const HashTableConstIterator< Key, Value, Hash, Equal >& lhs,
+    const HashTableIterator< Key, Value, Hash, Equal >& rhs);
 }
 
 template< class T >
