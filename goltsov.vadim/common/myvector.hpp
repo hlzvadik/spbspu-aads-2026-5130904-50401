@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <stdexcept>
 
-namespace topit
+namespace goltsov
 {
   template< class T >
   class VIter
@@ -84,7 +84,7 @@ namespace topit
   bool operator!=(const Vector< T >& rhs, const Vector< T >& lhs);
 }
 
-namespace topit
+namespace goltsov
 {
   template< class T >
   bool operator==(const Vector< T >& rhs, const Vector< T >& lhs)
