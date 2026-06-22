@@ -4,6 +4,29 @@
 #include <fstream>
 #include "my_hash_table.hpp"
 
+namespace
+{
+  void skipSpaces(std::istream& in)
+  {
+    while (in.peek() == ' ')
+    {
+      in.get();
+    }
+  }
+  bool checkEndLineWithSkipSpaces(std::istream& in)
+  {
+    skipSpaces(in);
+    if (in.peek() == '\n' || in.peek() == EOF)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+}
+
 void goltsov::detail::sortStringVector(goltsov::Vector< std::string >& vec)
 {
   if (vec.getSize() == 0)
@@ -74,7 +97,7 @@ void goltsov::graphsParsing(graphs_t& g, std::istream&)
 void goltsov::vertexesParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
-  if (!(in >> graph_name))
+  if (!(in >> graph_name) || !checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
@@ -85,7 +108,11 @@ void goltsov::outboundParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   std::string vertexe_name;
-  if (!(in >> graph_name >> vertexe_name))
+  if (!(in >> graph_name) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> vertexe_name) || !checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
@@ -96,7 +123,11 @@ void goltsov::inboundParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   std::string vertexe_name;
-  if (!(in >> graph_name >> vertexe_name))
+  if (!(in >> graph_name) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> vertexe_name) || !checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
@@ -108,7 +139,19 @@ void goltsov::bindParsing(graphs_t& g, std::istream& in)
   std::string graph_name;
   std::string vertexe_a, vertexe_b;
   size_t weight;
-  if (!(in >> graph_name >> vertexe_a >> vertexe_b >> weight))
+  if (!(in >> graph_name) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> vertexe_a) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> vertexe_b) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> weight) || !checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
@@ -119,7 +162,19 @@ void goltsov::cutParsing(graphs_t& g, std::istream& in)
   std::string graph_name;
   std::string vertexe_a, vertexe_b;
   size_t weight;
-  if (!(in >> graph_name >> vertexe_a >> vertexe_b >> weight))
+  if (!(in >> graph_name) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> vertexe_a) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> vertexe_b) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> weight) || !checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
@@ -129,27 +184,50 @@ void goltsov::createParsing(graphs_t& g, std::istream& in)
 {
   std::string graph_name;
   size_t count;
-  if (!(in >> graph_name >> count))
+  if (!(in >> graph_name) || checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
+  if (!(in >> count) || checkEndLineWithSkipSpaces(in))
+  {
+    if (count == 0)
+    {
+      create(g, graph_name, count, goltsov::Vector< std::string > {});
+      return;
+    }
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
   goltsov::Vector< std::string > vertexes_names;
-  for (size_t i = 0; i < count; ++i)
+  for (size_t i = 0; i < count - 1; ++i)
   {
     std::string name;
-    if (!(in >> name))
+    if (!(in >> name) || checkEndLineWithSkipSpaces(in))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     vertexes_names.pushBack(name);
   }
+  std::string name;
+  if (!(in >> name) || !checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  vertexes_names.pushBack(name);
   create(g, graph_name, count, vertexes_names);
 }
 void goltsov::mergeParsing(graphs_t& g, std::istream& in)
 {
   std::string new_graph;
   std::string old_graph_1, old_graph_2;
-  if (!(in >> new_graph >> old_graph_1 >> old_graph_2))
+  if (!(in >> new_graph) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> old_graph_1) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> old_graph_2) || !checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
@@ -160,20 +238,39 @@ void goltsov::extractParsing(graphs_t& g, std::istream& in)
   std::string new_graph;
   std::string old_graph;
   size_t count;
-  if (!(in >> new_graph >> old_graph >> count))
+  if (!(in >> new_graph) || checkEndLineWithSkipSpaces(in))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
+  if (!(in >> old_graph) || checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  if (!(in >> count) || checkEndLineWithSkipSpaces(in))
+  {
+    if (count == 0)
+    {
+      extract(g, new_graph, old_graph, count, goltsov::Vector< std::string > {});
+      return;
+    }
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
   goltsov::Vector< std::string > vertexes_names;
-  for (size_t i = 0; i < count; ++i)
+  for (size_t i = 0; i < count - 1; ++i)
   {
     std::string name;
-    if (!(in >> name))
+    if (!(in >> name) || checkEndLineWithSkipSpaces(in))
     {
       throw std::runtime_error("<INVALID COMMAND>");
     }
     vertexes_names.pushBack(name);
   }
+  std::string name;
+  if (!(in >> name) || !checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
+  vertexes_names.pushBack(name);
   extract(g, new_graph, old_graph, count, vertexes_names);
 }
 void goltsov::read_graphs(std::istream& in, graphs_t& graphs)
