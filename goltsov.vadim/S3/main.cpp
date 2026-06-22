@@ -50,6 +50,10 @@ int main(int argc, char** argv)
       }
       catch(...)
       {
+        if (!std::cin.eof() && std::cin.fail())
+        {
+          std::cin.clear();
+        }
         std::cout << "<INVALID COMMAND>\n";
       }
     }
