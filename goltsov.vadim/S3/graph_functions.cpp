@@ -89,8 +89,12 @@ void goltsov::detail::sortPairStringSizeTVector(goltsov::Vector< std::pair< std:
   }
 }
 
-void goltsov::graphsParsing(graphs_t& g, std::istream&)
+void goltsov::graphsParsing(graphs_t& g, std::istream& in)
 {
+  if (!checkEndLineWithSkipSpaces(in))
+  {
+    throw std::runtime_error("<INVALID COMMAND>");
+  }
   graphs(g);
   std::cout << '\n';
 }
