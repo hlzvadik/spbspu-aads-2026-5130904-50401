@@ -18,10 +18,14 @@ int main(int argc, char** argv)
   goltsov::readSets(file_in, all_sets);
 
   goltsov::bst_func functions;
-  functions.push("print", goltsov::printParsing);
-  functions.push("complement", goltsov::complementParsing);
-  functions.push("intersect", goltsov::intersectParsing);
-  functions.push("union", goltsov::unionParsing);
+  functions.insert(std::pair< std::string, void (*)(std::ostream&, std::istream&, goltsov::bst_s_bst_is&) >{
+    "print", goltsov::printParsing});
+  functions.insert(std::pair< std::string, void (*)(std::ostream&, std::istream&, goltsov::bst_s_bst_is&) >{
+    "complement", goltsov::complementParsing});
+  functions.insert(std::pair< std::string, void (*)(std::ostream&, std::istream&, goltsov::bst_s_bst_is&) >{
+    "intersect", goltsov::intersectParsing});
+  functions.insert(std::pair< std::string, void (*)(std::ostream&, std::istream&, goltsov::bst_s_bst_is&) >{
+    "union", goltsov::unionParsing});
 
   while(1)
   {
@@ -32,7 +36,7 @@ int main(int argc, char** argv)
     }
     try
     {
-      functions.get(command)(std::cout, std::cin, all_sets);
+      functions.at(command)(std::cout, std::cin, all_sets);
     }
     catch (std::exception& e)
     {
