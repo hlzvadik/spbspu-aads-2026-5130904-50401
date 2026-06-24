@@ -2,956 +2,954 @@
 #define MYBST_HPP
 #include <cstddef>
 #include <utility>
-#include <stdexcept>
-#include <algorithm>
+#include <memory>
+#include <mystack.hpp>
 
 namespace goltsov
 {
   template< class Key, class Value, class Compare >
   class BSTree;
-
+  template< class Key, class Value >
+  class BSTIterator;
   template< class Key, class Value >
   class BSTConstIterator;
 
-  template< class Key, class Value >
-  struct NodeBST
+  namespace detail
   {
-    std::pair< Key, Value > data_;
-    NodeBST< Key, Value >* left_;
-    NodeBST< Key, Value >* right_;
-    NodeBST< Key, Value >* parent_;
-    size_t height_;
-  };
+    template< class Key, class Value >
+    struct NodeBST
+    {
+      std::pair< Key, Value > data;
+      NodeBST< Key, Value >* left;
+      NodeBST< Key, Value >* right;
+      NodeBST< Key, Value >* parent;
+      size_t height() const noexcept;
+    };
+    template< class Key, class Value >
+    BSTIterator< Key, Value > makeBSTIterByPtr(NodeBST< Key, Value >* ptr);
+    template< class Key, class Value >
+    BSTConstIterator< Key, Value > makeBSTConstIterByPtr(NodeBST< Key, Value >* ptr);
+    template< class Key, class Value >
+    NodeBST< Key, Value >* falLeft(detail::NodeBST< Key, Value >* a);
+    template< class Key, class Value >
+    NodeBST< Key, Value >* falRight(detail::NodeBST< Key, Value >* a);
+  }
 
   template< class Key, class Value >
   class BSTIterator
   {
-    template< class K, class V, class C >
-    friend class BSTree;
-    friend BSTConstIterator< Key, Value >;
-    NodeBST< Key, Value>* ptr_;
   public:
     BSTIterator();
-    ~BSTIterator() = default;
-    BSTIterator(const BSTIterator< Key, Value >&);
+    BSTIterator(const BSTIterator< Key, Value >&) = default;
     BSTIterator(BSTIterator< Key, Value >&&);
-    BSTIterator< Key, Value > operator=(const BSTIterator< Key, Value >&);
-    BSTIterator< Key, Value > operator=(BSTIterator< Key, Value >&&);
-    BSTIterator(NodeBST< Key, Value >*);
-
-    BSTIterator< Key, Value > next() const;
-    bool hasNext() const noexcept;
-    BSTIterator< Key, Value > prev() const;
-    bool hasPrev() const noexcept;
-
+    ~BSTIterator() = default;
+    BSTIterator< Key, Value >& operator=(const BSTIterator< Key, Value >&) = default;
+    BSTIterator< Key, Value >& operator=(BSTIterator< Key, Value >&&);
     BSTIterator< Key, Value > operator++();
-
-    std::pair< Key, Value >& operator*() const;
-    std::pair< Key, Value >* operator->() const;
-
+    BSTIterator< Key, Value > operator++(int);
+    BSTIterator< Key, Value > operator--();
+    BSTIterator< Key, Value > operator--(int);
+    std::pair< Key, Value >& operator*();
+    std::pair< Key, Value >* operator->();
     bool operator==(const BSTIterator< Key, Value >&) const noexcept;
     bool operator!=(const BSTIterator< Key, Value >&) const noexcept;
     bool operator==(const BSTConstIterator< Key, Value >&) const noexcept;
     bool operator!=(const BSTConstIterator< Key, Value >&) const noexcept;
-
     operator BSTConstIterator< Key, Value >() const;
-
-    NodeBST< Key, Value >* getPtr() const;
+    detail::NodeBST< Key, Value >* getPtr();
+  private:
+    template< class K, class V, class C >
+    friend class BSTree;
+    friend BSTConstIterator< Key, Value >;
+    friend BSTIterator< Key, Value > detail::makeBSTIterByPtr< Key, Value >(NodeBST< Key, Value >* ptr);
+    detail::NodeBST< Key, Value>* ptr_;
+    BSTIterator(detail::NodeBST< Key, Value >*);
+    BSTIterator< Key, Value > next() const;
+    bool hasNext() const noexcept;
+    BSTIterator< Key, Value > prev() const;
+    bool hasPrev() const noexcept;
   };
 
   template< class Key, class Value >
   class BSTConstIterator
   {
-    template< class K, class V, class C >
-    friend class BSTree;
-    friend class BSTIterator< Key, Value >;
-    const NodeBST< Key, Value>* ptr_;
   public:
     BSTConstIterator();
-    ~BSTConstIterator() = default;
-    BSTConstIterator(const BSTConstIterator< Key, Value >&);
+    BSTConstIterator(const BSTConstIterator< Key, Value >&) = default;
     BSTConstIterator(BSTConstIterator< Key, Value >&&);
-    BSTConstIterator< Key, Value >& operator=(const BSTConstIterator< Key, Value >&);
+    ~BSTConstIterator() = default;
+    BSTConstIterator< Key, Value >& operator=(const BSTConstIterator< Key, Value >&) = default;
     BSTConstIterator< Key, Value >& operator=(BSTConstIterator< Key, Value >&&);
-    BSTConstIterator(const NodeBST< Key, Value >*);
-
-    BSTConstIterator< Key, Value > next() const;
-    bool hasNext() const noexcept;
-    BSTConstIterator< Key, Value > prev() const;
-    bool hasPrev() const noexcept;
-
     BSTConstIterator< Key, Value > operator++();
-
-    const std::pair< Key, Value >& operator*() const;
-    const std::pair< Key, Value >* operator->() const;
-
+    BSTConstIterator< Key, Value > operator++(int);
+    BSTConstIterator< Key, Value > operator--();
+    BSTConstIterator< Key, Value > operator--(int);
+    const std::pair< Key, Value >& operator*();
+    const std::pair< Key, Value >* operator->();
     bool operator==(const BSTIterator< Key, Value >&) const noexcept;
     bool operator!=(const BSTIterator< Key, Value >&) const noexcept;
     bool operator==(const BSTConstIterator< Key, Value >&) const noexcept;
     bool operator!=(const BSTConstIterator< Key, Value >&) const noexcept;
-
-    const NodeBST< Key, Value >* getPtr() const;
+    const detail::NodeBST< Key, Value >* getPtr();
+  private:
+    template< class K, class V, class C >
+    friend class BSTree;
+    friend class BSTIterator< Key, Value >;
+    friend BSTConstIterator< Key, Value > detail::makeBSTConstIterByPtr< Key, Value >(NodeBST< Key, Value >* ptr);
+    const detail::NodeBST< Key, Value>* ptr_;
+    BSTConstIterator(const detail::NodeBST< Key, Value >*);
+    BSTConstIterator< Key, Value > next() const;
+    bool hasNext() const noexcept;
+    BSTConstIterator< Key, Value > prev() const;
+    bool hasPrev() const noexcept;
   };
 
   template< class Key, class Value, class Compare >
   class BSTree
   {
-    friend class BSTIterator< Key, Value >;
-    friend class BSTConstIterator< Key, Value >;
-    NodeBST< Key, Value >* root_;
   public:
     BSTree();
-    ~BSTree();
     BSTree(const BSTree< Key, Value, Compare >&);
     BSTree(BSTree< Key, Value, Compare >&&);
+    ~BSTree();
     BSTree< Key, Value, Compare >& operator=(const BSTree< Key, Value, Compare >&);
     BSTree< Key, Value, Compare >& operator=(BSTree< Key, Value, Compare >&&);
-
-    void push(Key k, Value v);
-    Value& get(Key k);
-    Value drop(Key k);
-
+    template< class K, class V >
+    std::pair< BSTIterator< Key, Value >, bool > insert(std::pair< K, V >&&) noexcept;
+    Value& at(const Key&);
+    const Value& at(const Key&) const;
+    Value& operator[](const Key&) noexcept;
+    size_t erase(const Key&) noexcept;
     void swap(BSTree< Key, Value, Compare >&);
-
     BSTIterator< Key, Value > begin();
     BSTConstIterator< Key, Value > begin() const;
     BSTIterator< Key, Value > end();
     BSTConstIterator< Key, Value > end() const;
-
     BSTIterator< Key, Value > rotateLeft(BSTConstIterator< Key, Value > it);
     BSTIterator< Key, Value > rotateRight(BSTConstIterator< Key, Value > it);
     BSTIterator< Key, Value > rotateLargeLeft(BSTConstIterator< Key, Value > it);
     BSTIterator< Key, Value > rotateLargeRight(BSTConstIterator< Key, Value > it);
-
     size_t height(BSTConstIterator< Key, Value > it) const noexcept;
     size_t height() const noexcept;
+  private:
+    friend class BSTIterator< Key, Value >;
+    friend class BSTConstIterator< Key, Value >;
+    detail::NodeBST< Key, Value >* root_;
   };
 }
 
-namespace goltsov
+template< class Key, class Value >
+goltsov::detail::NodeBST< Key, Value >* goltsov::detail::falLeft(detail::NodeBST< Key, Value >* a)
 {
-  template< class Key, class Value >
-  NodeBST< Key, Value >* falLeft(NodeBST< Key, Value >* a)
+  if (!a)
   {
-    if (!a)
-    {
-      return nullptr;
-    }
-    while(a->left_)
-    {
-      a = a->left_;
-    }
-    return a;
+    return nullptr;
   }
-
-  template< class Key, class Value >
-  NodeBST< Key, Value >* falRight(NodeBST< Key, Value >* a)
+  while (a->left)
   {
-    if (!a)
-    {
-      return nullptr;
-    }
-    while(a->right_)
-    {
-      a = a->right_;
-    }
-    return a;
+    a = a->left;
   }
-
-  template< class Key, class Value, class Compare >
-  BSTree< Key, Value, Compare >::BSTree():
-    root_(nullptr)
-  {}
-
-  template< class Key, class Value, class Compare >
-  BSTree< Key, Value, Compare >::~BSTree()
+  return a;
+}
+template< class Key, class Value >
+goltsov::detail::NodeBST< Key, Value >* goltsov::detail::falRight(detail::NodeBST< Key, Value >* a)
+{
+  if (!a)
   {
-    NodeBST< Key, Value >* current = root_;
-    while (current)
+    return nullptr;
+  }
+  while (a->right)
+  {
+    a = a->right;
+  }
+  return a;
+}
+template<class Key, class Value>
+size_t goltsov::detail::NodeBST<Key, Value>::height() const noexcept
+{
+  size_t max_height = 0;
+  size_t current_height = 0;
+  const NodeBST<Key, Value>* current = this;
+  struct PathNode
+  {
+    const NodeBST<Key, Value>* node;
+    bool left_visited;
+    bool right_visited;
+  };
+  Stack< PathNode > road;
+  if (current)
+  {
+    road.push(PathNode{current, false, false});
+    ++current_height;
+    ++max_height;
+  }
+  while (!road.empty())
+  {
+    if (current->left && (road.empty() || !road.top().left_visited))
     {
-      if (!current->left_ && !current->right_)
+      road.top().left_visited = true;
+      road.push(PathNode{current->left, false, false});
+      current = current->left;
+      ++current_height;
+      max_height = std::max(max_height, current_height);
+    }
+    else if (current->right && (road.empty() || !road.top().right_visited))
+    {
+      road.top().right_visited = true;
+      road.push(PathNode{current->right, false, false});
+      current = current->right;
+      ++current_height;
+      max_height = std::max(max_height, current_height);
+    }
+    else
+    {
+      if (!road.empty())
       {
-        if (!current->parent_)
+        current = current->parent;
+        --current_height;
+        while (!road.empty() && road.top().node != current)
         {
-          delete current;
-          root_ = nullptr;
-          current = nullptr;
-        }
-        else
-        {
-          if (current == current->parent_->left_)
-          {
-            current = current->parent_;
-            delete current->left_;
-            current->left_ = nullptr;
-          }
-          else
-          {
-            current = current->parent_;
-            delete current->right_;
-            current->right_ = nullptr;
-          }
-        }
-      }
-      else if (current->left_)
-      {
-        current = current->left_;
-      }
-      else if (current->right_)
-      {
-        current = current->right_;
-      }
-    }
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTree< Key, Value, Compare >::BSTree(const BSTree< Key, Value, Compare >& other):
-    root_(nullptr)
-  {
-    NodeBST< Key, Value >* current = other.root_;
-    if (!current)
-    {
-      root_ = nullptr;
-      return;
-    }
-    BSTree< Key, Value, Compare > new_tree;
-    new_tree.root_ = new NodeBST< Key, Value >
-      {current->data_, nullptr, nullptr, nullptr, current->height_};
-    NodeBST< Key, Value >* new_node = new_tree.root_;
-    while (current)
-    {
-      if (current->left_ && !new_node->left_)
-      {
-        new_node->left_ = new NodeBST< Key, Value >
-          {current->left_->data_, nullptr, nullptr, new_node, current->left_->height_};
-        new_node = new_node->left_;
-        current = current->left_;
-      }
-      else if (current->right_ && !new_node->right_)
-      {
-        new_node->right_ = new NodeBST< Key, Value >
-          {current->right_->data_, nullptr, nullptr, new_node, current->right_->height_};
-        new_node = new_node->right_;
-        current = current->right_;
-      }
-      else
-      {
-        new_node = new_node->parent_;
-        current = current->parent_;
-      }
-    }
-    swap(new_tree);
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTree< Key, Value, Compare >::BSTree(BSTree< Key, Value, Compare >&& other):
-    root_(other.root_)
-  {
-    other.root_ = nullptr;
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTree< Key, Value, Compare >& BSTree< Key, Value, Compare >::operator=(const BSTree< Key, Value, Compare >& other)
-  {
-    BSTree< Key, Value, Compare > new_tree (other);
-    swap(new_tree);
-    return (* this);
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTree< Key, Value, Compare >& BSTree< Key, Value, Compare >::operator=(BSTree< Key, Value, Compare >&& other)
-  {
-    if (&other != this)
-    {
-      swap(other);
-    }
-    return (* this);
-  }
-
-  template< class Key, class Value, class Compare >
-  void BSTree< Key, Value, Compare >::push(Key k, Value v)
-  {
-    Compare comparator;
-    if (!root_)
-    {
-      root_ = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, nullptr, 1};
-      return;
-    }
-    NodeBST< Key, Value >* current = root_;
-    NodeBST< Key, Value >* inserted = nullptr;
-    while (true)
-    {
-      if (comparator(k, current->data_.first))
-      {
-        if (!current->left_)
-        {
-          inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, current, 1};
-          current->left_ = inserted;
-          break;
-        }
-        else
-        {
-          current = current->left_;
+          road.pop();
         }
       }
-      else if (comparator(current->data_.first, k))
-      {
-        if (!current->right_)
-        {
-          inserted = new NodeBST< Key, Value > {{k, v}, nullptr, nullptr, current, 1};
-          current->right_ = inserted;
-          break;
-        }
-        else
-        {
-          current = current->right_;
-        }
-      }
-      else
-      {
-        throw std::logic_error("Key allready in table");
-      }
-    }
-    current = inserted;
-    while (current)
-    {
-      size_t leftHeight = current->left_ ? current->left_->height_ : 0;
-      size_t rightHeight = current->right_ ? current->right_->height_ : 0;
-      current->height_ = 1 + std::max(leftHeight, rightHeight);
-      current = current->parent_;
     }
   }
-
-  template< class Key, class Value, class Compare >
-  Value& BSTree< Key, Value, Compare >::get(Key k)
+  return max_height;
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTree< Key, Value, Compare >::BSTree():
+  root_(nullptr)
+{}
+template< class Key, class Value, class Compare >
+goltsov::BSTree< Key, Value, Compare >::~BSTree()
+{
+  detail::NodeBST< Key, Value >* current = root_;
+  while (current)
   {
-    Compare comparator;
-    NodeBST< Key, Value >* current = root_;
-    while (current)
+    if (!current->left && !current->right)
     {
-      if (comparator(k, current->data_.first))
+      if (!current->parent)
       {
-        current = current->left_;
-      }
-      else if (comparator(current->data_.first, k))
-      {
-        current = current->right_;
-      }
-      else
-      {
-        return current->data_.second;
-      }
-    }
-    throw std::logic_error("No such key");
-  }
-
-  template< class Key, class Value, class Compare >
-  Value BSTree< Key, Value, Compare >::drop(Key k)
-  {
-    Compare comparator;
-    NodeBST<Key, Value>* current = root_;
-    while (current)
-    {
-      if (comparator(k, current->data_.first))
-      {
-        current = current->left_;
-      }
-      else if (comparator(current->data_.first, k))
-      {
-        current = current->right_;
-      }
-      else
-      {
-        NodeBST< Key, Value >* startHeightUpdate = nullptr;
-        if (!current->left_ && !current->right_)
-        {
-          startHeightUpdate = current->parent_;
-          if (current->parent_ && current->parent_->left_ == current)
-          {
-            current->parent_->left_ = nullptr;
-          }
-          else if (current->parent_)
-          {
-            current->parent_->right_ = nullptr;
-          }
-          else
-          {
-            root_ = nullptr;
-          }
-        }
-        else if (current->left_ && !current->right_)
-        {
-          startHeightUpdate = current->parent_;
-          if (current->parent_ && current->parent_->left_ == current)
-          {
-            current->parent_->left_ = current->left_;
-          }
-          else if (current->parent_)
-          {
-            current->parent_->right_ = current->left_;
-          }
-          else
-          {
-            root_ = current->left_;
-          }
-          if (current->left_)
-          {
-            current->left_->parent_ = current->parent_;
-          }
-        }
-        else if (!current->left_ && current->right_)
-        {
-          startHeightUpdate = current->parent_;
-          if (current->parent_ && current->parent_->left_ == current)
-          {
-            current->parent_->left_ = current->right_;
-          }
-          else if (current->parent_)
-          {
-            current->parent_->right_ = current->right_;
-          }
-          else
-          {
-            root_ = current->right_;
-          }
-          if (current->right_)
-          {
-            current->right_->parent_ = current->parent_;
-          }
-        }
-        else
-        {
-          NodeBST<Key, Value>* successor = falLeft(current->right_);
-          std::swap(current->data_, successor->data_);
-          Value res = current->data_.second;
-          startHeightUpdate = successor->parent_;
-          if (successor->parent_->left_ == successor)
-          {
-            successor->parent_->left_ = successor->right_;
-          }
-          else
-          {
-            successor->parent_->right_ = successor->right_;
-          }
-          if (successor->right_)
-          {
-            successor->right_->parent_ = successor->parent_;
-          }
-          delete successor;
-          NodeBST< Key, Value >* node = startHeightUpdate;
-          while (node)
-          {
-            size_t leftHeight = node->left_ ? node->left_->height_ : 0;
-            size_t rightHeight = node->right_ ? node->right_->height_ : 0;
-            node->height_ = 1 + std::max(leftHeight, rightHeight);
-            node = node->parent_;
-          }
-          return res;
-        }
-        Value res = current->data_.second;
         delete current;
-        NodeBST< Key, Value >* node = startHeightUpdate;
-        while (node)
+        root_ = nullptr;
+        current = nullptr;
+      }
+      else
+      {
+        if (current == current->parent->left)
         {
-          size_t leftHeight = node->left_ ? node->left_->height_ : 0;
-          size_t rightHeight = node->right_ ? node->right_->height_ : 0;
-          node->height_ = 1 + std::max(leftHeight, rightHeight);
-          node = node->parent_;
+          current = current->parent;
+          delete current->left;
+          current->left = nullptr;
         }
-        return res;
+        else
+        {
+          current = current->parent;
+          delete current->right;
+          current->right = nullptr;
+        }
       }
     }
-    throw std::runtime_error("Key is not in table");
-  }
-
-  template< class Key, class Value, class Compare >
-  void BSTree< Key, Value, Compare >::swap(BSTree< Key, Value, Compare >& other)
-  {
-    std::swap(root_, other.root_);
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::begin()
-  {
-    return BSTIterator< Key, Value >(falLeft(root_));
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTConstIterator< Key, Value > BSTree< Key, Value, Compare >::begin() const
-  {
-    return BSTConstIterator< Key, Value >(falLeft(root_));
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::end()
-  {
-    return BSTIterator< Key, Value >(nullptr);
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTConstIterator< Key, Value > BSTree< Key, Value, Compare >::end() const
-  {
-    return BSTConstIterator< Key, Value >(nullptr);
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::rotateLeft(BSTConstIterator< Key, Value > it)
-  {
-    NodeBST< Key, Value >* current = const_cast< NodeBST< Key, Value >* >(it.ptr_);
-    if (!current)
+    else if (current->left)
     {
-      throw std::logic_error("Can not do rotate. Iterator is empty");
+      current = current->left;
     }
-    if (!current->parent_)
+    else if (current->right)
     {
-      throw std::logic_error("Can not do rotate. No parent");
+      current = current->right;
     }
-    if (current == current->parent_->left_)
+  }
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTree< Key, Value, Compare >::BSTree(const BSTree< Key, Value, Compare >& other):
+  root_(nullptr)
+{
+  detail::NodeBST< Key, Value >* current = other.root_;
+  if (!current)
+  {
+    root_ = nullptr;
+    return;
+  }
+  BSTree< Key, Value, Compare > new_tree;
+  new_tree.root_ = new detail::NodeBST< Key, Value >{current->data, nullptr, nullptr, nullptr};
+  detail::NodeBST< Key, Value >* new_node = new_tree.root_;
+  while (current)
+  {
+    if (current->left && !new_node->left)
     {
-      throw std::logic_error("Can not do left rotate.");
+      new_node->left = new detail::NodeBST< Key, Value >{current->left->data, nullptr, nullptr, new_node};
+      new_node = new_node->left;
+      current = current->left;
     }
-    NodeBST< Key, Value >* P = current->parent_;
-    NodeBST< Key, Value >* GP = current->parent_->parent_;
-    NodeBST< Key, Value >* L = current->left_;
-    P->right_ = L;
-    if (L)
+    else if (current->right && !new_node->right)
     {
-      L->parent_ = P;
+      new_node->right = new detail::NodeBST< Key, Value >{current->right->data, nullptr, nullptr, new_node};
+      new_node = new_node->right;
+      current = current->right;
     }
-    current->left_ = P;
-    P->parent_ = current;
-    current->parent_ = GP;
-    if (GP)
+    else
     {
-      if (GP->left_ == P)
+      new_node = new_node->parent;
+      current = current->parent;
+    }
+  }
+  swap(new_tree);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTree< Key, Value, Compare >::BSTree(BSTree< Key, Value, Compare >&& other):
+  root_(std::exchange(other.root_, nullptr))
+{}
+template< class Key, class Value, class Compare >
+goltsov::BSTree< Key, Value, Compare >&
+  goltsov::BSTree< Key, Value, Compare >::operator=(const BSTree< Key, Value, Compare >& other)
+{
+  if (std::addressof(other) != this)
+  {
+    BSTree< Key, Value, Compare > new_tree(other);
+    swap(new_tree);
+  }
+  return (*this);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTree< Key, Value, Compare >&
+  goltsov::BSTree< Key, Value, Compare >::operator=(BSTree< Key, Value, Compare >&& other)
+{
+  if (std::addressof(other) != this)
+  {
+    swap(other);
+  }
+  return (*this);
+}
+template< class Key, class Value, class Compare >
+template< class K, class V >
+std::pair< goltsov::BSTIterator< Key, Value >, bool >
+  goltsov::BSTree< Key, Value, Compare >::insert(std::pair< K, V >&& k_v) noexcept
+{
+  Compare comparator;
+  if (!root_)
+  {
+    root_ = new detail::NodeBST< Key, Value >{std::forward< std::pair< K, V > >(k_v), nullptr, nullptr, nullptr};
+    return {BSTIterator< Key, Value >{}, false};
+  }
+  detail::NodeBST< Key, Value >* current = root_;
+  detail::NodeBST< Key, Value >* inserted = nullptr;
+  while (true)
+  {
+    if (comparator(k_v.first, current->data.first))
+    {
+      if (!current->left)
       {
-        GP->left_ = current;
+        inserted = new detail::NodeBST< Key, Value >{std::forward< std::pair< K, V > >(k_v),
+          nullptr, nullptr, current};
+        current->left = inserted;
+        break;
       }
       else
       {
-        GP->right_ = current;
+        current = current->left;
+      }
+    }
+    else if (comparator(current->data.first, k_v.first))
+    {
+      if (!current->right)
+      {
+        inserted = new detail::NodeBST< Key, Value >{std::forward< std::pair< K, V > >(k_v),
+          nullptr, nullptr, current};
+        current->right = inserted;
+        break;
+      }
+      else
+      {
+        current = current->right;
       }
     }
     else
     {
-      root_ = current;
+      return {BSTIterator< Key, Value >(current), false};
     }
-    P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-    current->height_ =
-      std::max(current->right_ ? current->right_->height_ : 0, current->left_ ? current->left_->height_ : 0) + 1;
-    if (current->parent_)
-    {
-      current->parent_->height_ = std::max(current->parent_->right_ ? current->parent_->right_->height_ : 0,
-        current->parent_->left_ ? current->parent_->left_->height_ : 0) + 1;
-    }
-    return BSTIterator< Key, Value > (current->right_);
   }
-
-  template< class Key, class Value, class Compare >
-  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::rotateRight(BSTConstIterator< Key, Value > it)
+  return {BSTIterator< Key, Value >(inserted), true};
+}
+template< class Key, class Value, class Compare >
+Value& goltsov::BSTree< Key, Value, Compare >::at(const Key& k)
+{
+  return const_cast< Value& >(static_cast< const BSTree< Key, Value, Compare >& >(*this).at(k));
+}
+template< class Key, class Value, class Compare >
+const Value& goltsov::BSTree< Key, Value, Compare >::at(const Key& k) const
+{
+  Compare comparator;
+  detail::NodeBST< Key, Value >* current = root_;
+  while (current)
   {
-    NodeBST< Key, Value >* current = const_cast< NodeBST< Key, Value >* >(it.ptr_);
-    if (!current)
+    if (comparator(k, current->data.first))
     {
-      throw std::logic_error("Can not do rotate. Iterator is empty");
+      current = current->left;
     }
-    if (!current->parent_)
+    else if (comparator(current->data.first, k))
     {
-      throw std::logic_error("Can not do rotate. No parent");
-    }
-    if (current == current->parent_->right_)
-    {
-      throw std::logic_error("Can not do right rotate.");
-    }
-    NodeBST< Key, Value >* P = current->parent_;
-    NodeBST< Key, Value >* GP = current->parent_->parent_;
-    NodeBST< Key, Value >* R = current->right_;
-    P->left_ = R;
-    if (R)
-    {
-      R->parent_ = P;
-    }
-    current->right_ = P;
-    P->parent_ = current;
-    current->parent_ = GP;
-    if (GP)
-    {
-      if (GP->left_ == P)
-      {
-        GP->left_ = current;
-      }
-      else
-      {
-        GP->right_ = current;
-      }
+      current = current->right;
     }
     else
     {
-      root_ = current;
+      return current->data.second;
     }
-    P->height_ = std::max(P->left_ ? P->left_->height_ : 0, P->right_ ? P->right_->height_ : 0) + 1;
-    current->height_ =
-      std::max(current->right_ ? current->right_->height_ : 0, current->left_ ? current->left_->height_ : 0) + 1;
-    if (current->parent_)
+  }
+  throw std::logic_error("No such key");
+}
+template< class Key, class Value, class Compare >
+Value& goltsov::BSTree< Key, Value, Compare >::operator[](const Key& k) noexcept
+{
+  try
+  {
+    return at(k);
+  }
+  catch (std::logic_error&)
+  {
+    return (insert(std::pair< Key, Value >{k, Value{}})).first->second;
+  }
+}
+template< class Key, class Value, class Compare >
+size_t goltsov::BSTree< Key, Value, Compare >::erase(const Key& k) noexcept
+{
+  Compare comparator;
+  detail::NodeBST<Key, Value>* current = root_;
+  while (current)
+  {
+    if (comparator(k, current->data.first))
     {
-      current->parent_->height_ = std::max(current->parent_->right_ ? current->parent_->right_->height_ : 0,
-        current->parent_->left_ ? current->parent_->left_->height_ : 0) + 1;
+      current = current->left;
     }
-    return BSTIterator< Key, Value > (current->left_);
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::rotateLargeLeft(BSTConstIterator< Key, Value > it)
-  {
-    NodeBST< Key, Value >* current = const_cast< NodeBST< Key, Value >* >(it.ptr_);
-    if (!current->parent_ || !current->parent_->parent_)
+    else if (comparator(current->data.first, k))
     {
-      throw std::logic_error("Can not do rotate. No parent");
+      current = current->right;
     }
-    rotateRight(it);
-    rotateLeft(it);
-    return BSTIterator< Key, Value > (it.ptr_->right_->left_);
-  }
-
-  template< class Key, class Value, class Compare >
-  BSTIterator< Key, Value > BSTree< Key, Value, Compare >::rotateLargeRight(BSTConstIterator< Key, Value > it)
-  {
-    NodeBST< Key, Value >* current = const_cast< NodeBST< Key, Value >* >(it.ptr_);
-    if (!current->parent_ || !current->parent_->parent_)
+    else
     {
-      throw std::logic_error("Can not do rotate. No parent");
-    }
-    rotateLeft(it);
-    rotateRight(it);
-    return BSTIterator< Key, Value > (it.ptr_->left_->right_);
-  }
-
-  template< class Key, class Value, class Compare >
-  size_t BSTree< Key, Value, Compare >::height(BSTConstIterator< Key, Value > it) const noexcept
-  {
-    if (!it.ptr_)
-    {
-      return 0;
-    }
-    return it.ptr_->height_;
-  }
-
-  template< class Key, class Value, class Compare >
-  size_t BSTree< Key, Value, Compare >::height() const noexcept
-  {
-    if (!root_)
-    {
-      return 0;
-    }
-    return root_->height_;
-  }
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value >::BSTIterator():
-    ptr_(nullptr)
-  {}
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value >::BSTIterator(const BSTIterator< Key, Value >& other):
-    ptr_(other.ptr_)
-  {}
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value >::BSTIterator(BSTIterator< Key, Value >&& other):
-    ptr_(other.ptr_)
-  {
-    other.ptr_ = nullptr;
-  }
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value > BSTIterator< Key, Value >::operator=(const BSTIterator< Key, Value >& other)
-  {
-    ptr_ = other.ptr_;
-    return (* this);
-  }
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value > BSTIterator< Key, Value >::operator=(BSTIterator< Key, Value >&& other)
-  {
-    ptr_ = other.ptr_;
-    other.ptr_ = nullptr;
-    return (* this);
-  }
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value >::BSTIterator(NodeBST< Key, Value >* ptr):
-    ptr_(ptr)
-  {}
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value > BSTIterator< Key, Value >::next() const
-  {
-    NodeBST< Key, Value >* current = ptr_;
-    if (!current)
-    {
-      throw std::logic_error("No next");
-    }
-    if (current->right_)
-    {
-      return BSTIterator< Key, Value >(falLeft(current->right_));
-    }
-    NodeBST< Key, Value >* previos = current;
-    while(current)
-    {
-      if (current->left_ == previos)
+      if (!current->left && !current->right)
       {
-        break;
+        if (current->parent && current->parent->left == current)
+        {
+          current->parent->left = nullptr;
+        }
+        else if (current->parent)
+        {
+          current->parent->right = nullptr;
+        }
+        else
+        {
+          root_ = nullptr;
+        }
       }
-      previos = current;
-      current = current->parent_;
-    }
-    return BSTIterator< Key, Value > (current);
-  }
-
-  template< class Key, class Value >
-  bool BSTIterator< Key, Value >::hasNext() const noexcept
-  {
-    return ptr_;
-  }
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value > BSTIterator< Key, Value >::prev() const
-  {
-    NodeBST< Key, Value >* current = ptr_;
-    if (current->left_)
-    {
-      return BSTIterator< Key, Value >(falRight(current->left_));
-    }
-    NodeBST< Key, Value >* previos = current;
-    while(current)
-    {
-      if (current->right_ == previos)
+      else if (current->left && !current->right)
       {
-        break;
+        if (current->parent && current->parent->left == current)
+        {
+          current->parent->left = current->left;
+        }
+        else if (current->parent)
+        {
+          current->parent->right = current->left;
+        }
+        else
+        {
+          root_ = current->left;
+        }
+        if (current->left)
+        {
+          current->left->parent = current->parent;
+        }
       }
-      previos = current;
-      current = current->parent_;
-    }
-    return BSTIterator< Key, Value > (current);
-  }
-
-  template< class Key, class Value >
-  bool BSTIterator< Key, Value >::hasPrev() const noexcept
-  {
-    return prev().ptr_;
-  }
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value > BSTIterator< Key, Value >::operator++()
-  {
-    (* this) = next();
-    return BSTIterator< Key, Value > (* this);
-  }
-
-  template< class Key, class Value >
-  std::pair< Key, Value >& BSTIterator< Key, Value >::operator*() const
-  {
-    return ptr_->data_;
-  }
-
-  template< class Key, class Value >
-  std::pair< Key, Value >* BSTIterator< Key, Value >::operator->() const
-  {
-    return &(ptr_->data_);
-  }
-
-  template< class Key, class Value >
-  BSTIterator< Key, Value >::operator BSTConstIterator< Key, Value >() const
-  {
-    return BSTConstIterator< Key, Value > (ptr_);
-  }
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value >::BSTConstIterator():
-    ptr_(nullptr)
-  {}
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value >::BSTConstIterator(const BSTConstIterator< Key, Value >& other):
-    ptr_(other.ptr_)
-  {}
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value >::BSTConstIterator(BSTConstIterator< Key, Value >&& other):
-    ptr_(other.ptr_)
-  {
-    other.ptr_ = nullptr;
-  }
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value >& BSTConstIterator< Key, Value >::operator=(const BSTConstIterator< Key, Value >& other)
-  {
-    ptr_ = other.ptr_;
-    return (* this);
-  }
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value >& BSTConstIterator< Key, Value >::operator=(BSTConstIterator< Key, Value >&& other)
-  {
-    ptr_ = other.ptr_;
-    other.ptr_ = nullptr;
-    return (* this);
-  }
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value >::BSTConstIterator(const NodeBST< Key, Value >* ptr)
-  {
-    ptr_ = ptr;
-  }
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value > BSTConstIterator< Key, Value >::next() const
-  {
-    NodeBST< Key, Value >* current = const_cast< NodeBST< Key, Value >* >(ptr_);
-    if (!current)
-    {
-      throw std::logic_error("No next");
-    }
-    if (current->right_)
-    {
-      return BSTConstIterator< Key, Value >(falLeft(current->right_));
-    }
-    NodeBST< Key, Value >* previos = current;
-    while(current)
-    {
-      if (current->left_ == previos)
+      else if (!current->left && current->right)
       {
-        break;
+        if (current->parent && current->parent->left == current)
+        {
+          current->parent->left = current->right;
+        }
+        else if (current->parent)
+        {
+          current->parent->right = current->right;
+        }
+        else
+        {
+          root_ = current->right;
+        }
+        if (current->right)
+        {
+          current->right->parent = current->parent;
+        }
       }
-      previos = current;
-      current = current->parent_;
-    }
-    return BSTConstIterator< Key, Value > (current);
-  }
-
-  template< class Key, class Value >
-  bool BSTConstIterator< Key, Value >::hasNext() const noexcept
-  {
-    return ptr_;
-  }
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value > BSTConstIterator< Key, Value >::prev() const
-  {
-    NodeBST< Key, Value >* current = const_cast< NodeBST< Key, Value >* > (ptr_);
-    if (current->left_)
-    {
-      return BSTConstIterator< Key, Value > (falRight(current->left_));
-    }
-    NodeBST< Key, Value >* previos = current;
-    while(current)
-    {
-      if (current->right_ == previos)
+      else
       {
-        break;
+        detail::NodeBST<Key, Value>* successor = detail::falLeft(current->right);
+        std::swap(current->data, successor->data);
+        if (successor->parent->left == successor)
+        {
+          successor->parent->left = successor->right;
+        }
+        else
+        {
+          successor->parent->right = successor->right;
+        }
+        if (successor->right)
+        {
+          successor->right->parent = successor->parent;
+        }
+        delete successor;
+        return 1;
       }
-      previos = current;
-      current = current->parent_;
+      delete current;
+      return 1;
     }
-    return BSTConstIterator< Key, Value > (current);
   }
-
-  template< class Key, class Value >
-  bool BSTConstIterator< Key, Value >::hasPrev() const noexcept
+  return 0;
+}
+template< class Key, class Value, class Compare >
+void goltsov::BSTree< Key, Value, Compare >::swap(BSTree< Key, Value, Compare >& other)
+{
+  std::swap(root_, other.root_);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTIterator< Key, Value > goltsov::BSTree< Key, Value, Compare >::begin()
+{
+  return BSTIterator< Key, Value >(detail::falLeft(root_));
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTree< Key, Value, Compare >::begin() const
+{
+  return BSTConstIterator< Key, Value >(detail::falLeft(root_));
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTIterator< Key, Value > goltsov::BSTree< Key, Value, Compare >::end()
+{
+  return BSTIterator< Key, Value >(nullptr);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTree< Key, Value, Compare >::end() const
+{
+  return BSTConstIterator< Key, Value >(nullptr);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTIterator< Key, Value > goltsov::BSTree< Key, Value, Compare >::rotateLeft(BSTConstIterator< Key, Value > it)
+{
+  detail::NodeBST< Key, Value >* current = const_cast< detail::NodeBST< Key, Value >* >(it.ptr_);
+  if (!current)
   {
-    return prev().ptr_;
+    throw std::logic_error("Can not do rotate. Iterator is empty");
   }
-
-  template< class Key, class Value >
-  BSTConstIterator< Key, Value > BSTConstIterator< Key, Value >::operator++()
+  if (!current->parent)
   {
-    (* this) = next();
-    return (* this);
+    throw std::logic_error("Can not do rotate. No parent");
   }
-
-  template< class Key, class Value >
-  const std::pair< Key, Value >& BSTConstIterator< Key, Value >::operator*() const
+  if (current == current->parent->left)
   {
-    return ptr_->data_;
+    throw std::logic_error("Can not do left rotate.");
   }
-
-  template< class Key, class Value >
-  const std::pair< Key, Value >* BSTConstIterator< Key, Value >::operator->() const
+  detail::NodeBST< Key, Value >* parent = current->parent;
+  detail::NodeBST< Key, Value >* grandparent = current->parent->parent;
+  detail::NodeBST< Key, Value >* left = current->left;
+  parent->right = left;
+  if (left)
   {
-    return & (ptr_->data_);
+    left->parent = parent;
   }
-
-  template< class Key, class Value >
-  bool operator==(const BSTConstIterator< Key, Value >& a, const BSTConstIterator< Key, Value >& b)
+  current->left = parent;
+  parent->parent = current;
+  current->parent = grandparent;
+  if (grandparent)
   {
-    return a.ptr_ == b.ptr_;
+    if (grandparent->left == parent)
+    {
+      grandparent->left = current;
+    }
+    else
+    {
+      grandparent->right = current;
+    }
   }
-
-  template< class Key, class Value >
-  bool operator!=(const BSTConstIterator< Key, Value >& a, const BSTConstIterator< Key, Value >& b)
+  else
   {
-    return !(a.ptr_ == b.ptr_);
+    root_ = current;
   }
-
-  template< class Key, class Value >
-  bool BSTIterator< Key, Value >::operator==(const BSTIterator< Key, Value >& other) const noexcept
+  return BSTIterator< Key, Value > (current->right);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTIterator< Key, Value >
+  goltsov::BSTree< Key, Value, Compare >::rotateRight(BSTConstIterator< Key, Value > it)
+{
+  detail::NodeBST< Key, Value >* current = const_cast< detail::NodeBST< Key, Value >* >(it.ptr_);
+  if (!current)
   {
-    return ptr_ == other.ptr_;
+    throw std::logic_error("Can not do rotate. Iterator is empty");
   }
-
-  template< class Key, class Value >
-  bool BSTIterator< Key, Value >::operator!=(const BSTIterator< Key, Value >& other) const noexcept
+  if (!current->parent)
   {
-    return !((* this) == other);
+    throw std::logic_error("Can not do rotate. No parent");
   }
-
-  template< class Key, class Value >
-  bool BSTIterator< Key, Value >::operator==(const BSTConstIterator< Key, Value >& other) const noexcept
+  if (current == current->parent->right)
   {
-    return ptr_ == other.ptr_;
+    throw std::logic_error("Can not do right rotate.");
   }
-
-  template< class Key, class Value >
-  bool BSTIterator< Key, Value >::operator!=(const BSTConstIterator< Key, Value >& other) const noexcept
+  detail::NodeBST< Key, Value >* parent = current->parent;
+  detail::NodeBST< Key, Value >* grandparent = current->parent->parent;
+  detail::NodeBST< Key, Value >* right = current->right;
+  parent->left = right;
+  if (right)
   {
-    return !((* this) == other);
+    right->parent = parent;
   }
-
-  template< class Key, class Value >
-  bool BSTConstIterator< Key, Value >::operator==(const BSTIterator< Key, Value >& other) const noexcept
+  current->right = parent;
+  parent->parent = current;
+  current->parent = grandparent;
+  if (grandparent)
   {
-    return ptr_ == other.ptr_;
+    if (grandparent->left == parent)
+    {
+      grandparent->left = current;
+    }
+    else
+    {
+      grandparent->right = current;
+    }
   }
-
-  template< class Key, class Value >
-  bool BSTConstIterator< Key, Value >::operator!=(const BSTIterator< Key, Value >& other) const noexcept
+  else
   {
-    return !((* this) == other);
+    root_ = current;
   }
-
-  template< class Key, class Value >
-  bool BSTConstIterator< Key, Value >::operator==(const BSTConstIterator< Key, Value >& other) const noexcept
+  return BSTIterator< Key, Value >(current->left);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTIterator< Key, Value >
+  goltsov::BSTree< Key, Value, Compare >::rotateLargeLeft(BSTConstIterator< Key, Value > it)
+{
+  detail::NodeBST< Key, Value >* current = const_cast< detail::NodeBST< Key, Value >* >(it.ptr_);
+  if (!current->parent || !current->parent->parent)
   {
-    return ptr_ == other.ptr_;
+    throw std::logic_error("Can not do rotate. No parent");
   }
-
-  template< class Key, class Value >
-  bool BSTConstIterator< Key, Value >::operator!=(const BSTConstIterator< Key, Value >& other) const noexcept
+  rotateRight(it);
+  rotateLeft(it);
+  return BSTIterator< Key, Value >(it.ptr_->right->left);
+}
+template< class Key, class Value, class Compare >
+goltsov::BSTIterator< Key, Value >
+  goltsov::BSTree< Key, Value, Compare >::rotateLargeRight(BSTConstIterator< Key, Value > it)
+{
+  detail::NodeBST< Key, Value >* current = const_cast< detail::NodeBST< Key, Value >* >(it.ptr_);
+  if (!current->parent || !current->parent->parent)
   {
-    return !((* this) == other);
+    throw std::logic_error("Can not do rotate. No parent");
   }
-
-  template< class Key, class Value >
-  NodeBST< Key, Value >* BSTIterator< Key, Value >::getPtr() const
+  rotateLeft(it);
+  rotateRight(it);
+  return BSTIterator< Key, Value >(it.ptr_->left->right);
+}
+template< class Key, class Value, class Compare >
+size_t goltsov::BSTree< Key, Value, Compare >::height(BSTConstIterator< Key, Value > it) const noexcept
+{
+  if (!it.ptr_)
   {
-    return ptr_;
+    return 0;
   }
-
-  template< class Key, class Value >
-  const NodeBST< Key, Value >* BSTConstIterator< Key, Value >::getPtr() const
+  return it.ptr_->height();
+}
+template< class Key, class Value, class Compare >
+size_t goltsov::BSTree< Key, Value, Compare >::height() const noexcept
+{
+  if (!root_)
   {
-    return ptr_;
+    return 0;
   }
+  return root_->height();
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value >::BSTIterator():
+  ptr_(nullptr)
+{}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value >::BSTIterator(BSTIterator< Key, Value >&& other):
+  ptr_(other.ptr_)
+{
+  other.ptr_ = nullptr;
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value >& goltsov::BSTIterator< Key, Value >::operator=(BSTIterator< Key, Value >&& other)
+{
+  ptr_ = other.ptr_;
+  other.ptr_ = nullptr;
+  return (*this);
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value >::BSTIterator(detail::NodeBST< Key, Value >* ptr):
+  ptr_(ptr)
+{}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value > goltsov::BSTIterator< Key, Value >::next() const
+{
+  detail::NodeBST< Key, Value >* current = ptr_;
+  if (!current)
+  {
+    throw std::logic_error("No next");
+  }
+  if (current->right)
+  {
+    return BSTIterator< Key, Value >(detail::falLeft(current->right));
+  }
+  detail::NodeBST< Key, Value >* previos = current;
+  while (current)
+  {
+    if (current->left == previos)
+    {
+      break;
+    }
+    previos = current;
+    current = current->parent;
+  }
+  return BSTIterator< Key, Value >(current);
+}
+template< class Key, class Value >
+bool goltsov::BSTIterator< Key, Value >::hasNext() const noexcept
+{
+  return ptr_;
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value > goltsov::BSTIterator< Key, Value >::prev() const
+{
+  detail::NodeBST< Key, Value >* current = ptr_;
+  if (current->left)
+  {
+    return BSTIterator< Key, Value >(detail::falRight(current->left));
+  }
+  detail::NodeBST< Key, Value >* previos = current;
+  while (current)
+  {
+    if (current->right == previos)
+    {
+      break;
+    }
+    previos = current;
+    current = current->parent;
+  }
+  return BSTIterator< Key, Value >(current);
+}
+template< class Key, class Value >
+bool goltsov::BSTIterator< Key, Value >::hasPrev() const noexcept
+{
+  return prev().ptr_;
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value > goltsov::BSTIterator< Key, Value >::operator++()
+{
+  (*this) = next();
+  return (*this);
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value > goltsov::BSTIterator< Key, Value >::operator++(int)
+{
+  BSTIterator< Key, Value > temp = (*this);
+  (*this) = next();
+  return temp;
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value > goltsov::BSTIterator< Key, Value >::operator--()
+{
+  (*this) = prev();
+  return (*this);
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value > goltsov::BSTIterator< Key, Value >::operator--(int)
+{
+  BSTIterator< Key, Value > temp = (*this);
+  (*this) = prev();
+  return temp;
+}
+template< class Key, class Value >
+std::pair< Key, Value >& goltsov::BSTIterator< Key, Value >::operator*()
+{
+  return ptr_->data;
+}
+template< class Key, class Value >
+std::pair< Key, Value >* goltsov::BSTIterator< Key, Value >::operator->()
+{
+  return std::addressof(ptr_->data);
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value >::operator goltsov::BSTConstIterator< Key, Value >() const
+{
+  return BSTConstIterator< Key, Value >(ptr_);
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value >::BSTConstIterator():
+  ptr_(nullptr)
+{}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value >::BSTConstIterator(BSTConstIterator< Key, Value >&& other):
+  ptr_(other.ptr_)
+{
+  other.ptr_ = nullptr;
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value >&
+  goltsov::BSTConstIterator< Key, Value >::operator=(BSTConstIterator< Key, Value >&& other)
+{
+  ptr_ = other.ptr_;
+  other.ptr_ = nullptr;
+  return (*this);
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value >::BSTConstIterator(const detail::NodeBST< Key, Value >* ptr)
+{
+  ptr_ = ptr;
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTConstIterator< Key, Value >::next() const
+{
+  detail::NodeBST< Key, Value >* current = const_cast< detail::NodeBST< Key, Value >* >(ptr_);
+  if (!current)
+  {
+    throw std::logic_error("No next");
+  }
+  if (current->right)
+  {
+    return BSTConstIterator< Key, Value >(detail::falLeft(current->right));
+  }
+  detail::NodeBST< Key, Value >* previos = current;
+  while (current)
+  {
+    if (current->left == previos)
+    {
+      break;
+    }
+    previos = current;
+    current = current->parent;
+  }
+  return BSTConstIterator< Key, Value >(current);
+}
+template< class Key, class Value >
+bool goltsov::BSTConstIterator< Key, Value >::hasNext() const noexcept
+{
+  return ptr_;
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTConstIterator< Key, Value >::prev() const
+{
+  detail::NodeBST< Key, Value >* current = const_cast< detail::NodeBST< Key, Value >* > (ptr_);
+  if (current->left)
+  {
+    return BSTConstIterator< Key, Value > (detail::falRight(current->left));
+  }
+  detail::NodeBST< Key, Value >* previos = current;
+  while (current)
+  {
+    if (current->right == previos)
+    {
+      break;
+    }
+    previos = current;
+    current = current->parent;
+  }
+  return BSTConstIterator< Key, Value >(current);
+}
+template< class Key, class Value >
+bool goltsov::BSTConstIterator< Key, Value >::hasPrev() const noexcept
+{
+  return prev().ptr_;
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTConstIterator< Key, Value >::operator++()
+{
+  (*this) = next();
+  return (*this);
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTConstIterator< Key, Value >::operator++(int)
+{
+  BSTConstIterator< Key, Value > temp = (*this);
+  (*this) = next();
+  return temp;
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTConstIterator< Key, Value >::operator--()
+{
+  (*this) = prev();
+  return (*this);
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value > goltsov::BSTConstIterator< Key, Value >::operator--(int)
+{
+  BSTConstIterator< Key, Value > temp = (*this);
+  (*this) = prev();
+  return temp;
+}
+template< class Key, class Value >
+const std::pair< Key, Value >& goltsov::BSTConstIterator< Key, Value >::operator*()
+{
+  return ptr_->data;
+}
+template< class Key, class Value >
+const std::pair< Key, Value >* goltsov::BSTConstIterator< Key, Value >::operator->()
+{
+  return std::addressof(ptr_->data);
+}
+template< class Key, class Value >
+bool goltsov::BSTIterator< Key, Value >::operator==(const BSTIterator< Key, Value >& other) const noexcept
+{
+  return ptr_ == other.ptr_;
+}
+template< class Key, class Value >
+bool goltsov::BSTIterator< Key, Value >::operator!=(const BSTIterator< Key, Value >& other) const noexcept
+{
+  return !((*this) == other);
+}
+template< class Key, class Value >
+bool goltsov::BSTIterator< Key, Value >::operator==(const BSTConstIterator< Key, Value >& other) const noexcept
+{
+  return ptr_ == other.ptr_;
+}
+template< class Key, class Value >
+bool goltsov::BSTIterator< Key, Value >::operator!=(const BSTConstIterator< Key, Value >& other) const noexcept
+{
+  return !((*this) == other);
+}
+template< class Key, class Value >
+bool goltsov::BSTConstIterator< Key, Value >::operator==(const BSTIterator< Key, Value >& other) const noexcept
+{
+  return ptr_ == other.ptr_;
+}
+template< class Key, class Value >
+bool goltsov::BSTConstIterator< Key, Value >::operator!=(const BSTIterator< Key, Value >& other) const noexcept
+{
+  return !((*this) == other);
+}
+template< class Key, class Value >
+bool goltsov::BSTConstIterator< Key, Value >::operator==(const BSTConstIterator< Key, Value >& other) const noexcept
+{
+  return ptr_ == other.ptr_;
+}
+template< class Key, class Value >
+bool goltsov::BSTConstIterator< Key, Value >::operator!=(const BSTConstIterator< Key, Value >& other) const noexcept
+{
+  return !((*this) == other);
+}
+template< class Key, class Value >
+goltsov::detail::NodeBST< Key, Value >* goltsov::BSTIterator< Key, Value >::getPtr()
+{
+  return ptr_;
+}
+template< class Key, class Value >
+const goltsov::detail::NodeBST< Key, Value >* goltsov::BSTConstIterator< Key, Value >::getPtr()
+{
+  return ptr_;
+}
+template< class Key, class Value >
+goltsov::BSTIterator< Key, Value > goltsov::detail::makeBSTIterByPtr(NodeBST< Key, Value >* ptr)
+{
+  return BSTIterator< Key, Value >(ptr);
+}
+template< class Key, class Value >
+goltsov::BSTConstIterator< Key, Value > goltsov::detail::makeBSTConstIterByPtr(NodeBST< Key, Value >* ptr)
+{
+  return BSTConstIterator< Key, Value >(ptr);
 }
 
 #endif

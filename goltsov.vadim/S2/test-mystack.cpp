@@ -30,28 +30,28 @@ BOOST_AUTO_TEST_CASE(push_test)
   int temp = 4;
   a.push(5);
   a.push(temp);
-  BOOST_CHECK(a.size() == 2 && a.front() == 4);
+  BOOST_CHECK(a.size() == 2 && a.top() == 4);
 }
 
 BOOST_AUTO_TEST_CASE(drop_test)
 {
   goltsov::Stack< int > a;
-  BOOST_CHECK_THROW(a.drop(), std::runtime_error);
+  BOOST_CHECK_THROW(a.pop(), std::runtime_error);
   a.push(5);
   a.push(4);
-  a.drop();
-  BOOST_CHECK(a.size() == 1 && a.front() == 5);
+  a.pop();
+  BOOST_CHECK(a.size() == 1 && a.top() == 5);
 }
 
 BOOST_AUTO_TEST_CASE(front_test)
 {
   goltsov::Stack< int > a;
-  BOOST_CHECK_THROW(a.front(), std::runtime_error);
+  BOOST_CHECK_THROW(a.top(), std::runtime_error);
   a.push(5);
   a.push(4);
-  BOOST_CHECK(a.front() == 4);
+  BOOST_CHECK(a.top() == 4);
   const goltsov::Stack< int > ac = a;
-  BOOST_CHECK(ac.front() == 4);
+  BOOST_CHECK(ac.top() == 4);
 }
 
 BOOST_AUTO_TEST_CASE(empty_test)
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(clear_test)
   a.push(5);
   a.push(4);
   a.clear();
-  BOOST_CHECK_THROW(a.drop(), std::runtime_error);
+  BOOST_CHECK_THROW(a.pop(), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

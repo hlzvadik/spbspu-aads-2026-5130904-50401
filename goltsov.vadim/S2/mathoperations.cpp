@@ -1,91 +1,88 @@
-#include <limits>
 #include "mathoperations.hpp"
 #include <iostream>
+#include <limits>
 
-namespace goltsov
+using lli = long long int;
+lli MAX_LLI = std::numeric_limits< lli >::max();
+lli MIN_LLI = std::numeric_limits< lli >::min();
+lli goltsov::addition(lli a, lli b)
 {
-  using lli = long long int;
-  lli MAX_LLI = std::numeric_limits< lli >::max();
-  lli MIN_LLI = std::numeric_limits< lli >::min();
-  lli addition(lli a, lli b)
+  if ((a > 0 && b > 0 && a > MAX_LLI - b) || (a < 0 && b < 0 && a < MIN_LLI - b))
   {
-    if ((a > 0 && b > 0 && a > MAX_LLI - b) || (a < 0 && b < 0 && a < MIN_LLI - b))
-    {
-      throw std::overflow_error("Overflow addition");
-    }
-    return a + b;
+    throw std::overflow_error("Overflow addition");
   }
-  lli subtraction(lli a, lli b)
+  return a + b;
+}
+lli goltsov::subtraction(lli a, lli b)
+{
+  if ((a < 0 && b > 0 && a < MIN_LLI + b) || (a > 0 && b < 0 && a > MAX_LLI + b))
   {
-    if ((a < 0 && b > 0 && a < MIN_LLI + b) || (a > 0 && b < 0 && a > MAX_LLI + b))
-    {
-      throw std::overflow_error("Overflow subtraction");
-    }
-    return a - b;
+    throw std::overflow_error("Overflow subtraction");
   }
-  lli multiplication(lli a, lli b)
+  return a - b;
+}
+lli goltsov::multiplication(lli a, lli b)
+{
+  if (b > 0 && a > MAX_LLI / b)
   {
-    if (b > 0 && a > MAX_LLI / b)
-    {
-      throw std::overflow_error("Overflow multiplication");
-    }
-    if (b < 0 && a < MAX_LLI / b)
-    {
-      throw std::overflow_error("Overflow multiplication");
-    }
-    if (a > 0 && b < 0 && b < MIN_LLI / a)
-    {
-      throw std::overflow_error("Overflow multiplication");
-    }
-    if (a < 0 && b > 0 && a < MIN_LLI / b)
-    {
-      throw std::overflow_error("Overflow multiplication");
-    }
-    return a * b;
+    throw std::overflow_error("Overflow multiplication");
   }
-  lli division(lli a, lli b)
+  if (b < 0 && a < MAX_LLI / b)
   {
-    return a / b;
+    throw std::overflow_error("Overflow multiplication");
   }
-  lli remOfDiv(lli a, lli b)
+  if (a > 0 && b < 0 && b < MIN_LLI / a)
   {
-    if (a % b < 0)
-    {
-      return a % b + b;
-    }
-    return a % b;
+    throw std::overflow_error("Overflow multiplication");
   }
-  lli concatenation(lli a, lli b)
+  if (a < 0 && b > 0 && a < MIN_LLI / b)
   {
-    lli res;
-    try
-    {
-      res = addition(multiplication(a, pow(10, countDigitOfNumber(b))), b);
-    }
-    catch(...)
-    {
-      throw std::overflow_error("Overflow concatenation");
-    }
-    return res;
+    throw std::overflow_error("Overflow multiplication");
   }
-  lli countDigitOfNumber(lli a)
+  return a * b;
+}
+lli goltsov::division(lli a, lli b)
+{
+  return a / b;
+}
+lli goltsov::remOfDiv(lli a, lli b)
+{
+  if (a % b < 0)
   {
-    lli ans = 0;
-    while (a != 0)
-    {
-      ans++;
-      a /= 10;
-    }
-    return ans;
+    return a % b + b;
   }
-  lli pow(lli a, lli b)
+  return a % b;
+}
+lli goltsov::concatenation(lli a, lli b)
+{
+  lli res;
+  try
   {
-    lli res = 1;
-    while (b != 0)
-    {
-      res = multiplication(res, a);
-      --b;
-    }
-    return res;
+    res = addition(multiplication(a, pow(10, countDigitOfNumber(b))), b);
   }
+  catch (...)
+  {
+    throw std::overflow_error("Overflow concatenation");
+  }
+  return res;
+}
+lli goltsov::countDigitOfNumber(lli a)
+{
+  lli ans = 0;
+  while (a != 0)
+  {
+    ans++;
+    a /= 10;
+  }
+  return ans;
+}
+lli goltsov::pow(lli a, lli b)
+{
+  lli res = 1;
+  while (b != 0)
+  {
+    res = multiplication(res, a);
+    --b;
+  }
+  return res;
 }
