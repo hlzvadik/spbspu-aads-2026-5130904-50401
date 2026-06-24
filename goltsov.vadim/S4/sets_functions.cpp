@@ -63,34 +63,34 @@ void goltsov::printParsing(std::ostream& out, std::istream& in, goltsov::bst_s_b
   out << '\n';
 }
 
-void goltsov::complementParsing(std::ostream& out, std::istream& in, goltsov::bst_s_bst_is& all_sets)
+void goltsov::complementParsing(std::ostream&, std::istream& in, goltsov::bst_s_bst_is& all_sets)
 {
   std::string new_dataset, dataset_1, dataset_2;
   if (!(in >> new_dataset >> dataset_1 >> dataset_2))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
-  complement_ds(out, all_sets, new_dataset, dataset_1, dataset_2);
+  complement_ds(all_sets, new_dataset, dataset_1, dataset_2);
 }
 
-void goltsov::intersectParsing(std::ostream& out, std::istream& in, goltsov::bst_s_bst_is& all_sets)
+void goltsov::intersectParsing(std::ostream&, std::istream& in, goltsov::bst_s_bst_is& all_sets)
 {
   std::string new_dataset, dataset_1, dataset_2;
   if (!(in >> new_dataset >> dataset_1 >> dataset_2))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
-  intersect_ds(out, all_sets, new_dataset, dataset_1, dataset_2);
+  intersect_ds(all_sets, new_dataset, dataset_1, dataset_2);
 }
 
-void goltsov::unionParsing(std::ostream& out, std::istream& in, goltsov::bst_s_bst_is& all_sets)
+void goltsov::unionParsing(std::ostream&, std::istream& in, goltsov::bst_s_bst_is& all_sets)
 {
   std::string new_dataset, dataset_1, dataset_2;
   if (!(in >> new_dataset >> dataset_1 >> dataset_2))
   {
     throw std::runtime_error("<INVALID COMMAND>");
   }
-  union_ds(out, all_sets, new_dataset, dataset_1, dataset_2);
+  union_ds(all_sets, new_dataset, dataset_1, dataset_2);
 }
 
 void goltsov::print_ds(std::ostream& out, goltsov::bst_s_bst_is& all_sets, std::string dataset)
@@ -114,8 +114,7 @@ void goltsov::print_ds(std::ostream& out, goltsov::bst_s_bst_is& all_sets, std::
   }
 }
 
-void goltsov::complement_ds(std::ostream& out,
-  bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
+void goltsov::complement_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
 {
   goltsov::BSTree< long long, std::string, std::less< long long > > new_set;
   try
@@ -162,8 +161,8 @@ void goltsov::complement_ds(std::ostream& out,
   }
 }
 
-void goltsov::intersect_ds(std::ostream& out,
-  bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
+void goltsov::intersect_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1,
+  std::string dataset_2)
 {
   goltsov::BSTree< long long, std::string, std::less< long long > > new_set;
   try
@@ -210,8 +209,7 @@ void goltsov::intersect_ds(std::ostream& out,
   }
 }
 
-void goltsov::union_ds(std::ostream& out,
-  bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
+void goltsov::union_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
 {
   goltsov::BSTree< long long, std::string, std::less< long long > > new_set;
   try
