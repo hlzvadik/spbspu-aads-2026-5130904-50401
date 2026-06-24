@@ -116,8 +116,8 @@ namespace goltsov
     ~RBTree() noexcept;
     RBTree< Key, Value, Compare >& operator=(const RBTree< Key, Value, Compare >&);
     RBTree< Key, Value, Compare >& operator=(RBTree< Key, Value, Compare >&&);
-    template< class K, class V >
-    std::pair< RBTIterator< Key, Value >, bool > insert(std::pair< K, V >&&) noexcept;
+    std::pair< RBTIterator< Key, Value >, bool > insert(const std::pair< Key, Value >&);
+    std::pair< RBTIterator< Key, Value >, bool > insert(std::pair< Key, Value >&&);
     Value& at(const Key&);
     const Value& at(const Key&) const;
     RBTIterator< Key, Value > find(const Key&);
@@ -367,15 +367,14 @@ goltsov::RBTree< Key, Value, Compare >&
   return (*this);
 }
 template< class Key, class Value, class Compare >
-template< class K, class V >
 std::pair< goltsov::RBTIterator< Key, Value >, bool >
-  goltsov::RBTree< Key, Value, Compare >::insert(std::pair< K, V >&& k_v) noexcept
+  goltsov::RBTree< Key, Value, Compare >::insert(const std::pair< Key, Value >& k_v)
 {
   Compare comparator;
   detail::NodeRBT< Key, Value >* inserted = nullptr;
   if (!root_)
   {
-    inserted = new detail::NodeRBT< Key, Value >{std::forward< std::pair< K, V > >(k_v), nullptr, nullptr, nullptr,
+    inserted = new detail::NodeRBT< Key, Value >{k_v, nullptr, nullptr, nullptr,
       true};
     root_ = inserted;
     ++size_;
@@ -389,7 +388,7 @@ std::pair< goltsov::RBTIterator< Key, Value >, bool >
       {
         if (!current->left)
         {
-          inserted = new detail::NodeRBT< Key, Value >{std::forward< std::pair< K, V > >(k_v),
+          inserted = new detail::NodeRBT< Key, Value >{k_v,
             nullptr, nullptr, current, false};
           current->left = inserted;
           ++size_;
@@ -404,7 +403,64 @@ std::pair< goltsov::RBTIterator< Key, Value >, bool >
       {
         if (!current->right)
         {
-          inserted = new detail::NodeRBT< Key, Value >{std::forward< std::pair< K, V > >(k_v),
+          inserted = new detail::NodeRBT< Key, Value >{k_v,
+            nullptr, nullptr, current, false};
+          current->right = inserted;
+          ++size_;
+          break;
+        }
+        else
+        {
+          current = current->right;
+        }
+      }
+      else
+      {
+        return {RBTIterator< Key, Value >(current), false};
+      }
+    }
+  }
+  makeBalanceAfterPush(inserted);
+  return {RBTIterator< Key, Value >(inserted), true};
+}
+template< class Key, class Value, class Compare >
+std::pair< goltsov::RBTIterator< Key, Value >, bool >
+  goltsov::RBTree< Key, Value, Compare >::insert(std::pair< Key, Value >&& k_v)
+{
+  Compare comparator;
+  detail::NodeRBT< Key, Value >* inserted = nullptr;
+  if (!root_)
+  {
+    inserted = new detail::NodeRBT< Key, Value >{std::move(k_v), nullptr, nullptr, nullptr,
+      true};
+    root_ = inserted;
+    ++size_;
+  }
+  else
+  {
+    detail::NodeRBT< Key, Value >* current = root_;
+    while (true)
+    {
+      if (comparator(k_v.first, current->data.first))
+      {
+        if (!current->left)
+        {
+          inserted = new detail::NodeRBT< Key, Value >{std::move(k_v),
+            nullptr, nullptr, current, false};
+          current->left = inserted;
+          ++size_;
+          break;
+        }
+        else
+        {
+          current = current->left;
+        }
+      }
+      else if (comparator(current->data.first, k_v.first))
+      {
+        if (!current->right)
+        {
+          inserted = new detail::NodeRBT< Key, Value >{std::move(k_v),
             nullptr, nullptr, current, false};
           current->right = inserted;
           ++size_;
@@ -504,7 +560,7 @@ template< class Key, class Value, class Compare >
 size_t goltsov::RBTree< Key, Value, Compare >::erase(const Key& k) noexcept
 {
   Compare comparator;
-  NodeRBT<Key, Value>* current = root_;
+  detail::NodeRBT< Key, Value >* current = root_;
   while (current)
   {
     if (comparator(k, current->data.first))
@@ -534,11 +590,11 @@ size_t goltsov::RBTree< Key, Value, Compare >::erase(const Key& k) noexcept
       }
       else if (current->left && !current->right)
       {
-        NodeRBT< Key, Value >* maxLeft = falRight(current->left);
-        NodeRBT< Key, Value >* currParent = current->parent;
-        NodeRBT< Key, Value >* currLeft = current->left;
-        NodeRBT< Key, Value >* maxParent = maxLeft->parent;
-        NodeRBT< Key, Value >* maxLeftChild = maxLeft->left;
+        detail::NodeRBT< Key, Value >* maxLeft = falRight(current->left);
+        detail::NodeRBT< Key, Value >* currParent = current->parent;
+        detail::NodeRBT< Key, Value >* currLeft = current->left;
+        detail::NodeRBT< Key, Value >* maxParent = maxLeft->parent;
+        detail::NodeRBT< Key, Value >* maxLeftChild = maxLeft->left;
         std::swap(current->is_black, maxLeft->is_black);
         maxLeft->parent = currParent;
         if (currParent)
@@ -609,12 +665,12 @@ size_t goltsov::RBTree< Key, Value, Compare >::erase(const Key& k) noexcept
       }
       else
       {
-        NodeRBT< Key, Value >* minRight = falLeft(current->right);
-        NodeRBT< Key, Value >* currParent = current->parent;
-        NodeRBT< Key, Value >* currLeft = current->left;
-        NodeRBT< Key, Value >* currRight = current->right;
-        NodeRBT< Key, Value >* minParent = minRight->parent;
-        NodeRBT< Key, Value >* minRightChild = minRight->right;
+        detail::NodeRBT< Key, Value >* minRight = falLeft(current->right);
+        detail::NodeRBT< Key, Value >* currParent = current->parent;
+        detail::NodeRBT< Key, Value >* currLeft = current->left;
+        detail::NodeRBT< Key, Value >* currRight = current->right;
+        detail::NodeRBT< Key, Value >* minParent = minRight->parent;
+        detail::NodeRBT< Key, Value >* minRightChild = minRight->right;
         std::swap(current->is_black, minRight->is_black);
         minRight->parent = currParent;
         if (currParent)
@@ -678,12 +734,12 @@ size_t goltsov::RBTree< Key, Value, Compare >::erase(const Key& k) noexcept
           }
         }
       }
-      NodeRBT< Key, Value >* res_ptr = current->parent;
+      detail::NodeRBT< Key, Value >* res_ptr = current->parent;
       Value res_val = current->data.second;
       bool res_is_black = current->is_black;
       delete current;
       size_ -= 1;
-      makeBalanceAfterDrop({res_ptr, res_val, res_is_black});
+      makeBalanceAfterDrop(std::make_tuple(res_ptr, res_val, res_is_black));
       return 1;
     }
   }
@@ -1284,20 +1340,20 @@ void goltsov::RBTree< Key, Value, Compare >::makeBalanceAfterDrop(std::tuple< de
   }
   if (std::get< 2 >(dropedParent))
   {
-    if (blackHeight(detail::RBTConstIterator< Key, Value >(P->left)) < blackHeight(
-      detail::RBTConstIterator< Key, Value >(P->right)) && P->left && !P->left->is_black)
+    if (blackHeight(RBTConstIterator< Key, Value >(P->left)) < blackHeight(
+      RBTConstIterator< Key, Value >(P->right)) && P->left && !P->left->is_black)
     {
       P->left->is_black = true;
     }
-    else if (blackHeight(detail::RBTConstIterator< Key, Value >(P->left)) > blackHeight(
-      detail::RBTConstIterator< Key, Value >(P->right)) && P->right && !P->right->is_black)
+    else if (blackHeight(RBTConstIterator< Key, Value >(P->left)) > blackHeight(
+      RBTConstIterator< Key, Value >(P->right)) && P->right && !P->right->is_black)
     {
       P->right->is_black = true;
     }
     else
     {
-      detail::NodeRBT< Key, Value >* B = (blackHeight(detail::RBTConstIterator< Key, Value >(P->left)) <
-        blackHeight(detail::RBTConstIterator< Key, Value >(P->right))) ? P->right : P->left;
+      detail::NodeRBT< Key, Value >* B = (blackHeight(RBTConstIterator< Key, Value >(P->left)) <
+        blackHeight(RBTConstIterator< Key, Value >(P->right))) ? P->right : P->left;
       if (B)
       {
         if (B->is_black && ((P->left == B && B->left && !B->left->is_black) || (P->right == B && B->right

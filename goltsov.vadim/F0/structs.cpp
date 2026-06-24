@@ -1,4 +1,5 @@
 #include "structs.hpp"
+#include <iostream>
 
 std::istream& goltsov::detail::operator>>(std::istream& is, const Delimeter& a)
 {

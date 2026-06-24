@@ -1,8 +1,9 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
+#include <ios>
 #include <string>
-#include "mymap.hpp"
 #include <myvector.hpp>
+#include "mymap.hpp"
 
 namespace goltsov
 {

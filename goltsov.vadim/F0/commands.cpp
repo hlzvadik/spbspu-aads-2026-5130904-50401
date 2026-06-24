@@ -41,7 +41,7 @@ bool goltsov::detail::pushTask(State& current_state, Task& task, const TimeInter
   }
   else
   {
-    current = current.next();
+    ++current;
   }
   DateTime start = task.left_boundary_time_;
   while (current != current_state.current_schedule_->tasks_.end()
@@ -88,8 +88,14 @@ bool goltsov::detail::pushSoftTask(State& current_state, Task& task, const TimeI
     return true;
   }
   MapIterator<DateTime, Task> current = rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
-  current = (current == current_state.current_schedule_->tasks_.end()) ?
-    current_state.current_schedule_->tasks_.begin() : current.next();
+  if (current == current_state.current_schedule_->tasks_.end())
+  {
+    current = current_state.current_schedule_->tasks_.begin();
+  }
+  else
+  {
+    ++current;
+  }
   DateTime potential_start = task.left_boundary_time_;
   while (current != current_state.current_schedule_->tasks_.end()
     && potential_start + duration <= task.right_boundary_time_)
@@ -122,7 +128,7 @@ goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::pushPr
   }
   else
   {
-    current = current.next();
+    ++current;
   }
   while (current != current_state.current_schedule_->tasks_.end()
     && task.right_boundary_time_ > current->second.start_time_)
@@ -158,7 +164,7 @@ goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::pushPr
   }
   else
   {
-    current = current.next();
+    ++current;
   }
   while (current != current_state.current_schedule_->tasks_.end()
     && task.right_boundary_time_ > current->second.start_time_)
@@ -219,9 +225,9 @@ std::pair< goltsov::DateTime, goltsov::DateTime > goltsov::detail::findCommonGap
     const DateTime& start_time,
     const DateTime& end_time,
     const TimeInterval& duration,
-    const topit::Vector< std::string >& names_schedules)
+    const goltsov::Vector< std::string >& names_schedules)
   {
-    topit::Vector< Task > all_tasks;
+    goltsov::Vector< Task > all_tasks;
     for (size_t i = 0; i < names_schedules.getSize(); ++i)
     {
       goltsov::Schedule& current_schedule =
@@ -635,7 +641,7 @@ void goltsov::parsingFindCommonGap(std::istream& is, std::ostream& os, State& cu
 {
   TimeInterval gap;
   size_t count;
-  topit::Vector< std::string > names_schedules;
+  goltsov::Vector< std::string > names_schedules;
   is >> gap;
   if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
   {
@@ -670,7 +676,7 @@ void goltsov::parsingFindCommonGapOnInterval(std::istream& is, std::ostream& os,
   DateTime start_time, end_time;
   TimeInterval gap;
   size_t count;
-  topit::Vector< std::string > names_schedules;
+  goltsov::Vector< std::string > names_schedules;
   is >> start_time;
   if (is.fail() || detail::isEndOfLine(detail::skipSpaces(is)))
   {
@@ -1085,7 +1091,7 @@ void goltsov::findGap(std::ostream& os, State& current_state, const TimeInterval
 {
   try
   {
-    topit::Vector< std::string > a;
+    goltsov::Vector< std::string > a;
     a.pushBack(current_state.current_schedule_->name_schedule_);
     std::pair< DateTime, DateTime > gap = detail::findCommonGapInVector(current_state,
       current_state.current_time, current_state.current_schedule_->tasks_.getLast()->second.end_time_ + interval,
@@ -1102,7 +1108,7 @@ void goltsov::findGapOnInterval(std::ostream& os, State& current_state, const Da
 {
   try
   {
-    topit::Vector< std::string > a;
+    goltsov::Vector< std::string > a;
     a.pushBack(current_state.current_schedule_->name_schedule_);
     std::pair< DateTime, DateTime > gap = detail::findCommonGapInVector(current_state, start_time,
       end_time, interval, a);
@@ -1114,7 +1120,7 @@ void goltsov::findGapOnInterval(std::ostream& os, State& current_state, const Da
   }
 }
 void goltsov::findCommonGap(std::ostream& os, State& current_state, const TimeInterval& interval,
-  const size_t&, const topit::Vector< std::string >& names_schedules)
+  const size_t&, const goltsov::Vector< std::string >& names_schedules)
 {
   try
   {
@@ -1130,7 +1136,7 @@ void goltsov::findCommonGap(std::ostream& os, State& current_state, const TimeIn
 }
 void goltsov::findCommonGapOnInterval(std::ostream& os, State& current_state, const DateTime& start_time,
   const DateTime& end_time, const TimeInterval& interval, const size_t&,
-  const topit::Vector< std::string >& names_schedules)
+  const goltsov::Vector< std::string >& names_schedules)
 {
   try
   {

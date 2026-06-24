@@ -28,6 +28,7 @@ namespace goltsov
     MapIterator< Key, Value > getLast() noexcept;
     MapConstIterator< Key, Value > getLast() const noexcept;
     std::pair< MapIterator< Key, Value >, bool > insert(const std::pair< Key, Value >&);
+    std::pair< MapIterator< Key, Value >, bool > insert(std::pair< Key, Value >&&);
     size_t erase(const Key&);
     void clear();
     MapIterator< Key, Value > find(const Key&);
@@ -65,7 +66,7 @@ Value& goltsov::Map< Key, Value >::at(const Key& k)
 template< class Key, class Value >
 const Value& goltsov::Map< Key, Value >::at(const Key& k) const
 {
-  return data_.at(K);
+  return data_.at(k);
 }
 template< class Key, class Value >
 goltsov::MapIterator< Key, Value > goltsov::Map< Key, Value >::getLast() noexcept
@@ -81,6 +82,11 @@ template< class Key, class Value >
 std::pair< goltsov::MapIterator< Key, Value >, bool > goltsov::Map< Key, Value >::insert(const std::pair< Key, Value >& k_v)
 {
   return data_.insert(k_v);
+}
+template< class Key, class Value >
+std::pair< goltsov::MapIterator< Key, Value >, bool > goltsov::Map< Key, Value >::insert(std::pair< Key, Value >&& k_v)
+{
+  return data_.insert(std::move(k_v));
 }
 template< class Key, class Value >
 size_t goltsov::Map< Key, Value >::erase(const Key& k)
@@ -112,12 +118,12 @@ goltsov::MapConstIterator< Key, Value > goltsov::Map< Key, Value >::find(const K
 template< class Key, class Value >
 bool goltsov::Map< Key, Value >::contains(const Key& k) const
 {
-  return data_.find(k);
+  return data_.find(k) != data_.end();
 }
 template< class Key, class Value >
 size_t goltsov::Map< Key, Value >::count(const Key& k) const
 {
-  return (contains(k) != end() ? 1 : 0);
+  return (contains(k) ? 1 : 0);
 }
 template< class Key, class Value >
 bool goltsov::Map< Key, Value >::empty() const

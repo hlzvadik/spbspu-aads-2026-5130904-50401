@@ -1,8 +1,8 @@
 #ifndef COMMANDS_HPP
 #define COMMANDS_HPP
 #include <iostream>
-#include "myrbt.hpp"
 #include <myvector.hpp>
+#include "mymap.hpp"
 #include "structs.hpp"
 
 namespace goltsov
@@ -19,7 +19,7 @@ namespace goltsov
     std::pair< size_t, size_t > mergeInterval(State&, MapIterator< DateTime, Task >,
       MapIterator< DateTime, Task >);
     std::pair< DateTime, DateTime > findCommonGapInVector(State&, const DateTime&,
-      const DateTime&, const TimeInterval&, const topit::Vector< std::string >&);
+      const DateTime&, const TimeInterval&, const goltsov::Vector< std::string >&);
     template< class Predicate >
     MapIterator< DateTime, Task > findByPredicate(Schedule&, Predicate);
     template< class Predicate >
@@ -80,9 +80,9 @@ namespace goltsov
   void findGapOnInterval(std::ostream&, State&, const DateTime&, const DateTime&,
     const TimeInterval&);
   void findCommonGap(std::ostream&, State&, const TimeInterval&, const size_t&,
-    const topit::Vector< std::string >&);
+    const goltsov::Vector< std::string >&);
   void findCommonGapOnInterval(std::ostream&, State&, const DateTime&, const DateTime&,
-    const TimeInterval&, const size_t&, const topit::Vector< std::string >&);
+    const TimeInterval&, const size_t&, const goltsov::Vector< std::string >&);
   void listSchedules(std::ostream&, State&);
   void listContexts(std::ostream&, State&);
 }
