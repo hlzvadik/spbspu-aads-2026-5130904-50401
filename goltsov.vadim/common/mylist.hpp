@@ -471,7 +471,6 @@ template< class T >
 goltsov::LIter< T > goltsov::detail::makeInconstantLIter(LCIter< T > it)
 {
   return LIter< T >{const_cast< Node< T >* >(it.ptr_)};
->>>>>>> goltsov.vadim/S3
 }
 
 #endif

@@ -1,37 +1,32 @@
 #include <boost/test/unit_test.hpp>
-#include "mybst.hpp"
 #include <string>
 #include <utility>
+#include "mybst.hpp"
 
-struct ComparatorString
+namespace goltsov
 {
-  bool operator()(const std::string& a, const std::string& b)
-  {
-    return a < b;
-  }
-};
-
-using bst_si = goltsov::BSTree< std::string, int, ComparatorString >;
+  using bst_si = goltsov::BSTree< std::string, int, std::less< std::string > >;
+}
 
 BOOST_AUTO_TEST_SUITE(BST_suite)
 
 BOOST_AUTO_TEST_CASE(constructors_test)
 {
-  bst_si b;
+  goltsov::bst_si b;
   BOOST_CHECK(b.height() == 0);
   b.insert(std::pair< std::string, int >{"a", 1});
   b.insert(std::pair< std::string, int >{"b", 2});
-  bst_si b2 (b);
-  bst_si b3 = b2;
+  goltsov::bst_si b2 (b);
+  goltsov::bst_si b3 = b2;
   BOOST_CHECK(b2.at("a") == 1 && b2.at("b") == 2 && b3.at("a") == 1 && b3.at("b") == 2);
-  bst_si b4 (std::move(b2));
-  bst_si b5 = std::move(b3);
+  goltsov::bst_si b4 (std::move(b2));
+  goltsov::bst_si b5 = std::move(b3);
   BOOST_CHECK(b4.at("a") == 1 && b4.at("b") == 2 && b5.at("a") == 1 && b5.at("b") == 2);
 }
 
 BOOST_AUTO_TEST_CASE(insert_at_erase_case)
 {
-  bst_si b;
+  goltsov::bst_si b;
   b.insert(std::pair< std::string, int >{"a", 1});
   b.insert(std::pair< std::string, int >{"b", 2});
   BOOST_CHECK(b.insert(std::pair< std::string, int >{"a", 1}).second == false);
@@ -43,20 +38,20 @@ BOOST_AUTO_TEST_CASE(insert_at_erase_case)
 
 BOOST_AUTO_TEST_CASE(swap_test)
 {
-  bst_si b;
+  goltsov::bst_si b;
   b.insert(std::pair< std::string, int >{"a", 1});
   b.insert(std::pair< std::string, int >{"b", 2});
-  bst_si b1;
+  goltsov::bst_si b1;
   b.swap(b1);
   BOOST_CHECK(b.height() == 0 && b1.at("a") == 1 && b1.at("b") == 2);
 }
 
 BOOST_AUTO_TEST_CASE(begin_and_test)
 {
-  bst_si b;
+  goltsov::bst_si b;
   b.insert(std::pair< std::string, int >{"a", 1});
   b.insert(std::pair< std::string, int >{"b", 2});
-  const bst_si bc = b;
+  const goltsov::bst_si bc = b;
   goltsov::BSTIterator< std::string, int > temp = goltsov::BSTIterator< std::string, int >{};
   goltsov::BSTConstIterator< std::string, int > tempc = goltsov::BSTConstIterator< std::string, int >{};
   BOOST_CHECK((* b.begin()).second == 1 && b.end() == temp &&
@@ -65,7 +60,7 @@ BOOST_AUTO_TEST_CASE(begin_and_test)
 
 BOOST_AUTO_TEST_CASE(rotates_test)
 {
-  bst_si b;
+  goltsov::bst_si b;
   b.insert(std::pair< std::string, int >{"a", 1});
   b.insert(std::pair< std::string, int >{"e", 2});
   b.insert(std::pair< std::string, int >{"g", 3});
@@ -80,7 +75,7 @@ BOOST_AUTO_TEST_CASE(rotates_test)
   i1 = ++(++(++(++b.begin())));
   BOOST_CHECK(b.rotateLeft(i1) ==
     (goltsov::BSTIterator< std::string, int >{}) && b.height() == 4);
-  bst_si b1;
+  goltsov::bst_si b1;
   b1.insert(std::pair< std::string, int >{"e", 3});
   b1.insert(std::pair< std::string, int >{"d", 2});
   b1.insert(std::pair< std::string, int >{"c", 1});
@@ -93,14 +88,14 @@ BOOST_AUTO_TEST_CASE(rotates_test)
   i1 = ++(b.begin());
   BOOST_CHECK_THROW(b.rotateRight(i1), std::logic_error);
   BOOST_CHECK(b.rotateRight(b.begin()) == (goltsov::BSTIterator< std::string, int >{}) && b.height() == 5);
-  bst_si b2;
+  goltsov::bst_si b2;
   b2.insert(std::pair< std::string, int >{"c", 3});
   b2.insert(std::pair< std::string, int >{"a", 1});
   b2.insert(std::pair< std::string, int >{"b", 2});
   i1 = ++(b2.begin());
   BOOST_CHECK(b2.rotateLargeRight(i1)
     == (goltsov::BSTConstIterator< std::string, int >{}) && b2.height() == 2);
-  bst_si b3;
+  goltsov::bst_si b3;
   b3.insert(std::pair< std::string, int >{"a", 1});
   b3.insert(std::pair< std::string, int >{"c", 3});
   b3.insert(std::pair< std::string, int >{"b", 2});
@@ -111,7 +106,7 @@ BOOST_AUTO_TEST_CASE(rotates_test)
 
 BOOST_AUTO_TEST_CASE(height_test)
 {
-  bst_si b;
+  goltsov::bst_si b;
   b.insert(std::pair< std::string, int >{"a", 1});
   b.insert(std::pair< std::string, int >{"e", 2});
   b.insert(std::pair< std::string, int >{"g", 3});
@@ -148,8 +143,8 @@ BOOST_AUTO_TEST_CASE(constructors_test)
 
 BOOST_AUTO_TEST_CASE(test_operators)
 {
-  nb_si* n1 = new nb_si {{"a", 5}, nullptr, nullptr, nullptr, 1};
-  nb_si* n2 = new nb_si {{"b", 3}, nullptr, nullptr, nullptr, 1};
+  nb_si* n1 = new nb_si {{"a", 5}, nullptr, nullptr, nullptr};
+  nb_si* n2 = new nb_si {{"b", 3}, nullptr, nullptr, nullptr};
 
   bi_si it1 = goltsov::detail::makeBSTIterByPtr(n1);
   bi_si it2 = goltsov::detail::makeBSTIterByPtr(n1);
