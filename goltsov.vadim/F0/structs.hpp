@@ -1,7 +1,7 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 #include <string>
-#include <mymap.hpp>
+#include "mymap.hpp"
 #include <myvector.hpp>
 
 namespace goltsov

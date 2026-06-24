@@ -1,7 +1,7 @@
+#include "commands.hpp"
 #include <stdexcept>
 #include <iomanip>
 #include <fstream>
-#include "commands.hpp"
 #include "structs.hpp"
 
 std::istream& goltsov::detail::skipSpaces(std::istream& is)

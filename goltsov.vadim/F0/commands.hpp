@@ -1,6 +1,7 @@
 #ifndef COMMANDS_HPP
 #define COMMANDS_HPP
 #include <iostream>
+#include "myrbt.hpp"
 #include <myvector.hpp>
 #include "structs.hpp"
 
@@ -13,10 +14,10 @@ namespace goltsov
     bool pushTask(State&, Task&, const TimeInterval&);
     bool pushSoftTask(State&, Task&, const TimeInterval&);
     void pushUnplanned(State&);
-    RBTIterator< DateTime, Task > pushProtectedTask(State&, Task&);
-    RBTIterator< DateTime, Task > pushProtectedTaskForce(State&, Task&);
-    std::pair< size_t, size_t > mergeInterval(State&, RBTIterator< DateTime, Task >,
-      RBTIterator< DateTime, Task >);
+    MapIterator< DateTime, Task > pushProtectedTask(State&, Task&);
+    MapIterator< DateTime, Task > pushProtectedTaskForce(State&, Task&);
+    std::pair< size_t, size_t > mergeInterval(State&, MapIterator< DateTime, Task >,
+      MapIterator< DateTime, Task >);
     std::pair< DateTime, DateTime > findCommonGapInVector(State&, const DateTime&,
       const DateTime&, const TimeInterval&, const topit::Vector< std::string >&);
     template< class Predicate >
