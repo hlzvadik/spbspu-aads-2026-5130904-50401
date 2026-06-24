@@ -62,7 +62,6 @@ void goltsov::printParsing(std::ostream& out, std::istream& in, goltsov::bst_s_b
   print_ds(out, all_sets, name_dataset);
   out << '\n';
 }
-
 void goltsov::complementParsing(std::ostream&, std::istream& in, goltsov::bst_s_bst_is& all_sets)
 {
   std::string new_dataset, dataset_1, dataset_2;
@@ -72,7 +71,6 @@ void goltsov::complementParsing(std::ostream&, std::istream& in, goltsov::bst_s_
   }
   complement_ds(all_sets, new_dataset, dataset_1, dataset_2);
 }
-
 void goltsov::intersectParsing(std::ostream&, std::istream& in, goltsov::bst_s_bst_is& all_sets)
 {
   std::string new_dataset, dataset_1, dataset_2;
@@ -82,7 +80,6 @@ void goltsov::intersectParsing(std::ostream&, std::istream& in, goltsov::bst_s_b
   }
   intersect_ds(all_sets, new_dataset, dataset_1, dataset_2);
 }
-
 void goltsov::unionParsing(std::ostream&, std::istream& in, goltsov::bst_s_bst_is& all_sets)
 {
   std::string new_dataset, dataset_1, dataset_2;
@@ -99,7 +96,7 @@ void goltsov::print_ds(std::ostream& out, goltsov::bst_s_bst_is& all_sets, std::
   {
     if (all_sets.at(dataset).height() == 0)
     {
-      out << "<EMPTY>\n";
+      out << "<EMPTY>";
       return;
     }
   }
@@ -110,10 +107,9 @@ void goltsov::print_ds(std::ostream& out, goltsov::bst_s_bst_is& all_sets, std::
   out << dataset;
   for (goltsov::bst_is_iterator it = all_sets.at(dataset).begin(); it != all_sets.at(dataset).end(); ++it)
   {
-    out << " " << (* it).first << " " << (* it).second;
+    out << " " << (*it).first << " " << (*it).second;
   }
 }
-
 void goltsov::complement_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
 {
   goltsov::BSTree< long long, std::string, std::less< long long > > new_set;
@@ -131,36 +127,27 @@ void goltsov::complement_ds(bst_s_bst_is& all_sets, std::string new_dataset, std
   while (it_1 != all_sets.at(dataset_1).end() || it_2 != all_sets.at(dataset_2).end())
   {
     if (it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first == (* it_2).first)
+      && (*it_1).first == (*it_2).first)
     {
       ++it_1;
       ++it_2;
     }
     if ((it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first < (* it_2).first)
+      && (*it_1).first < (*it_2).first)
       || (it_1 != all_sets.at(dataset_1).end() && it_2 == all_sets.at(dataset_2).end()))
     {
-      new_set.insert(std::pair< long long, std::string >{(* it_1).first, (* it_1).second});
+      new_set.insert(std::pair< long long, std::string >{(*it_1).first, (*it_1).second});
       ++it_1;
     }
     if ((it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first > (* it_2).first)
+      && (*it_1).first > (*it_2).first)
       || (it_1 == all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()))
     {
       ++it_2;
     }
   }
-  try
-  {
-    all_sets.insert(std::pair< std::string, goltsov::BSTree< long long, std::string,
-      std::less< long long > > >{new_dataset, new_set});
-  }
-  catch (...)
-  {
-    all_sets.at(new_dataset) = new_set;
-  }
+  all_sets[new_dataset] = new_set;
 }
-
 void goltsov::intersect_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1,
   std::string dataset_2)
 {
@@ -179,36 +166,27 @@ void goltsov::intersect_ds(bst_s_bst_is& all_sets, std::string new_dataset, std:
   while (it_1 != all_sets.at(dataset_1).end() || it_2 != all_sets.at(dataset_2).end())
   {
     if (it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first == (* it_2).first)
+      && (*it_1).first == (*it_2).first)
     {
-      new_set.insert(std::pair< long long, std::string >{(* it_1).first, (* it_1).second});
+      new_set.insert(std::pair< long long, std::string >{(*it_1).first, (*it_1).second});
       ++it_1;
       ++it_2;
     }
     if ((it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first < (* it_2).first)
+      && (*it_1).first < (*it_2).first)
       || (it_1 != all_sets.at(dataset_1).end() && it_2 == all_sets.at(dataset_2).end()))
     {
       ++it_1;
     }
     if ((it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first > (* it_2).first)
+      && (*it_1).first > (*it_2).first)
       || (it_1 == all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()))
     {
       ++it_2;
     }
   }
-  try
-  {
-    all_sets.insert(std::pair< std::string, goltsov::BSTree< long long, std::string,
-      std::less< long long > > >{new_dataset, new_set});
-  }
-  catch (...)
-  {
-    all_sets.at(new_dataset) = new_set;
-  }
+  all_sets[new_dataset] = new_set;
 }
-
 void goltsov::union_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::string dataset_1, std::string dataset_2)
 {
   goltsov::BSTree< long long, std::string, std::less< long long > > new_set;
@@ -226,34 +204,26 @@ void goltsov::union_ds(bst_s_bst_is& all_sets, std::string new_dataset, std::str
   while (it_1 != all_sets.at(dataset_1).end() || it_2 != all_sets.at(dataset_2).end())
   {
     if (it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first == (* it_2).first)
+      && (*it_1).first == (*it_2).first)
     {
-      new_set.insert(std::pair< long long, std::string >{(* it_1).first, (* it_1).second});
+      new_set.insert(std::pair< long long, std::string >{(*it_1).first, (*it_1).second});
       ++it_1;
       ++it_2;
     }
     if ((it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first < (* it_2).first)
+      && (*it_1).first < (*it_2).first)
       || (it_1 != all_sets.at(dataset_1).end() && it_2 == all_sets.at(dataset_2).end()))
     {
-      new_set.insert(std::pair< long long, std::string >{(* it_1).first, (* it_1).second});
+      new_set.insert(std::pair< long long, std::string >{(*it_1).first, (*it_1).second});
       ++it_1;
     }
     if ((it_1 != all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()
-      && (* it_1).first > (* it_2).first)
+      && (*it_1).first > (*it_2).first)
       || (it_1 == all_sets.at(dataset_1).end() && it_2 != all_sets.at(dataset_2).end()))
     {
-      new_set.insert(std::pair< long long, std::string >{(* it_2).first, (* it_2).second});
+      new_set.insert(std::pair< long long, std::string >{(*it_2).first, (*it_2).second});
       ++it_2;
     }
   }
-  try
-  {
-    all_sets.insert(std::pair< std::string, goltsov::BSTree< long long, std::string,
-      std::less< long long > > >{new_dataset, new_set});
-  }
-  catch (...)
-  {
-    all_sets.at(new_dataset) = new_set;
-  }
+  all_sets[new_dataset] = new_set;
 }
