@@ -4,9 +4,6 @@
 #include <stdexcept>
 #include <mylist.hpp>
 #include <boost/uuid/detail/sha1.hpp>
-<<<<<<< HEAD
-#include <mylist.hpp>
-=======
 #include <utility>
 
 namespace goltsov
@@ -48,7 +45,6 @@ namespace goltsov
     LIter< T > makeInconstantLIter(LCIter< T >);
   }
 }
->>>>>>> goltsov.vadim/S4
 
 namespace goltsov
 {

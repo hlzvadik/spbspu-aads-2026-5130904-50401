@@ -2,10 +2,6 @@
 #include <string>
 #include <myvector.hpp>
 #include "my_hash_table.hpp"
-<<<<<<< HEAD
-#include <myvector.hpp>
-=======
->>>>>>> goltsov.vadim/S4
 
 namespace goltsov
 {

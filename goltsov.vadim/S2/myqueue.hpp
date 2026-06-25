@@ -1,9 +1,6 @@
 #ifndef MYQUEUE_HPP
 #define MYQUEUE_HPP
-<<<<<<< HEAD
-=======
 #include <utility>
->>>>>>> goltsov.vadim/S4
 #include <mylist.hpp>
 
 namespace goltsov

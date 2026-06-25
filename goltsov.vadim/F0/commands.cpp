@@ -847,6 +847,7 @@ void goltsov::unplannedRemove(std::ostream& os, State& current_state, const std:
   try
   {
     current_state.current_schedule->unplanned_tasks.erase(id);
+    os << "<TASK " << id << " REMOVED>\n";
   }
   catch (...)
   {

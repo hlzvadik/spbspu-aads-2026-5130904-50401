@@ -4,10 +4,6 @@
 #include <limits>
 #include <myvector.hpp>
 #include "my_hash_table.hpp"
-<<<<<<< HEAD
-#include <myvector.hpp>
-=======
->>>>>>> goltsov.vadim/S4
 #include "graph_functions.hpp"
 
 int main(int argc, char** argv)

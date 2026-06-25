@@ -1,9 +1,6 @@
 #ifndef MYSTACK_HPP
 #define MYSTACK_HPP
-<<<<<<< HEAD
-=======
 #include <utility>
->>>>>>> goltsov.vadim/S4
 #include <mylist.hpp>
 
 namespace goltsov
