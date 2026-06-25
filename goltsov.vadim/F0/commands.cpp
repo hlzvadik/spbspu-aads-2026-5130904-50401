@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include "structs.hpp"
 
 std::istream& goltsov::detail::skipSpaces(std::istream& is)
@@ -25,51 +26,51 @@ bool goltsov::detail::isEndOfLine(std::istream& is)
 }
 bool goltsov::detail::pushTask(State& current_state, Task& task, const TimeInterval& duration)
 {
-  if (current_state.current_schedule_->tasks_.size() == 0)
+  if (current_state.current_schedule->tasks.size() == 0)
   {
-    task.start_time_ = task.left_boundary_time_;
-    task.end_time_ = task.start_time_ + duration;
-    current_state.current_schedule_->tasks_.insert({task.start_time_, task});
-    current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
+    task.start_time = task.left_boundary_time;
+    task.end_time = task.start_time + duration;
+    current_state.current_schedule->tasks.insert({task.start_time, task});
+    current_state.current_schedule->id_start_time[task.id] = task.start_time;
     return true;
   }
   goltsov::MapIterator< DateTime, Task > current =
-    rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
-  if (current == current_state.current_schedule_->tasks_.end())
+    rfindByPredicate(*current_state.current_schedule, FindTaskHasETLessLB{task});
+  if (current == current_state.current_schedule->tasks.end())
   {
-    current = current_state.current_schedule_->tasks_.begin();
+    current = current_state.current_schedule->tasks.begin();
   }
   else
   {
     ++current;
   }
-  DateTime start = task.left_boundary_time_;
-  while (current != current_state.current_schedule_->tasks_.end()
-    && start + duration > current->second.start_time_ && start + duration <= task.right_boundary_time_)
+  DateTime start = task.left_boundary_time;
+  while (current != current_state.current_schedule->tasks.end()
+    && start + duration > current->second.start_time && start + duration <= task.right_boundary_time)
   {
-    if (task.priority_ > current->second.priority_ && !current->second.is_protected_)
+    if (task.priority > current->second.priority && !current->second.is_protected)
     {
-      current_state.current_schedule_->unplanned_tasks_.insert({current->second.id_, current->second});
+      current_state.current_schedule->unplanned_tasks.insert({current->second.id, current->second});
       goltsov::MapIterator< DateTime, Task > temp = current;
       ++current;
-      current_state.current_schedule_->id_start_time_.erase(temp->second.id_);
-      current_state.current_schedule_->tasks_.erase(temp->first);
+      current_state.current_schedule->id_start_time.erase(temp->second.id);
+      current_state.current_schedule->tasks.erase(temp->first);
     }
     else
     {
-      start = current->second.end_time_;
+      start = current->second.end_time;
       ++current;
     }
   }
-  if (((current == current_state.current_schedule_->tasks_.end()) &&
-    (start + duration <= task.right_boundary_time_))
-      || ((current != current_state.current_schedule_->tasks_.end())
-      && (start + duration <= current->second.start_time_ && start + duration <= task.right_boundary_time_)))
+  if (((current == current_state.current_schedule->tasks.end()) &&
+    (start + duration <= task.right_boundary_time))
+      || ((current != current_state.current_schedule->tasks.end())
+      && (start + duration <= current->second.start_time && start + duration <= task.right_boundary_time)))
   {
-    task.start_time_ = start;
-    task.end_time_ = start + duration;
-    current_state.current_schedule_->tasks_.insert({task.start_time_, task});
-    current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
+    task.start_time = start;
+    task.end_time = start + duration;
+    current_state.current_schedule->tasks.insert({task.start_time, task});
+    current_state.current_schedule->id_start_time[task.id] = task.start_time;
     return true;
   }
   else
@@ -79,40 +80,40 @@ bool goltsov::detail::pushTask(State& current_state, Task& task, const TimeInter
 }
 bool goltsov::detail::pushSoftTask(State& current_state, Task& task, const TimeInterval& duration)
 {;
-  if (current_state.current_schedule_->tasks_.empty())
+  if (current_state.current_schedule->tasks.empty())
   {
-    task.start_time_ = task.left_boundary_time_;
-    task.end_time_ = task.start_time_ + duration;
-    current_state.current_schedule_->tasks_.insert({task.start_time_, task});
-    current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
+    task.start_time = task.left_boundary_time;
+    task.end_time = task.start_time + duration;
+    current_state.current_schedule->tasks.insert({task.start_time, task});
+    current_state.current_schedule->id_start_time[task.id] = task.start_time;
     return true;
   }
-  MapIterator<DateTime, Task> current = rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
-  if (current == current_state.current_schedule_->tasks_.end())
+  MapIterator<DateTime, Task> current = rfindByPredicate(*current_state.current_schedule, FindTaskHasETLessLB{task});
+  if (current == current_state.current_schedule->tasks.end())
   {
-    current = current_state.current_schedule_->tasks_.begin();
+    current = current_state.current_schedule->tasks.begin();
   }
   else
   {
     ++current;
   }
-  DateTime potential_start = task.left_boundary_time_;
-  while (current != current_state.current_schedule_->tasks_.end()
-    && potential_start + duration <= task.right_boundary_time_)
+  DateTime potential_start = task.left_boundary_time;
+  while (current != current_state.current_schedule->tasks.end()
+    && potential_start + duration <= task.right_boundary_time)
   {
-    if (potential_start + duration <= current->second.start_time_)
+    if (potential_start + duration <= current->second.start_time)
     {
       break;
     }
-    potential_start = current->second.end_time_;
+    potential_start = current->second.end_time;
     ++current;
   }
-  if (potential_start + duration <= task.right_boundary_time_)
+  if (potential_start + duration <= task.right_boundary_time)
   {
-    task.start_time_ = potential_start;
-    task.end_time_ = potential_start + duration;
-    current_state.current_schedule_->tasks_.insert({task.start_time_, task});
-    current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
+    task.start_time = potential_start;
+    task.end_time = potential_start + duration;
+    current_state.current_schedule->tasks.insert({task.start_time, task});
+    current_state.current_schedule->id_start_time[task.id] = task.start_time;
     return true;
   }
   return pushTask(current_state, task, duration);
@@ -121,65 +122,65 @@ goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::pushPr
   State& current_state, Task& task)
 {
   goltsov::MapIterator< DateTime, Task > current =
-    rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
-  if (current == current_state.current_schedule_->tasks_.end())
+    rfindByPredicate(*current_state.current_schedule, FindTaskHasETLessLB{task});
+  if (current == current_state.current_schedule->tasks.end())
   {
-    current = current_state.current_schedule_->tasks_.begin();
+    current = current_state.current_schedule->tasks.begin();
   }
   else
   {
     ++current;
   }
-  while (current != current_state.current_schedule_->tasks_.end()
-    && task.right_boundary_time_ > current->second.start_time_)
+  while (current != current_state.current_schedule->tasks.end()
+    && task.right_boundary_time > current->second.start_time)
   {
-    if (current->second.is_protected_)
+    if (current->second.is_protected)
     {
-      current_state.current_schedule_->unplanned_tasks_.insert({task.id_, task});
+      current_state.current_schedule->unplanned_tasks.insert({task.id, task});
       return current;
     }
     else
     {
-      current_state.current_schedule_->unplanned_tasks_.insert({current->second.id_, current->second});
+      current_state.current_schedule->unplanned_tasks.insert({current->second.id, current->second});
       goltsov::MapIterator< DateTime, Task > temp = current;
       ++current;
-      current_state.current_schedule_->id_start_time_.erase(temp->second.id_);
-      current_state.current_schedule_->tasks_.erase(temp->first);
+      current_state.current_schedule->id_start_time.erase(temp->second.id);
+      current_state.current_schedule->tasks.erase(temp->first);
     }
   }
-  task.start_time_ = task.left_boundary_time_;
-  task.end_time_ = task.right_boundary_time_;
-  current_state.current_schedule_->tasks_.insert({task.start_time_, task});
-  current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
-  return current_state.current_schedule_->tasks_.end();
+  task.start_time = task.left_boundary_time;
+  task.end_time = task.right_boundary_time;
+  current_state.current_schedule->tasks.insert({task.start_time, task});
+  current_state.current_schedule->id_start_time[task.id] = task.start_time;
+  return current_state.current_schedule->tasks.end();
 }
 goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::pushProtectedTaskForce(
   State& current_state, Task& task)
 {
   goltsov::MapIterator< DateTime, Task > current =
-    rfindByPredicate(*current_state.current_schedule_, FindTaskHasETLessLB{task});
-  if (current == current_state.current_schedule_->tasks_.end())
+    rfindByPredicate(*current_state.current_schedule, FindTaskHasETLessLB{task});
+  if (current == current_state.current_schedule->tasks.end())
   {
-    current = current_state.current_schedule_->tasks_.begin();
+    current = current_state.current_schedule->tasks.begin();
   }
   else
   {
     ++current;
   }
-  while (current != current_state.current_schedule_->tasks_.end()
-    && task.right_boundary_time_ > current->second.start_time_)
+  while (current != current_state.current_schedule->tasks.end()
+    && task.right_boundary_time > current->second.start_time)
   {
-    current_state.current_schedule_->unplanned_tasks_.insert({current->second.id_, current->second});
+    current_state.current_schedule->unplanned_tasks.insert({current->second.id, current->second});
     goltsov::MapIterator< DateTime, Task > temp = current;
     ++current;
-    current_state.current_schedule_->id_start_time_.erase(temp->second.id_);
-    current_state.current_schedule_->tasks_.erase(temp->first);
+    current_state.current_schedule->id_start_time.erase(temp->second.id);
+    current_state.current_schedule->tasks.erase(temp->first);
   }
-  task.start_time_ = task.left_boundary_time_;
-  task.end_time_ = task.right_boundary_time_;
-  current_state.current_schedule_->tasks_.insert({task.start_time_, task});
-  current_state.current_schedule_->id_start_time_[task.id_] = task.start_time_;
-  return current_state.current_schedule_->tasks_.end();
+  task.start_time = task.left_boundary_time;
+  task.end_time = task.right_boundary_time;
+  current_state.current_schedule->tasks.insert({task.start_time, task});
+  current_state.current_schedule->id_start_time[task.id] = task.start_time;
+  return current_state.current_schedule->tasks.end();
 }
 void goltsov::detail::pushUnplanned(State& current_state)
 {
@@ -188,12 +189,12 @@ void goltsov::detail::pushUnplanned(State& current_state)
   {
     count_pushed = 0;
     for (goltsov::MapIterator< std::string, Task > it =
-      current_state.current_schedule_->unplanned_tasks_.begin();
-      it != current_state.current_schedule_->unplanned_tasks_.end(); ++it)
+      current_state.current_schedule->unplanned_tasks.begin();
+      it != current_state.current_schedule->unplanned_tasks.end(); ++it)
     {
-      if (pushSoftTask(current_state, it->second, it->second.end_time_ - it->second.start_time_))
+      if (pushSoftTask(current_state, it->second, it->second.end_time - it->second.start_time))
       {
-        current_state.current_schedule_->unplanned_tasks_.erase(it->second.id_);
+        current_state.current_schedule->unplanned_tasks.erase(it->second.id);
         ++count_pushed;
       }
     }
@@ -203,107 +204,104 @@ std::pair< size_t, size_t > goltsov::detail::mergeInterval(State& current_state,
   goltsov::MapIterator< DateTime, Task > s,
   goltsov::MapIterator< DateTime, Task > e)
 {
-  size_t count_planned0 = current_state.current_schedule_->tasks_.size();
+  size_t count_planned0 = current_state.current_schedule->tasks.size();
   for (; s != e; ++s)
   {
-    if (!s->second.is_protected_)
+    if (!s->second.is_protected)
     {
-      pushSoftTask(current_state, s->second, s->second.end_time_ - s->second.start_time_);
+      pushSoftTask(current_state, s->second, s->second.end_time - s->second.start_time);
     }
     else
     {
-      pushProtectedTask(current_state, s->second) == current_state.current_schedule_->tasks_.end();
+      pushProtectedTask(current_state, s->second) == current_state.current_schedule->tasks.end();
     }
   }
   detail::pushUnplanned(current_state);
-  size_t count_unplanned = current_state.current_schedule_->tasks_.size();
-  size_t count_planned1 = current_state.current_schedule_->tasks_.size();
+  size_t count_unplanned = current_state.current_schedule->tasks.size();
+  size_t count_planned1 = current_state.current_schedule->tasks.size();
   return {count_planned1 - count_planned0, count_unplanned};
 }
 std::pair< goltsov::DateTime, goltsov::DateTime > goltsov::detail::findCommonGapInVector(
-    State& current_state,
-    const DateTime& start_time,
-    const DateTime& end_time,
-    const TimeInterval& duration,
-    const goltsov::Vector< std::string >& names_schedules)
+    State& current_state, const DateTime& start_time, const DateTime& end_time,
+    const TimeInterval& duration, const goltsov::Vector< std::string >& names_schedules)
+{
+  goltsov::Vector< Task > all_tasks;
+  for (size_t i = 0; i < names_schedules.getSize(); ++i)
   {
-    goltsov::Vector< Task > all_tasks;
-    for (size_t i = 0; i < names_schedules.getSize(); ++i)
+    goltsov::Schedule& current_schedule =
+      current_state.current_context->schedules.at(names_schedules[i]);
+    for (MapIterator< DateTime, Task > it = current_schedule.tasks.begin(); it != current_schedule.tasks.end(); ++it)
     {
-      goltsov::Schedule& current_schedule =
-        current_state.current_context_->schedules_.at(names_schedules[i]);
-      for (MapIterator< DateTime, Task > it = current_schedule.tasks_.begin(); it != current_schedule.tasks_.end(); ++it)
+      if (it->second.end_time > start_time && it->second.start_time < end_time)
       {
-        if (it->second.end_time_ > start_time && it->second.start_time_ < end_time)
-        {
-          all_tasks.pushBack(it->second);
-        }
+        all_tasks.pushBack(it->second);
       }
     }
-    for (size_t i = 0; i < all_tasks.getSize(); ++i)
+  }
+  for (size_t i = 0; i < all_tasks.getSize(); ++i)
+  {
+    for (size_t j = i + 1; j < all_tasks.getSize(); ++j)
     {
-      for (size_t j = i + 1; j < all_tasks.getSize(); ++j)
+      if (all_tasks[j].start_time < all_tasks[i].start_time)
       {
-        if (all_tasks[j].start_time_ < all_tasks[i].start_time_)
-        {
-          std::swap(all_tasks[i], all_tasks[j]);
-        }
+        std::swap(all_tasks[i], all_tasks[j]);
       }
     }
-    DateTime current = start_time;
-    for (size_t i = 0; i < all_tasks.getSize(); ++i)
+  }
+  DateTime current = start_time;
+  for (size_t i = 0; i < all_tasks.getSize(); ++i)
+  {
+    Task& task = all_tasks[i];
+    DateTime task_start = (task.start_time < start_time) ? start_time : task.start_time;
+    DateTime task_end = (task.end_time > end_time) ? end_time : task.end_time;
+    if (task_start > current)
     {
-      Task& task = all_tasks[i];
-      DateTime task_start = (task.start_time_ < start_time) ? start_time : task.start_time_;
-      DateTime task_end = (task.end_time_ > end_time) ? end_time : task.end_time_;
-      if (task_start > current)
-      {
-        if (task_start - current >= duration)
-        {
-          return {current, current + duration};
-        }
-      }
-      if (task_end > current)
-      {
-        current = task_end;
-      }
-    }
-    if (end_time > current)
-    {
-      if (end_time - current >= duration)
+      if (task_start - current >= duration)
       {
         return {current, current + duration};
       }
     }
-    throw std::runtime_error("<GAP DID NOT FOUND>");
+    if (task_end > current)
+    {
+      current = task_end;
+    }
   }
+  if (end_time > current)
+  {
+    if (end_time - current >= duration)
+    {
+      return {current, current + duration};
+    }
+  }
+  throw std::runtime_error("<GAP DID NOT FOUND>");
+}
 template< class Predicate >
 goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::findByPredicate(Schedule& schedule, Predicate pred)
 {
-  for (MapIterator< DateTime, Task > it = schedule.tasks_.begin(); it != schedule.tasks_.end(); ++it)
+  for (MapIterator< DateTime, Task > it = schedule.tasks.begin(); it != schedule.tasks.end(); ++it)
   {
     if (pred(*it))
     {
       return it;
     }
   }
-  return schedule.tasks_.end();
+  return schedule.tasks.end();
 }
 template< class Predicate >
 goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::rfindByPredicate(Schedule& schedule, Predicate pred)
 {
-  for (MapIterator< DateTime, Task > it = schedule.tasks_.getLast(); it != schedule.tasks_.begin(); --it)
+  for (MapIterator< DateTime, Task > it = schedule.tasks.getLast(); it != schedule.tasks.begin(); --it)
   {
     if (pred(*it))
     {
       return it;
     }
   }
-  if (pred(*schedule.tasks_.begin()))
+  if (pred(*schedule.tasks.begin()))
   {
-    return schedule.tasks_.begin();
+    return schedule.tasks.begin();
   }
-  return schedule.tasks_.end();
+  return schedule.tasks.end();
 }
 
 void goltsov::parsingAdd(std::istream& is, std::ostream& os, State& current_state)
@@ -749,14 +747,14 @@ void goltsov::add(std::ostream& os, State& current_state, const std::string& id,
   bool is_planned = detail::pushSoftTask(current_state, temp, duration);
   if (is_planned)
   {
-    DateTime k = current_state.current_schedule_->id_start_time_[id];
-    os << "<TASK ADDED: Scheduled at " << current_state.current_schedule_->tasks_.at(k).start_time_
-      << ' ' << current_state.current_schedule_->tasks_.at(k).end_time_ << ">\n";
+    DateTime k = current_state.current_schedule->id_start_time[id];
+    os << "<TASK ADDED: Scheduled at " << current_state.current_schedule->tasks.at(k).start_time
+      << ' ' << current_state.current_schedule->tasks.at(k).end_time << ">\n";
   }
   else
   {
-    current_state.current_schedule_->unplanned_tasks_.insert({temp.id_, temp});
-    os << "<TASK UNPLANNED>\n";
+    current_state.current_schedule->unplanned_tasks.insert({temp.id, temp});
+    throw std::runtime_error("<TASK DID NOT ADDED>");
   }
   detail::pushUnplanned(current_state);
 }
@@ -767,67 +765,92 @@ void goltsov::addProtected(std::ostream& os, State& current_state, const std::st
   Task task{id, title, description, left_boundary_time, right_boundary_time, left_boundary_time,
     right_boundary_time, 0, true};
   MapIterator< DateTime, Task > res = detail::pushProtectedTask(current_state, task);
-  if (res == current_state.current_schedule_->tasks_.end())
+  if (res == current_state.current_schedule->tasks.end())
   {
     os << "<TASK ADDED: Scheduled at " << left_boundary_time << ' ' << right_boundary_time << ">\n";
   }
   else
   {
-    os << "<TASK DID NOT ADDED: Allready scheduled " << (* res).second.title_ << " at " << (* res).second.start_time_
-      << ' ' << (* res).second.end_time_ << ">\n";
+    std::ostringstream oss;
+    oss << "<TASK DID NOT ADDED: Allready scheduled " << (* res).second.title << " at " << (* res).second.start_time
+      << ' ' << (* res).second.end_time << ">";
+    throw std::runtime_error(oss.str());
   }
   detail::pushUnplanned(current_state);
 }
 void goltsov::remove(std::ostream& os, State& current_state, const std::string& id)
 {
-  DateTime k = current_state.current_schedule_->id_start_time_[id];
-  current_state.current_schedule_->tasks_.erase(k);
-  os << "<TASK REMOVED: ID " << id << ">\n";
+  try
+  {
+    DateTime k = current_state.current_schedule->id_start_time.at(id);
+    current_state.current_schedule->tasks.erase(k);
+    os << "<TASK REMOVED: ID " << id << ">\n";
+  }
+  catch (...)
+  {
+    throw std::runtime_error("<NO TASK IN SCHEDULE>");
+  }
 }
 void goltsov::list(std::ostream& os, State& current_state)
 {
-  for (MapIterator< DateTime, Task > it = current_state.current_schedule_->tasks_.begin();
-    it != current_state.current_schedule_->tasks_.end(); ++it)
+  MapIterator< DateTime, Task > it = current_state.current_schedule->tasks.begin();
+  if (it != current_state.current_schedule->tasks.end())
   {
-    os << (* it).second << '\n';
+    os << (*it).second;
+    ++it;
   }
+  for (; it != current_state.current_schedule->tasks.end(); ++it)
+  {
+    os << '\n' << (*it).second;
+  }
+  os << '\n';
 }
 void goltsov::merge(std::ostream& os, State& current_state, const std::string& name_other_schedule)
 {
   goltsov::Schedule* other_schedule;
   try
   {
-    other_schedule = &(current_state.current_context_->schedules_.at(name_other_schedule));
+    other_schedule = &(current_state.current_context->schedules.at(name_other_schedule));
   }
   catch (...)
   {
-    os << "<INVALID COMMAND>\n";
+    throw std::runtime_error("<INVALID COMMAND>");
   }
-  std::pair< size_t, size_t > res = detail::mergeInterval(current_state, other_schedule->tasks_.begin(),
-    other_schedule->tasks_.end());
+  std::pair< size_t, size_t > res = detail::mergeInterval(current_state, other_schedule->tasks.begin(),
+    other_schedule->tasks.end());
   os << "<MERGE DONE. Added: " << res.first << ", Conflicts: " << res.second << ">\n";
 }
 void goltsov::showUnplanned(std::ostream& os, State& current_state)
 {
-  for (MapIterator< std::string, Task > it = current_state.current_schedule_->unplanned_tasks_.begin();
-    it != current_state.current_schedule_->unplanned_tasks_.end(); ++it)
+  MapIterator< std::string, Task > it = current_state.current_schedule->unplanned_tasks.begin();
+  if (it != current_state.current_schedule->unplanned_tasks.end())
   {
     Task& a = it->second;
-    os << "<UNPLANNED: id=" << a.id_ << " Task=\"" << a.title_ << "\", left_boundary_time=" << a.left_boundary_time_
-      << ", right_boundary_time=" << a.right_boundary_time_ << ", duration="
-      << a.end_time_ - a.start_time_ << ", priority=" << a.priority_ << ", is_protected="
-      << a.is_protected_ << ">\n";
+    os << "<UNPLANNED: id=" << a.id << " Task=\"" << a.title << "\", left_boundary_time=" << a.left_boundary_time
+      << ", right_boundary_time=" << a.right_boundary_time << ", duration="
+      << a.end_time - a.start_time << ", priority=" << a.priority << ", is_protected="
+      << a.is_protected << ">";
+    ++it;
   }
+  for (; it != current_state.current_schedule->unplanned_tasks.end(); ++it)
+  {
+    Task& a = it->second;
+    os << "\n<UNPLANNED: id=" << a.id << " Task=\"" << a.title << "\", left_boundary_time=" << a.left_boundary_time
+      << ", right_boundary_time=" << a.right_boundary_time << ", duration="
+      << a.end_time - a.start_time << ", priority=" << a.priority << ", is_protected="
+      << a.is_protected << ">";
+  }
+  os << '\n';
 }
 void goltsov::unplannedRemove(std::ostream& os, State& current_state, const std::string& id)
 {
   try
   {
-    current_state.current_schedule_->unplanned_tasks_.erase(id);
+    current_state.current_schedule->unplanned_tasks.erase(id);
   }
   catch (...)
   {
-    os << "<INVALID COMMAND>\n";
+    throw std::runtime_error("<INVALID COMMAND>");
   }
 }
 void goltsov::unplannedForce(std::ostream& os, State& current_state, const std::string& id)
@@ -835,11 +858,11 @@ void goltsov::unplannedForce(std::ostream& os, State& current_state, const std::
   Task task;
   try
   {
-    task = current_state.current_schedule_->unplanned_tasks_.at(id);
-    current_state.current_schedule_->unplanned_tasks_.erase(id);
-    size_t now_size_unplanned = current_state.current_schedule_->unplanned_tasks_.size();
+    task = current_state.current_schedule->unplanned_tasks.at(id);
+    current_state.current_schedule->unplanned_tasks.erase(id);
+    size_t now_size_unplanned = current_state.current_schedule->unplanned_tasks.size();
     MapIterator< DateTime, Task > res;
-    if (task.is_protected_)
+    if (task.is_protected)
     {
       res = detail::pushProtectedTaskForce(current_state, task);
     }
@@ -847,20 +870,20 @@ void goltsov::unplannedForce(std::ostream& os, State& current_state, const std::
     {
       res = detail::pushProtectedTask(current_state, task);
     }
-    if (res == current_state.current_schedule_->tasks_.end())
+    if (res == current_state.current_schedule->tasks.end())
     {
-      os << "<FORCED ADD: " << task.title_ << ", NEW UNPLANNED: "
-        << current_state.current_schedule_->unplanned_tasks_.size() - now_size_unplanned << ">\n";
+      os << "<FORCED ADD: " << task.title << ", NEW UNPLANNED: "
+        << current_state.current_schedule->unplanned_tasks.size() - now_size_unplanned << ">\n";
     }
     else
     {
-      os << "<FORCED ADD FAILED: " << res->second.title_ << " allready scheduled at "
-        << res->second.start_time_ << ' ' << res->second.end_time_ << ">\n";
+      os << "<FORCED ADD FAILED: " << res->second.title << " allready scheduled at "
+        << res->second.start_time << ' ' << res->second.end_time << ">\n";
     }
   }
   catch (...)
   {
-    os << "<NO TASK>\n";
+    throw std::runtime_error("<NO TASK>");
   }
 }
 void goltsov::mergeScheduleOtherContext(std::ostream& os, State& current_state, const std::string& schedule_name,
@@ -870,24 +893,22 @@ void goltsov::mergeScheduleOtherContext(std::ostream& os, State& current_state, 
   goltsov::Schedule schedule;
   try
   {
-    context = current_state.contexts_.at(context_name);
+    context = current_state.contexts.at(context_name);
   }
   catch (...)
   {
-    os << "<NO CONTEXT>\n";
-    return;
+    throw std::runtime_error("<NO CONTEXT>");
   }
   try
   {
-    schedule = context.schedules_.at(schedule_name);
+    schedule = context.schedules.at(schedule_name);
   }
   catch (...)
   {
-    os << "<NO SCHEDULE>\n";
-    return;
+    throw std::runtime_error("<NO SCHEDULE>");
   }
   std::pair< size_t, size_t > res = detail::mergeInterval(
-    current_state, schedule.tasks_.begin(), schedule.tasks_.end());
+    current_state, schedule.tasks.begin(), schedule.tasks.end());
   os << "<MERGE DONE. Added: " << res.first << ", Conflicts: " << res.second << ">\n";
 }
 void goltsov::addScheduleOtherContext(std::ostream& os, State& current_state, const std::string& schedule_name,
@@ -897,32 +918,30 @@ void goltsov::addScheduleOtherContext(std::ostream& os, State& current_state, co
   goltsov::Schedule schedule;
   try
   {
-    context = current_state.contexts_.at(context_name);
+    context = current_state.contexts.at(context_name);
   }
   catch (...)
   {
-    os << "<NO CONTEXT>\n";
-    return;
+    throw std::runtime_error("<NO CONTEXT>");
   }
   try
   {
-    schedule = context.schedules_.at(schedule_name);
+    schedule = context.schedules.at(schedule_name);
   }
   catch (...)
   {
-    os << "<NO SCHEDULE>\n";
-    return;
+    throw std::runtime_error("<NO SCHEDULE>");
   }
   try
   {
-    current_state.current_context_->schedules_.at(schedule_name);
-    os << "<SCHEDULE ALLREADY EXISTS>\n";
+    current_state.current_context->schedules.at(schedule_name);
+    throw std::runtime_error("<SCHEDULE ALLREADY EXISTS>");
   }
   catch (...)
   {
-    current_state.current_context_->schedules_.insert({schedule_name, schedule});
-    os << "<ADD DONE. Added: " << schedule.tasks_.size() << ", Conflicts: "
-      << schedule.unplanned_tasks_.size() << ">\n";
+    current_state.current_context->schedules.insert({schedule_name, schedule});
+    os << "<ADD DONE. Added: " << schedule.tasks.size() << ", Conflicts: "
+      << schedule.unplanned_tasks.size() << ">\n";
   }
 }
 void goltsov::addForceScheduleOtherContext(std::ostream& os, State& current_state,
@@ -931,11 +950,11 @@ void goltsov::addForceScheduleOtherContext(std::ostream& os, State& current_stat
   bool is_current_schedule = false;
   try
   {
-    current_state.current_context_->schedules_.at(schedule_name);
-    if (current_state.current_context_->name_context_ != context_name)
+    current_state.current_context->schedules.at(schedule_name);
+    if (current_state.current_context->name_context != context_name)
     {
-      is_current_schedule = current_state.current_schedule_->name_schedule_ == schedule_name;
-      current_state.current_context_->schedules_.erase(schedule_name);
+      is_current_schedule = current_state.current_schedule->name_schedule == schedule_name;
+      current_state.current_context->schedules.erase(schedule_name);
     }
   }
   catch (...)
@@ -943,55 +962,55 @@ void goltsov::addForceScheduleOtherContext(std::ostream& os, State& current_stat
   addScheduleOtherContext(os, current_state, schedule_name, context_name);
   if (is_current_schedule)
   {
-    current_state.current_schedule_ = &current_state.current_context_->schedules_.at(schedule_name);
+    current_state.current_schedule = &current_state.current_context->schedules.at(schedule_name);
   }
 }
 void goltsov::switchSchedule(std::ostream& os, State& current_state, const std::string& schedule_name)
 {
   try
   {
-    current_state.current_schedule_ = &current_state.current_context_->schedules_.at(schedule_name);
+    current_state.current_schedule = &current_state.current_context->schedules.at(schedule_name);
     os << "<SCHEDULE SWITCHED>\n";
   }
   catch (...)
   {
-    os << "<NO SCHEDULE>\n";
+    throw std::runtime_error("<NO SCHEDULE>");
   }
 }
 void goltsov::switchContext(std::ostream& os, State& current_state, const std::string& context_name)
 {
   try
   {
-    current_state.current_context_ = & current_state.contexts_.at(context_name);
-    current_state.current_schedule_ = & current_state.current_context_->schedules_.begin()->second;
+    current_state.current_context = & current_state.contexts.at(context_name);
+    current_state.current_schedule = & current_state.current_context->schedules.begin()->second;
     os << "<CONTEXT SWITCHED>\n";
   }
   catch (...)
   {
-    os << "<NO CONTEXT>\n";
+    throw std::runtime_error("<NO CONTEXT>");
   }
 }
 void goltsov::stats(std::ostream& os, State& current_state, const DateTime& start_time,
   const DateTime& end_time)
 {
   Task a;
-  a.start_time_ = start_time;
+  a.start_time = start_time;
   goltsov::MapIterator< DateTime, Task > current =
-    detail::rfindByPredicate(*current_state.current_schedule_, detail::FindTaskHasETLessLB{a});
+    detail::rfindByPredicate(*current_state.current_schedule, detail::FindTaskHasETLessLB{a});
   TimeInterval busy_time {0, 0, 0, 0, 0, 0};
   size_t count_tasks = 0;
   try
   {
-    for (; current != current_state.current_schedule_->tasks_.end()
-      && current->second.start_time_ < end_time; ++current)
+    for (; current != current_state.current_schedule->tasks.end()
+      && current->second.start_time < end_time; ++current)
     {
-      busy_time = busy_time + (std::max(end_time, current->second.end_time_) - current->second.start_time_);
+      busy_time = busy_time + (std::max(end_time, current->second.end_time) - current->second.start_time);
       count_tasks += 1;
     }
   }
   catch (...)
   {
-    os << "<INVALID COMMAND>\n";
+    throw std::runtime_error("<INVALID COMMAND>");
     return;
   }
   os << "<Tasks: " << count_tasks << ", Load: ";
@@ -999,32 +1018,36 @@ void goltsov::stats(std::ostream& os, State& current_state, const DateTime& star
 }
 void goltsov::newSchedule(std::ostream&, State& current_state, const std::string& name_schedule)
 {
-  current_state.current_context_->schedules_.insert({name_schedule, goltsov::Schedule {}});
-  current_state.current_context_->schedules_.at(name_schedule).name_schedule_ = name_schedule;
+  current_state.current_context->schedules.insert({name_schedule, goltsov::Schedule {}});
+  current_state.current_context->schedules.at(name_schedule).name_schedule = name_schedule;
 }
 void goltsov::newContext(std::ostream&, State& current_state, const std::string& name_context)
 {
-  current_state.contexts_.insert({name_context, goltsov::Context {}});
-  current_state.contexts_.at(name_context).name_context_ = name_context;
-  current_state.contexts_.at(name_context).schedules_.insert({"Base_schedule", goltsov::Schedule {}});
-  current_state.contexts_.at(name_context).schedules_.at("Base_schedule").name_schedule_ = "Base_schedule";
+  current_state.contexts.insert({name_context, goltsov::Context {}});
+  current_state.contexts.at(name_context).name_context = name_context;
+  current_state.contexts.at(name_context).schedules.insert({"Base_schedule", goltsov::Schedule {}});
+  current_state.contexts.at(name_context).schedules.at("Base_schedule").name_schedule = "Base_schedule";
 }
 void goltsov::loadSchedule(std::ostream& os, State& current_state, const std::string& schedule_name,
   const std::string& filename)
 {
   try
   {
-    current_state.current_context_->schedules_.at(schedule_name);
-    os << "<NAME IS OCCUPIED>\n";
+    current_state.current_context->schedules.at(schedule_name);
+    throw std::runtime_error("<NAME IS OCCUPIED>");
   }
   catch (...)
   {
     goltsov::Schedule schedule;
-    schedule.name_schedule_ = schedule_name;
+    schedule.name_schedule = schedule_name;
     std::fstream inp_f (filename);
+    if (!inp_f)
+    {
+      throw std::runtime_error("<BAD FILE>");
+    }
     inp_f >> schedule;
-    current_state.current_context_->schedules_.insert({schedule_name, schedule});
-    current_state.current_schedule_ = &current_state.current_context_->schedules_.at(schedule_name);
+    current_state.current_context->schedules.insert({schedule_name, schedule});
+    current_state.current_schedule = &current_state.current_context->schedules.at(schedule_name);
     os << "<SCHEDULE LOADED>\n";
   }
 }
@@ -1033,18 +1056,18 @@ void goltsov::saveSchedule(std::ostream& os, State& current_state, const std::st
 {
   try
   {
-    goltsov::Schedule schedule = current_state.current_context_->schedules_.at(schedule_name);
+    goltsov::Schedule schedule = current_state.current_context->schedules.at(schedule_name);
     std::fstream out_f(filename, std::ios::out | std::ios::trunc);
     if (!out_f.is_open())
     {
-      throw std::runtime_error("Cannot open file");
+      throw std::runtime_error("<BAD FILE>");
     }
     out_f << schedule << '\n';
     os << "<SCHEDULE SAVED>\n";
   }
   catch (...)
   {
-    os << "<NO SUCH SCHEDULE>\n";
+    throw std::runtime_error("<NO SUCH SCHEDULE>");
   }
 }
 void goltsov::loadContext(std::ostream& os, State& current_state, const std::string& context_name,
@@ -1052,19 +1075,27 @@ void goltsov::loadContext(std::ostream& os, State& current_state, const std::str
 {
   try
   {
-    goltsov::Context context = current_state.contexts_.at(context_name);
-    os << "<NAME IS OCCUPIED>\n";
+    goltsov::Context context = current_state.contexts.at(context_name);
+    throw std::runtime_error("<NAME IS OCCUPIED>");
   }
   catch (...)
   {
     goltsov::Context context;
-    context.name_context_ = context_name;
-    std::fstream inp_f (filename);
+    context.name_context = context_name;
+    std::fstream inp_f(filename);
+    if (!inp_f)
+    {
+      throw std::runtime_error("<BAD FILE>");
+    }
     inp_f >> context;
-    current_state.contexts_.insert({context_name, context});
-    current_state.contexts_.at(context_name).name_context_ = context_name;
-    current_state.current_context_ = &current_state.contexts_.at(context_name);
-    current_state.current_schedule_ = &current_state.current_context_->schedules_.begin()->second;
+    if (context.schedules.empty())
+    {
+      context.schedules.insert({"Base schedule", goltsov::Schedule{}});
+    }
+    current_state.contexts.insert({context_name, context});
+    current_state.contexts.at(context_name).name_context = context_name;
+    current_state.current_context = &current_state.contexts.at(context_name);
+    current_state.current_schedule = &current_state.current_context->schedules.begin()->second;
     os << "<CONTEXT LOADED>\n";
   }
 }
@@ -1073,18 +1104,18 @@ void goltsov::saveContext(std::ostream& os, State& current_state, const std::str
 {
   try
   {
-    goltsov::Context context = current_state.contexts_.at(context_name);
+    goltsov::Context context = current_state.contexts.at(context_name);
     std::fstream out_f(filename, std::ios::out | std::ios::trunc);
     if (!out_f.is_open())
     {
-      throw std::runtime_error("Cannot open file");
+      throw std::runtime_error("<BAD FILE>");
     }
     out_f << context << '\n';
     os << "<CONTEXT SAVED>\n";
   }
   catch (...)
   {
-    os << "<NO SUCH CONTEXT>\n";
+    throw std::runtime_error("<NO SUCH CONTEXT>");
   }
 }
 void goltsov::findGap(std::ostream& os, State& current_state, const TimeInterval& interval)
@@ -1092,10 +1123,11 @@ void goltsov::findGap(std::ostream& os, State& current_state, const TimeInterval
   try
   {
     goltsov::Vector< std::string > a;
-    a.pushBack(current_state.current_schedule_->name_schedule_);
+    a.pushBack(current_state.current_schedule->name_schedule);
+    auto last = current_state.current_schedule->tasks.getLast();
     std::pair< DateTime, DateTime > gap = detail::findCommonGapInVector(current_state,
-      current_state.current_time, current_state.current_schedule_->tasks_.getLast()->second.end_time_ + interval,
-      interval, a);
+      current_state.current_time, ((last != current_state.current_schedule->tasks.end()) ? last->second.end_time :
+      current_state.current_time) + interval, interval, a);
     os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
   }
   catch(const std::exception& e)
@@ -1109,7 +1141,7 @@ void goltsov::findGapOnInterval(std::ostream& os, State& current_state, const Da
   try
   {
     goltsov::Vector< std::string > a;
-    a.pushBack(current_state.current_schedule_->name_schedule_);
+    a.pushBack(current_state.current_schedule->name_schedule);
     std::pair< DateTime, DateTime > gap = detail::findCommonGapInVector(current_state, start_time,
       end_time, interval, a);
     os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
@@ -1122,17 +1154,26 @@ void goltsov::findGapOnInterval(std::ostream& os, State& current_state, const Da
 void goltsov::findCommonGap(std::ostream& os, State& current_state, const TimeInterval& interval,
   const size_t&, const goltsov::Vector< std::string >& names_schedules)
 {
-  try
+  if (!current_state.current_schedule)
   {
-    std::pair< DateTime, DateTime > gap = detail::findCommonGapInVector(current_state,
-      current_state.current_time, current_state.current_schedule_->tasks_.getLast()->second.end_time_ + interval,
-        interval, names_schedules);
-    os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
+    throw std::runtime_error("<NO SCHEDULE>");
   }
-  catch(const std::exception& e)
+  auto last = current_state.current_schedule->tasks.getLast();
+  for (auto it = current_state.current_context->schedules.begin(); it != current_state.current_context->schedules.end();
+    ++it)
   {
-    std::cerr << e.what();
+    if (it->second.tasks.getLast() != it->second.tasks.end())
+    {
+      if (last->second.end_time < it->second.tasks.getLast()->second.end_time)
+      {
+        last = it->second.tasks.getLast();
+      }
+    }
   }
+  std::pair< DateTime, DateTime > gap = detail::findCommonGapInVector(current_state,
+    current_state.current_time, ((last != current_state.current_schedule->tasks.end()) ? last->second.end_time :
+    current_state.current_time) + interval, interval, names_schedules);
+  os << "<GAP FOUND: " << gap.first << ' ' << gap.second << ">\n";
 }
 void goltsov::findCommonGapOnInterval(std::ostream& os, State& current_state, const DateTime& start_time,
   const DateTime& end_time, const TimeInterval& interval, const size_t&,
@@ -1151,31 +1192,31 @@ void goltsov::findCommonGapOnInterval(std::ostream& os, State& current_state, co
 }
 void goltsov::listSchedules(std::ostream& os, State& current_state)
 {
-  for (MapIterator< std::string, goltsov::Schedule > it = current_state.current_context_->schedules_.begin();
-    it != current_state.current_context_->schedules_.end(); ++it)
+  for (MapIterator< std::string, goltsov::Schedule > it = current_state.current_context->schedules.begin();
+    it != current_state.current_context->schedules.end(); ++it)
   {
-    if (current_state.current_schedule_->name_schedule_ == it->second.name_schedule_)
+    if (current_state.current_schedule->name_schedule == it->second.name_schedule)
     {
-      os << "* " << it->second.name_schedule_ << '\n';
+      os << "* " << it->second.name_schedule << '\n';
     }
     else
     {
-      os << "  " << it->second.name_schedule_ << '\n';
+      os << "  " << it->second.name_schedule << '\n';
     }
   }
 }
 void goltsov::listContexts(std::ostream& os, State& current_state)
 {
-  for (MapIterator< std::string, goltsov::Context > it = current_state.contexts_.begin();
-    it != current_state.contexts_.end(); ++it)
+  for (MapIterator< std::string, goltsov::Context > it = current_state.contexts.begin();
+    it != current_state.contexts.end(); ++it)
   {
-    if (current_state.current_context_->name_context_ == it->second.name_context_)
+    if (current_state.current_context->name_context == it->second.name_context)
     {
-      os << "* " << it->second.name_context_ << '\n';
+      os << "* " << it->second.name_context << '\n';
     }
     else
     {
-      os << "  " << it->second.name_context_ << '\n';
+      os << "  " << it->second.name_context << '\n';
     }
   }
 }

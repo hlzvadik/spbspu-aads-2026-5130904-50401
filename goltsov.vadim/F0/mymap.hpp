@@ -101,14 +101,7 @@ void goltsov::Map< Key, Value >::clear()
 template< class Key, class Value >
 goltsov::MapIterator< Key, Value > goltsov::Map< Key, Value >::find(const Key& k)
 {
-  try
-  {
-    return data_.get(k);
-  }
-  catch (...)
-  {
-    return data_.end();
-  }
+  return data_.find(k);
 }
 template< class Key, class Value >
 goltsov::MapConstIterator< Key, Value > goltsov::Map< Key, Value >::find(const Key& k) const

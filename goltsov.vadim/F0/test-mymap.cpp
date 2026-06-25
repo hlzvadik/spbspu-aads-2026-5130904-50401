@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(at_test)
   BOOST_CHECK(m.at(10) == "new_ten");
   const map_is const_m = m;
   BOOST_CHECK(const_m.at(10) == "new_ten");
-  BOOST_CHECK_THROW(m.at(999), std::out_of_range);
-  BOOST_CHECK_THROW(const_m.at(999), std::out_of_range);
+  BOOST_CHECK_THROW(m.at(999), std::logic_error);
+  BOOST_CHECK_THROW(const_m.at(999), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(contains_and_count_test)
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(erase_test)
   m.erase(10);
   BOOST_CHECK(m.size() == 1);
   BOOST_CHECK(m.contains(10) == false);
-  BOOST_CHECK_THROW(m.erase(999), std::out_of_range);
+  BOOST_CHECK(m.erase(999) == 0);
 }
 
 BOOST_AUTO_TEST_CASE(clear_test)

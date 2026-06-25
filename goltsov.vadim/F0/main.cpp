@@ -1,6 +1,6 @@
 #include <iostream>
-#include <mymap.hpp>
 #include <limits>
+#include "mymap.hpp"
 #include "structs.hpp"
 #include "commands.hpp"
 
@@ -21,12 +21,12 @@ int main()
     std::cin >> current_time;
   }
   goltsov::State current_state {nullptr, nullptr, goltsov::Map< std::string, goltsov::Context > {}, current_time};
-  current_state.contexts_.insert({"Base_context", goltsov::Context {}});
-  current_state.contexts_.at("Base_context").name_context_ = "Base_context";
-  current_state.current_context_ = &current_state.contexts_.at("Base_context");
-  current_state.current_context_->schedules_.insert({"Base_schedule", goltsov::Schedule {}});
-  current_state.current_context_->schedules_.at("Base_schedule").name_schedule_ = "Base_schedule";
-  current_state.current_schedule_ = &current_state.current_context_->schedules_.at("Base_schedule");
+  current_state.contexts.insert({"Base_context", goltsov::Context {}});
+  current_state.contexts.at("Base_context").name_context = "Base_context";
+  current_state.current_context = &current_state.contexts.at("Base_context");
+  current_state.current_context->schedules.insert({"Base_schedule", goltsov::Schedule {}});
+  current_state.current_context->schedules.at("Base_schedule").name_schedule = "Base_schedule";
+  current_state.current_schedule = &current_state.current_context->schedules.at("Base_schedule");
 
   goltsov::Map< std::string, void (*)(std::istream&, std::ostream&, goltsov::State&) > commands;
   commands["add"] = goltsov::parsingAdd;
@@ -60,8 +60,7 @@ int main()
   while(!std::cin.eof())
   {
     std::string command;
-    std::cin >> command;
-    if (!std::cin.fail())
+    if (std::cin >> command)
     {
       if (!commands.count(command))
       {
@@ -77,6 +76,17 @@ int main()
       {
         std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
         std::cerr << e.what() << '\n';
+        if (std::cin.fail() && !std::cin.eof())
+        {
+          std::cin.clear();
+        }
+      }
+    }
+    else
+    {
+      if (!std::cin.eof())
+      {
+        std::cin.clear();
       }
     }
   }

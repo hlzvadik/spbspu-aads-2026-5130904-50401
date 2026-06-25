@@ -75,8 +75,8 @@ namespace goltsov
 
   struct TimeInterval
   {
-    size_t years_, months_, days_;
-    size_t hours_, minutes_, seconds_;
+    size_t years, months, days;
+    size_t hours, minutes, seconds;
   };
   TimeInterval operator-(const TimeInterval&, const TimeInterval&);
   TimeInterval operator+(const TimeInterval&, const TimeInterval&);
@@ -92,8 +92,8 @@ namespace goltsov
 
   struct DateTime
   {
-    size_t year_, month_, day_;
-    size_t hour_, minute_, second_;
+    size_t year, month, day;
+    size_t hour, minute, second;
   };
   std::istream& operator>>(std::istream&, DateTime&);
   std::ostream& operator<<(std::ostream&, const DateTime&);
@@ -109,40 +109,42 @@ namespace goltsov
 
   struct Task
   {
-    std::string id_;
-    std::string title_, description_;
-    DateTime left_boundary_time_, right_boundary_time_;
-    DateTime start_time_, end_time_;
-    size_t priority_;
-    bool is_protected_;
+    std::string id;
+    std::string title, description;
+    DateTime left_boundary_time, right_boundary_time;
+    DateTime start_time, end_time;
+    size_t priority;
+    bool is_protected;
   };
   std::istream& operator>>(std::istream&, Task&);
   std::ostream& operator<<(std::ostream&, const Task&);
 
   struct Schedule
   {
-    std::string name_schedule_;
-    goltsov::Map< DateTime, Task > tasks_;
-    goltsov::Map< std::string, goltsov::Task > unplanned_tasks_;
-    goltsov::Map< std::string, goltsov::DateTime > id_start_time_;
+    std::string name_schedule;
+    goltsov::Map< DateTime, Task > tasks;
+    goltsov::Map< std::string, goltsov::Task > unplanned_tasks;
+    goltsov::Map< std::string, goltsov::DateTime > id_start_time;
   };
   std::istream& operator>>(std::istream&, Schedule&);
   std::ostream& operator<<(std::ostream&, Schedule&);
 
   struct Context
   {
-    std::string name_context_;
-    goltsov::Map< std::string, Schedule > schedules_;
+    std::string name_context;
+    goltsov::Map< std::string, Schedule > schedules;
   };
   std::istream& operator>>(std::istream&, Context&);
   std::ostream& operator<<(std::ostream&, Context&);
 
   struct State
   {
-    Schedule* current_schedule_;
-    Context* current_context_;
-    goltsov::Map< std::string, Context > contexts_;
+    Schedule* current_schedule;
+    Context* current_context;
+    goltsov::Map< std::string, Context > contexts;
     goltsov::DateTime current_time;
+    State();
+    State(Context*, Schedule*, const Map<std::string, Context>&, const DateTime&);
   };
 }
 

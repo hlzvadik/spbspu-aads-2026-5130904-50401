@@ -13,11 +13,11 @@ std::istream& goltsov::detail::operator>>(std::istream& is, const Delimeter& a)
 }
 bool goltsov::detail::FindTaskHasETLessLB::operator()(const std::pair< DateTime, Task >& current)
 {
-  return (current.second.end_time_ <= a.left_boundary_time_);
+  return (current.second.end_time <= a.left_boundary_time);
 }
 bool goltsov::detail::FindTaskHasEnoughET::operator()(const std::pair< DateTime, Task >& current)
 {
-  return (a.right_boundary_time_ >= current.second.end_time_ && a.right_boundary_time_ - current.second.end_time_ >= duration);
+  return (a.right_boundary_time >= current.second.end_time && a.right_boundary_time - current.second.end_time >= duration);
 }
 bool goltsov::detail::FindDateTime::operator()(const std::pair< goltsov::DateTime, std::pair < DateTime,
   DateTime > >& current)
@@ -58,12 +58,12 @@ long long goltsov::detail::TimeIntervalToSeconds(const TimeInterval& interval)
   long long sec_ind_mounth = 30 * sec_in_day;
   long long sec_in_year = 365 * sec_in_day;
   long long total_seconds = 0;
-  total_seconds += static_cast< long long > (interval.years_) * sec_in_year;
-  total_seconds += static_cast< long long > (interval.months_) * sec_ind_mounth;
-  total_seconds += static_cast< long long > (interval.days_) * sec_in_day;
-  total_seconds += static_cast< long long > (interval.hours_) * sec_in_hour;
-  total_seconds += static_cast< long long > (interval.minutes_) * sec_in_min;
-  total_seconds += static_cast< long long > (interval.seconds_);
+  total_seconds += static_cast< long long > (interval.years) * sec_in_year;
+  total_seconds += static_cast< long long > (interval.months) * sec_ind_mounth;
+  total_seconds += static_cast< long long > (interval.days) * sec_in_day;
+  total_seconds += static_cast< long long > (interval.hours) * sec_in_hour;
+  total_seconds += static_cast< long long > (interval.minutes) * sec_in_min;
+  total_seconds += static_cast< long long > (interval.seconds);
   return total_seconds;
 }
 
@@ -81,12 +81,12 @@ std::istream& goltsov::operator>>(std::istream& is, TimeInterval& a)
   is >> years >> d_t{'-'} >> months >> d_t{'-'} >> days;
   is >> d_t{'_'};
   is >> hours >> d_t {':'} >> minutes >> d_t {':'} >> seconds;
-  a.years_ = years;
-  a.months_ = months;
-  a.days_ = days;
-  a.hours_ = hours;
-  a.minutes_ = minutes;
-  a.seconds_ = seconds;
+  a.years = years;
+  a.months = months;
+  a.days = days;
+  a.hours = hours;
+  a.minutes = minutes;
+  a.seconds = seconds;
   return is;
 }
 std::istream& goltsov::operator>>(std::istream& is, DateTime& a)
@@ -103,12 +103,12 @@ std::istream& goltsov::operator>>(std::istream& is, DateTime& a)
   is >> year >> d_t {'-'} >> month >> d_t {'-'} >> day;
   is >> d_t {'_'};
   is >> hour >> d_t {':'} >> minute >> d_t {':'} >> second;
-  a.year_ = year;
-  a.month_ = month;
-  a.day_ = day;
-  a.hour_ = hour;
-  a.minute_ = minute;
-  a.second_ = second;
+  a.year = year;
+  a.month = month;
+  a.day = day;
+  a.hour = hour;
+  a.minute = minute;
+  a.second = second;
   return is;
 }
 std::istream& goltsov::operator>>(std::istream& is, Task& a)
@@ -129,14 +129,14 @@ std::istream& goltsov::operator>>(std::istream& is, Task& a)
   is >> id >> d_t {' '} >> title >> d_t {' '} >> description >> d_t {' '}  >> left_boundary_time
     >> d_t {' '} >> right_boundary_time >> d_t {' '} >> start_time >> d_t {' '} >> end_time
     >> d_t {' '} >> priority >> d_t {' '} >> is_protected;
-  a.id_ = id;
-  a.title_ = title;
-  a.description_ = description;
-  a.left_boundary_time_ = left_boundary_time;
-  a.right_boundary_time_ = right_boundary_time;
-  a.start_time_ = start_time;
-  a.end_time_ = end_time;
-  a.priority_ = priority;
+  a.id = id;
+  a.title = title;
+  a.description = description;
+  a.left_boundary_time = left_boundary_time;
+  a.right_boundary_time = right_boundary_time;
+  a.start_time = start_time;
+  a.end_time = end_time;
+  a.priority = priority;
   return is;
 }
 std::istream& goltsov::operator>>(std::istream& is, Schedule& a)
@@ -147,8 +147,8 @@ std::istream& goltsov::operator>>(std::istream& is, Schedule& a)
   {
     goltsov::Task task;
     is >> task;
-    a.tasks_.insert({task.start_time_, task});
-    a.id_start_time_.insert({task.id_, task.start_time_});
+    a.tasks.insert({task.start_time, task});
+    a.id_start_time.insert({task.id, task.start_time});
   }
   return is;
 }
@@ -161,73 +161,73 @@ std::istream& goltsov::operator>>(std::istream& is, Context& a)
     goltsov::Schedule schedule;
     std::string name_schedule;
     is >> name_schedule >> schedule;
-    a.schedules_.insert({name_schedule, schedule});
-    a.schedules_.at(name_schedule).name_schedule_ = name_schedule;
+    a.schedules.insert({name_schedule, schedule});
+    a.schedules.at(name_schedule).name_schedule = name_schedule;
   }
   return is;
 }
 std::ostream& goltsov::operator<<(std::ostream& os, const TimeInterval& a)
 {
-  os << a.years_ << '-' << a.months_ << '-' << a.days_ << '_' << a.hours_ << ':' << a.minutes_ << ':' << a.seconds_;
+  os << a.years << '-' << a.months << '-' << a.days << '_' << a.hours << ':' << a.minutes << ':' << a.seconds;
   return os;
 }
 std::ostream& goltsov::operator<<(std::ostream& os, const DateTime& a)
 {
-  os << a.year_ << '-' << a.month_ << '-' << a.day_ << '_' << a.hour_ << ':' << a.minute_ << ':' << a.second_;
+  os << a.year << '-' << a.month << '-' << a.day << '_' << a.hour << ':' << a.minute << ':' << a.second;
   return os;
 }
 std::ostream& goltsov::operator<<(std::ostream& os, const Task& a)
 {
-  os << "(id: " << a.id_ << ")" << " (title: " << a.title_ << ")" << " (description: " << a.description_ << ")"
-    << " (left_boundary_time: " << a.left_boundary_time_ << ")" << " (right_boundary_time: "
-    << a.right_boundary_time_ << ")"<< " (start_time: " << a.start_time_ << ")" << " (end_time: " << a.end_time_
-    << ")" << " (priority: " << a.priority_ << ")" << " (is_protected: " << (a.is_protected_ ? 1 : 0) << ")";
+  os << "(id: " << a.id << ")" << " (title: " << a.title << ")" << " (description: " << a.description << ")"
+    << " (left_boundary_time: " << a.left_boundary_time << ")" << " (right_boundary_time: "
+    << a.right_boundary_time << ")"<< " (start_time: " << a.start_time << ")" << " (end_time: " << a.end_time
+    << ")" << " (priority: " << a.priority << ")" << " (is_protected: " << (a.is_protected ? 1 : 0) << ")";
   return os;
 }
 std::ostream& goltsov::operator<<(std::ostream& os, Schedule& a)
 {
-  os << a.tasks_.size();
-  for (MapIterator< goltsov::DateTime, goltsov::Task > it = a.tasks_.begin(); it != a.tasks_.end(); ++it)
+  os << a.tasks.size();
+  for (MapIterator< goltsov::DateTime, goltsov::Task > it = a.tasks.begin(); it != a.tasks.end(); ++it)
   {
-    os << '\n' << it->second.id_ << ' ' << it->second.title_ << ' ' << it->second.description_ << ' '
-       << it->second.left_boundary_time_ << ' ' << it->second.right_boundary_time_ << ' '
-        << it->second.start_time_ << ' ' << it->second.end_time_ << ' ' << it->second.priority_ << ' '
-         << it->second.is_protected_;
+    os << '\n' << it->second.id << ' ' << it->second.title << ' ' << it->second.description << ' '
+       << it->second.left_boundary_time << ' ' << it->second.right_boundary_time << ' '
+        << it->second.start_time << ' ' << it->second.end_time << ' ' << it->second.priority << ' '
+         << it->second.is_protected;
   }
   return os;
 }
 std::ostream& goltsov::operator<<(std::ostream& os, Context& a)
 {
-  os << a.schedules_.size();
-  for (MapIterator< std::string, goltsov::Schedule > it = a.schedules_.begin(); it != a.schedules_.end(); ++it)
+  os << a.schedules.size();
+  for (MapIterator< std::string, goltsov::Schedule > it = a.schedules.begin(); it != a.schedules.end(); ++it)
   {
-    os << '\n' << it->second.name_schedule_ << ' ' << it->second;
+    os << '\n' << it->second.name_schedule << ' ' << it->second;
   }
   return os;
 }
 bool goltsov::operator<(const TimeInterval& lhs, const TimeInterval& rhs)
 {
-  if (lhs.years_ != rhs.years_)
+  if (lhs.years != rhs.years)
   {
-    return lhs.years_ < rhs.years_;
+    return lhs.years < rhs.years;
   }
-  if (lhs.months_ != rhs.months_)
+  if (lhs.months != rhs.months)
   {
-    return lhs.months_ < rhs.months_;
+    return lhs.months < rhs.months;
   }
-  if (lhs.days_ != rhs.days_)
+  if (lhs.days != rhs.days)
   {
-    return lhs.days_ < rhs.days_;
+    return lhs.days < rhs.days;
   }
-  if (lhs.hours_ != rhs.hours_)
+  if (lhs.hours != rhs.hours)
   {
-    return lhs.hours_ < rhs.hours_;
+    return lhs.hours < rhs.hours;
   }
-  if (lhs.minutes_ != rhs.minutes_)
+  if (lhs.minutes != rhs.minutes)
   {
-    return lhs.minutes_ < rhs.minutes_;
+    return lhs.minutes < rhs.minutes;
   }
-  return lhs.seconds_ < rhs.seconds_;
+  return lhs.seconds < rhs.seconds;
 }
 bool goltsov::operator>(const TimeInterval& lhs, const TimeInterval& rhs)
 {
@@ -251,27 +251,27 @@ bool goltsov::operator>=(const TimeInterval& lhs, const TimeInterval& rhs)
 }
 bool goltsov::operator<(const DateTime& lhs, const DateTime& rhs)
 {
-  if (lhs.year_ != rhs.year_)
+  if (lhs.year != rhs.year)
   {
-    return lhs.year_ < rhs.year_;
+    return lhs.year < rhs.year;
   }
-  if (lhs.month_ != rhs.month_)
+  if (lhs.month != rhs.month)
   {
-    return lhs.month_ < rhs.month_;
+    return lhs.month < rhs.month;
   }
-  if (lhs.day_ != rhs.day_)
+  if (lhs.day != rhs.day)
   {
-    return lhs.day_ < rhs.day_;
+    return lhs.day < rhs.day;
   }
-  if (lhs.hour_ != rhs.hour_)
+  if (lhs.hour != rhs.hour)
   {
-    return lhs.hour_ < rhs.hour_;
+    return lhs.hour < rhs.hour;
   }
-  if (lhs.minute_ != rhs.minute_)
+  if (lhs.minute != rhs.minute)
   {
-    return lhs.minute_ < rhs.minute_;
+    return lhs.minute < rhs.minute;
   }
-  return lhs.second_ < rhs.second_;
+  return lhs.second < rhs.second;
 }
 bool goltsov::operator>(const DateTime& lhs, const DateTime& rhs)
 {
@@ -300,87 +300,87 @@ goltsov::TimeInterval goltsov::operator-(const DateTime& lhs, const DateTime& rh
     throw std::logic_error("The first operand must be greater than second");
   }
   TimeInterval result;
-  int sec = static_cast<int> (lhs.second_) - static_cast<int> (rhs.second_);
+  int sec = static_cast<int> (lhs.second) - static_cast<int> (rhs.second);
   int borrow_min = 0;
   if (sec < 0)
   {
     sec += 60;
     borrow_min = 1;
   }
-  result.seconds_ = static_cast<size_t> (sec);
-  int min = static_cast<int> (lhs.minute_) - static_cast<int> (rhs.minute_) - borrow_min;
+  result.seconds = static_cast<size_t> (sec);
+  int min = static_cast<int> (lhs.minute) - static_cast<int> (rhs.minute) - borrow_min;
   int borrow_hour = 0;
   if (min < 0)
   {
     min += 60;
     borrow_hour = 1;
   }
-  result.minutes_ = static_cast<size_t> (min);
-  int hour = static_cast<int> (lhs.hour_) - static_cast<int> (rhs.hour_) - borrow_hour;
+  result.minutes = static_cast<size_t> (min);
+  int hour = static_cast<int> (lhs.hour) - static_cast<int> (rhs.hour) - borrow_hour;
   int borrow_day = 0;
   if (hour < 0)
   {
     hour += 24;
     borrow_day = 1;
   }
-  result.hours_ = static_cast<size_t> (hour);
-  int day = static_cast<int> (lhs.day_) - static_cast<int> (rhs.day_) - borrow_day;
+  result.hours = static_cast<size_t> (hour);
+  int day = static_cast<int> (lhs.day) - static_cast<int> (rhs.day) - borrow_day;
   int borrow_month = 0;
   if (day < 0)
   {
-    size_t prev_month = lhs.month_ == 1 ? 12 : lhs.month_ - 1;
-    size_t prev_year = lhs.month_ == 1 ? lhs.year_ - 1 : lhs.year_;
+    size_t prev_month = lhs.month == 1 ? 12 : lhs.month - 1;
+    size_t prev_year = lhs.month == 1 ? lhs.year - 1 : lhs.year;
     day += static_cast<int> (detail::getDaysInMonth(prev_year, prev_month));
     borrow_month = 1;
   }
-  result.days_ = static_cast<size_t> (day);
-  int month = static_cast<int> (lhs.month_) - static_cast<int> (rhs.month_) - borrow_month;
+  result.days = static_cast<size_t> (day);
+  int month = static_cast<int> (lhs.month) - static_cast<int> (rhs.month) - borrow_month;
   int borrow_year = 0;
   if (month < 0)
   {
     month += 12;
     borrow_year = 1;
   }
-  result.months_ = static_cast<size_t> (month);
-  int year = static_cast<int> (lhs.year_) - static_cast<int> (rhs.year_) - borrow_year;
-  result.years_ = static_cast<size_t> (year);
+  result.months = static_cast<size_t> (month);
+  int year = static_cast<int> (lhs.year) - static_cast<int> (rhs.year) - borrow_year;
+  result.years = static_cast<size_t> (year);
   return result;
 }
 goltsov::DateTime goltsov::operator+(const DateTime& lhs, const TimeInterval& rhs)
 {
   DateTime result = lhs;
-  int sec = static_cast<int> (result.second_) + static_cast<int> (rhs.seconds_);
+  int sec = static_cast<int> (result.second) + static_cast<int> (rhs.seconds);
   int carry_min = sec / 60;
-  result.second_ = sec % 60;
-  int min = static_cast<int> (result.minute_) + static_cast<int> (rhs.minutes_) + carry_min;
+  result.second = sec % 60;
+  int min = static_cast<int> (result.minute) + static_cast<int> (rhs.minutes) + carry_min;
   int carry_hour = min / 60;
-  result.minute_ = min % 60;
-  int hour = static_cast<int> (result.hour_) + static_cast<int> (rhs.hours_) + carry_hour;
+  result.minute = min % 60;
+  int hour = static_cast<int> (result.hour) + static_cast<int> (rhs.hours) + carry_hour;
   int carry_day = hour / 24;
-  result.hour_ = hour % 24;
-  result.year_ += rhs.years_;
-  int total_months = static_cast<int> (result.month_) + static_cast<int> (rhs.months_);
-  int carry_year_from_month = (total_months - 1) / 12;
-  result.year_ += carry_year_from_month;
-  result.month_ = (total_months - 1) % 12 + 1;
-  int days_to_add = static_cast<int> (rhs.days_) + carry_day;
-  while (days_to_add > 0)
+  result.hour = hour % 24;
+  result.year += rhs.years;
+  int total_months = static_cast<int> (result.month) + static_cast<int> (rhs.months);
+  int carry_yearfrom_month = (total_months - 1) / 12;
+  result.year += carry_yearfrom_month;
+  result.month = (total_months - 1) % 12 + 1;
+  int daysto_add = static_cast<int> (rhs.days) + carry_day;
+  while (daysto_add > 0)
   {
-    size_t days_in_current_month = detail::getDaysInMonth(result.year_, result.month_);
-    int remaining_days_in_month = static_cast<int> (days_in_current_month) - static_cast<int> (result.day_);
-    if (days_to_add <= remaining_days_in_month)
+    size_t daysin_current_month = detail::getDaysInMonth(result.year, result.month);
+    int remaining_daysin_month = static_cast<int> (daysin_current_month) - static_cast<int> (result.day);
+    if (daysto_add <= remaining_daysin_month)
     {
-      result.day_ += days_to_add;
-      days_to_add = 0;
+      result.day += daysto_add;
+      daysto_add = 0;
     } else
     {
-      days_to_add -= (remaining_days_in_month + 1);
-      result.day_ = 1;
-      result.month_++;
-      if (result.month_ > 12)
+      daysto_add -= (remaining_daysin_month + 1);
+      result.day = 1;
+      result.month++;
+      if (result.month > 12)
       {
-        result.month_ = 1;
-        result.year_++;
+        result.month = 1;
+        result.year++;
       }
     }
   }
@@ -389,72 +389,72 @@ goltsov::DateTime goltsov::operator+(const DateTime& lhs, const TimeInterval& rh
 goltsov::DateTime goltsov::operator-(const DateTime& lhs, const TimeInterval& rhs)
 {
   DateTime result = lhs;
-  int sec = static_cast<int> (result.second_) - static_cast<int> (rhs.seconds_);
+  int sec = static_cast<int> (result.second) - static_cast<int> (rhs.seconds);
   int borrow_min = 0;
   if (sec < 0)
   {
     sec += 60;
     borrow_min = 1;
   }
-  result.second_ = static_cast<size_t> (sec);
-  int min = static_cast<int> (result.minute_) - static_cast<int> (rhs.minutes_) - borrow_min;
+  result.second = static_cast<size_t> (sec);
+  int min = static_cast<int> (result.minute) - static_cast<int> (rhs.minutes) - borrow_min;
   int borrow_hour = 0;
   if (min < 0)
   {
     min += 60;
     borrow_hour = 1;
   }
-  result.minute_ = static_cast<size_t> (min);
-  int hour = static_cast<int> (result.hour_) - static_cast<int> (rhs.hours_) - borrow_hour;
+  result.minute = static_cast<size_t> (min);
+  int hour = static_cast<int> (result.hour) - static_cast<int> (rhs.hours) - borrow_hour;
   int borrow_day = 0;
   if (hour < 0)
   {
     hour += 24;
     borrow_day = 1;
   }
-  result.hour_ = static_cast<size_t> (hour);
-  if (rhs.years_ > result.year_)
+  result.hour = static_cast<size_t> (hour);
+  if (rhs.years > result.year)
   {
     throw std::logic_error("Resulting year would be negative");
   }
-  result.year_ -= rhs.years_;
-  int total_months = static_cast<int> (result.month_) - static_cast<int> (rhs.months_);
-  int borrow_year_from_month = 0;
+  result.year -= rhs.years;
+  int total_months = static_cast<int> (result.month) - static_cast<int> (rhs.months);
+  int borrow_yearfrom_month = 0;
   while (total_months <= 0) {
     total_months += 12;
-    borrow_year_from_month++;
+    borrow_yearfrom_month++;
   }
-  result.month_ = static_cast<size_t> (total_months);
-  if (result.year_ < static_cast< size_t >(borrow_year_from_month))
+  result.month = static_cast<size_t> (total_months);
+  if (result.year < static_cast< size_t >(borrow_yearfrom_month))
   {
     throw std::logic_error("Resulting year would be negative");
   }
-  result.year_ -= borrow_year_from_month;
-  int days_to_subtract = static_cast<int> (rhs.days_) + borrow_day;
-  while (days_to_subtract > 0)
+  result.year -= borrow_yearfrom_month;
+  int daysto_subtract = static_cast<int> (rhs.days) + borrow_day;
+  while (daysto_subtract > 0)
   {
-    if (static_cast<int> (result.day_) > days_to_subtract)
+    if (static_cast<int> (result.day) > daysto_subtract)
     {
-      result.day_ -= days_to_subtract;
-      days_to_subtract = 0;
+      result.day -= daysto_subtract;
+      daysto_subtract = 0;
     }
     else
     {
-      days_to_subtract -= result.day_;
-      if (result.month_ == 1)
+      daysto_subtract -= result.day;
+      if (result.month == 1)
       {
-        result.month_ = 12;
-        if (result.year_ == 0)
+        result.month = 12;
+        if (result.year == 0)
         {
           throw std::logic_error("Resulting year would be negative");
         }
-        result.year_--;
+        result.year--;
       }
       else
       {
-        result.month_--;
+        result.month--;
       }
-      result.day_ = detail::getDaysInMonth(result.year_, result.month_);
+      result.day = detail::getDaysInMonth(result.year, result.month);
     }
   }
   return result;
@@ -462,74 +462,74 @@ goltsov::DateTime goltsov::operator-(const DateTime& lhs, const TimeInterval& rh
 goltsov::TimeInterval goltsov::operator+(const TimeInterval& lhs, const TimeInterval& rhs)
 {
   TimeInterval result;
-  long long sec = static_cast< long long > (lhs.seconds_) + static_cast< long long > (rhs.seconds_);
+  long long sec = static_cast< long long > (lhs.seconds) + static_cast< long long > (rhs.seconds);
   long long carry_min = sec / 60;
-  result.seconds_ = static_cast< size_t > (sec % 60);
-  long long min = static_cast< long long > (lhs.minutes_) + static_cast< long long > (rhs.minutes_) + carry_min;
+  result.seconds = static_cast< size_t > (sec % 60);
+  long long min = static_cast< long long > (lhs.minutes) + static_cast< long long > (rhs.minutes) + carry_min;
   long long carry_hour = min / 60;
-  result.minutes_ = static_cast< size_t > (min % 60);
-  long long hour = static_cast< long long > (lhs.hours_) + static_cast< long long > (rhs.hours_) + carry_hour;
+  result.minutes = static_cast< size_t > (min % 60);
+  long long hour = static_cast< long long > (lhs.hours) + static_cast< long long > (rhs.hours) + carry_hour;
   long long carry_day = hour / 24;
-  result.hours_ = static_cast< size_t > (hour % 24);
-  long long day = static_cast< long long > (lhs.days_) + static_cast< long long > (rhs.days_) + carry_day;
+  result.hours = static_cast< size_t > (hour % 24);
+  long long day = static_cast< long long > (lhs.days) + static_cast< long long > (rhs.days) + carry_day;
   long long carry_month = day / 30;
-  result.days_ = static_cast< size_t > (day % 30);
-  long long month = static_cast< long long > (lhs.months_) + static_cast< long long > (rhs.months_) + carry_month;
+  result.days = static_cast< size_t > (day % 30);
+  long long month = static_cast< long long > (lhs.months) + static_cast< long long > (rhs.months) + carry_month;
   long long carry_year = month / 12;
-  result.months_ = static_cast< size_t > (month % 12);
-  result.years_ = static_cast< size_t > (static_cast< long long > (lhs.years_)
-    + static_cast< long long > (rhs.years_) + carry_year);
+  result.months = static_cast< size_t > (month % 12);
+  result.years = static_cast< size_t > (static_cast< long long > (lhs.years)
+    + static_cast< long long > (rhs.years) + carry_year);
   return result;
 }
 goltsov::TimeInterval goltsov::operator-(const TimeInterval& lhs, const TimeInterval& rhs)
 {
   TimeInterval result;
-  long long sec = static_cast< long long > (lhs.seconds_) - static_cast< long long > (rhs.seconds_);
+  long long sec = static_cast< long long > (lhs.seconds) - static_cast< long long > (rhs.seconds);
   long long borrow_min = 0;
   if (sec < 0)
   {
     sec += 60;
     borrow_min = 1;
   }
-  result.seconds_ = static_cast< size_t > (sec);
-  long long min = static_cast< long long > (lhs.minutes_) - static_cast< long long > (rhs.minutes_) - borrow_min;
+  result.seconds = static_cast< size_t > (sec);
+  long long min = static_cast< long long > (lhs.minutes) - static_cast< long long > (rhs.minutes) - borrow_min;
   long long borrow_hour = 0;
   if (min < 0)
   {
     min += 60;
     borrow_hour = 1;
   }
-  result.minutes_ = static_cast< size_t > (min);
-  long long hour = static_cast< long long > (lhs.hours_) - static_cast< long long > (rhs.hours_) - borrow_hour;
+  result.minutes = static_cast< size_t > (min);
+  long long hour = static_cast< long long > (lhs.hours) - static_cast< long long > (rhs.hours) - borrow_hour;
   long long borrow_day = 0;
   if (hour < 0)
   {
     hour += 24;
     borrow_day = 1;
   }
-  result.hours_ = static_cast< size_t > (hour);
-  long long day = static_cast< long long > (lhs.days_) - static_cast< long long > (rhs.days_) - borrow_day;
+  result.hours = static_cast< size_t > (hour);
+  long long day = static_cast< long long > (lhs.days) - static_cast< long long > (rhs.days) - borrow_day;
   long long borrow_month = 0;
   if (day < 0)
   {
     day += 30;
     borrow_month = 1;
   }
-  result.days_ = static_cast< size_t > (day);
-  long long month = static_cast< long long > (lhs.months_) - static_cast< long long > (rhs.months_) - borrow_month;
+  result.days = static_cast< size_t > (day);
+  long long month = static_cast< long long > (lhs.months) - static_cast< long long > (rhs.months) - borrow_month;
   long long borrow_year = 0;
   if (month < 0)
   {
     month += 12;
     borrow_year = 1;
   }
-  result.months_ = static_cast< size_t > (month);
-  long long year = static_cast< long long > (lhs.years_) - static_cast< long long > (rhs.years_) - borrow_year;
+  result.months = static_cast< size_t > (month);
+  long long year = static_cast< long long > (lhs.years) - static_cast< long long > (rhs.years) - borrow_year;
   if (year < 0)
   {
     throw std::logic_error("Resulting interval would be negative");
   }
-  result.years_ = static_cast< size_t > (year);
+  result.years = static_cast< size_t > (year);
   return result;
 }
 double goltsov::operator/(const TimeInterval& lhs, const TimeInterval& rhs)
@@ -542,3 +542,15 @@ double goltsov::operator/(const TimeInterval& lhs, const TimeInterval& rhs)
   }
   return static_cast< double > (lhs_seconds) / static_cast< double > (rhs_seconds);
 }
+goltsov::State::State():
+  current_schedule(nullptr),
+  current_context(nullptr),
+  contexts(goltsov::Map< std::string, Context >{}),
+  current_time(goltsov::DateTime{})
+{}
+goltsov::State::State(Context* ctx, Schedule* sch, const Map<std::string, Context>& ctxs, const DateTime& time):
+  current_schedule(sch),
+  current_context(ctx),
+  contexts(ctxs),
+  current_time(time)
+{}

@@ -280,8 +280,11 @@ size_t goltsov::detail::NodeRBT< Key, Value >::blackHeight() const noexcept
     {
       if (!road.empty())
       {
+        if (current->is_black)
+        {
+          --current_black_height;
+        }
         current = current->parent;
-        --current_black_height;
         while (!road.empty() && road.top().node != current)
         {
           road.pop();
@@ -313,6 +316,7 @@ goltsov::RBTree< Key, Value, Compare >::RBTree(const RBTree< Key, Value, Compare
   }
   RBTree< Key, Value, Compare > new_tree;
   new_tree.root_ = new detail::NodeRBT< Key, Value >{current->data, nullptr, nullptr, nullptr, current->is_black};
+  new_tree.size_ = 1;
   detail::NodeRBT< Key, Value >* new_node = new_tree.root_;
   while (current)
   {
@@ -510,7 +514,24 @@ const Value& goltsov::RBTree< Key, Value, Compare >::at(const Key& k) const
 template< class Key, class Value, class Compare >
 goltsov::RBTIterator< Key, Value > goltsov::RBTree< Key, Value, Compare >::find(const Key& k)
 {
-  return const_cast< Value& >(static_cast< const RBTree< Key, Value, Compare >& >(*this).find(k));
+  Compare comparator;
+  detail::NodeRBT< Key, Value >* current = root_;
+  while (current)
+  {
+    if (comparator(k, current->data.first))
+    {
+      current = current->left;
+    }
+    else if (comparator(current->data.first, k))
+    {
+      current = current->right;
+    }
+    else
+    {
+      return current;
+    }
+  }
+  return end();
 }
 template< class Key, class Value, class Compare >
 goltsov::RBTConstIterator< Key, Value > goltsov::RBTree< Key, Value, Compare >::find(const Key& k) const
