@@ -20,7 +20,6 @@ BOOST_AUTO_TEST_CASE(constructor_empty_test)
 BOOST_AUTO_TEST_CASE(insert_and_size_test)
 {
   rbt_is tree;
-  
   auto res1 = tree.insert({10, "ten"});
   BOOST_CHECK(res1.second == true);
   BOOST_CHECK((*res1.first).second == "ten");
@@ -186,7 +185,6 @@ BOOST_AUTO_TEST_CASE(height_properties_test)
 BOOST_AUTO_TEST_CASE(balancing_and_rbt_properties_test)
 {
   rbt_is tree;
-  
   const size_t keys_size = 10;
   int* keys = new int[keys_size]{10, 20, 30, 15, 25, 5, 1, 7, 12, 18};
 
@@ -204,12 +202,10 @@ BOOST_AUTO_TEST_CASE(balancing_and_rbt_properties_test)
 
   const size_t erase_size = 3;
   int* keys_to_erase = new int[erase_size]{15, 30, 5};
-  
   for (size_t i = 0; i < erase_size; ++i)
   {
     BOOST_CHECK(tree.erase(keys_to_erase[i]) == 1);
-    
-    if (tree.size() > 0)
+      if (tree.size() > 0)
     {
       BOOST_CHECK(tree.height() > 0);
       BOOST_CHECK(tree.blackHeight() > 0);
