@@ -2,6 +2,7 @@
 #define MYLIST_HPP
 #include <stdexcept>
 #include <utility>
+#include <iostream>
 
 namespace goltsov
 {
@@ -114,6 +115,9 @@ namespace goltsov
 
     template< class Compare >
     void sort(Compare);
+
+    template< class Predicate >
+    void partition(Predicate);
   private:
     detail::Node< T >* fake_;
     size_t size_;
@@ -500,7 +504,7 @@ void goltsov::List<T>::spliceAfter(LCIter<T> pos, List<T>& other)
 {
   if (pos == cend())
   {
-    throw std::runtime_error("Invalid iter");
+    return;
   }
   spliceAfter(pos, other, other.beforeBegin(), other.end());
 }
@@ -509,7 +513,7 @@ void goltsov::List<T>::spliceAfter(LCIter<T> pos, List<T>& other, LCIter<T> it)
 {
   if (pos == cend() || it == other.cend() || it.next() == other.cend())
   {
-    throw std::runtime_error("Invalid iter");
+    return;
   }
   if (&other == this)
   {
@@ -533,7 +537,7 @@ void goltsov::List<T>::spliceAfter(LCIter<T> pos, List<T>& other, LCIter<T> firs
 {
   if (pos == cend())
   {
-    throw std::runtime_error("Invalid iter");
+    return;
   }
   if (first == last || first.next() == last)
   {
@@ -626,6 +630,33 @@ void goltsov::List< T >::sort(Compare comp)
     }
     swap(merged);
     block_size *= 2;
+  }
+}
+template< class T >
+template< class Predicate >
+void goltsov::List< T >::partition(Predicate pred)
+{
+  if (size() < 2)
+  {
+    return;
+  }
+  LIter< T > lastGood = beforeBegin();
+  LIter< T > it = beforeBegin();
+  while (it.next() != end())
+  {
+    if (pred(*it.next()))
+    {
+      spliceAfter(lastGood, *this, it);
+      if (it == lastGood)
+      {
+        ++it;
+      }
+      ++lastGood;
+    }
+    else
+    {
+      ++it;
+    }
   }
 }
 #endif

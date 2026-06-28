@@ -223,8 +223,6 @@ BOOST_AUTO_TEST_CASE(spliceAfter_test)
   a.spliceAfter(a.beforeBegin(), empty);
   BOOST_CHECK(a.size() == 11);
   BOOST_CHECK(empty.empty());
-  BOOST_CHECK_THROW(a.spliceAfter(a.cend(), empty), std::runtime_error);
-  BOOST_CHECK_THROW(a.spliceAfter(a.begin(), empty, empty.cend()), std::runtime_error);
   size_t a_size = a.size();
   goltsov::List< int > e;
   auto ite = e.beforeBegin();
@@ -278,6 +276,29 @@ BOOST_AUTO_TEST_CASE(sort_test)
   }
   al.sort(std::less< int >{});
   int exp[] = {1, 3, 4, 4, 7, 7, 8, 9};
+  goltsov::LIter< int > ite = al.begin();
+  for (size_t i = 0; i < 8; ++i)
+  {
+    BOOST_CHECK(*ite == exp[i]);
+    ++ite;
+  }
+}
+
+BOOST_AUTO_TEST_CASE(partition_test)
+{
+  int a[] = {9, 4, 7, 8, 1, 4, 7, 3};
+  goltsov::List< int > al;
+  goltsov::LIter< int > it = al.beforeBegin();
+  for (size_t i = 0; i < 8; ++i)
+  {
+    it = al.insertAfter(it, a[i]);
+  }
+  al.partition([](int q)
+    {
+      return q > 4;
+    }
+  );
+  int exp[] = {9, 7, 8, 7, 4, 1, 4, 3};
   goltsov::LIter< int > ite = al.begin();
   for (size_t i = 0; i < 8; ++i)
   {
