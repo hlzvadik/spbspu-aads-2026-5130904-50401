@@ -306,18 +306,22 @@ goltsov::List< T >::List(const List< T >& other):
   size_(0)
 {
   fake_->next = nullptr;
-  if (!other.fake_)
-  {
-    return;
-  }
-  if (!other.fake_->next)
+  if (!other.fake_ || !other.fake_->next)
   {
     return;
   }
   LIter< T > i = beforeBegin();
   for (LCIter< T > it = other.cbegin(); it != other.cend(); ++it)
   {
-    i = insertAfter(i, (*it));
+    try
+    {
+      i = insertAfter(i, (*it));
+    }
+    catch (...)
+    {
+      clear();
+      throw;
+    }
   }
 }
 template< class T >
@@ -332,17 +336,8 @@ goltsov::List< T >& goltsov::List< T >::operator=(const List< T >& other)
 {
   if (this != &other)
   {
-    clear();
-    fake_->next = nullptr;
-    if (!other.fake_->next)
-    {
-      return (*this);
-    }
-    LIter< T > i = beforeBegin();
-    for (LCIter< T > it = other.cbegin(); it != other.end(); ++it)
-    {
-      i = insertAfter(i, (*it));
-    }
+    List< T > new_list(other);
+    swap(new_list);
   }
   return (*this);
 }
@@ -399,7 +394,7 @@ template< class T >
 template< class ValRef >
 goltsov::LIter< T > goltsov::List< T >::push_start(ValRef&& a)
 {
-  detail::Node< T >* new_el = new detail::Node< T > {std::forward< ValRef >(a), fake_->next};
+  detail::Node< T >* new_el = new detail::Node< T >{std::forward< ValRef >(a), fake_->next};
   fake_->next = new_el;
   size_++;
   return LIter< T >(new_el);
@@ -439,7 +434,7 @@ template< class T >
 template< class ValRef >
 goltsov::LIter< T > goltsov::List< T >::insertAfter(LIter< T > i, ValRef&& a)
 {
-  if (i == end() || i == end())
+  if (i == end())
   {
     throw std::runtime_error("Invalid iter");
   }
