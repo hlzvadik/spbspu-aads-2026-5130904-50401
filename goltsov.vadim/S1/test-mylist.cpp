@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE(end_test)
 BOOST_AUTO_TEST_CASE(getLast_test)
 {
   goltsov::List< int > a;
-  BOOST_CHECK(a.getLast() == goltsov::detail::makeLIterByPtr< int >(nullptr));
+  BOOST_CHECK(a.getLast() == a.beforeBegin());
   const goltsov::List< int > b;
-  BOOST_CHECK(b.getLast() == goltsov::detail::makeLCIterByPtr< int >(nullptr));
+  BOOST_CHECK(b.getLast() == b.beforeBegin());
   a.push_start(1);
   BOOST_CHECK(a.getLast() != goltsov::detail::makeLIterByPtr< int >(nullptr) && (*a.getLast()) == 1);
   const goltsov::List< int > b1 = a;
@@ -236,6 +236,54 @@ BOOST_AUTO_TEST_CASE(spliceAfter_test)
   a.spliceAfter(a.beforeBegin(), e);
   BOOST_CHECK(a.size() == a_size + e_size);
   BOOST_CHECK(e.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(merge_test)
+{
+  int a[] = {1, 2, 3, 4, 5};
+  int b[] = {2, 6, 8};
+  goltsov::List< int > al;
+  goltsov::List< int > bl;
+  goltsov::LIter< int > ita = al.beforeBegin();
+  for (size_t i = 0; i < 5; ++i)
+  {
+    ita = al.insertAfter(ita, a[i]);
+  }
+  goltsov::LIter< int > itb = bl.beforeBegin();
+  for (size_t i = 0; i < 3; ++i)
+  {
+    itb = bl.insertAfter(itb, b[i]);
+  }
+  goltsov::LIter< int > iter = bl.begin();
+  ++iter;
+  al.merge(bl, std::less< int >{});
+  int exp[] = {1, 2, 2, 3, 4, 5, 6, 8};
+  goltsov::LIter< int > ite = al.begin();
+  for (size_t i = 0; i < 8; ++i)
+  {
+    BOOST_CHECK(*ite == exp[i]);
+    ++ite;
+  }
+  BOOST_CHECK(*iter == 6);
+}
+
+BOOST_AUTO_TEST_CASE(sort_test)
+{
+  int a[] = {9, 4, 7, 8, 1, 4, 7, 3};
+  goltsov::List< int > al;
+  goltsov::LIter< int > it = al.beforeBegin();
+  for (size_t i = 0; i < 8; ++i)
+  {
+    al.insertAfter(it, a[i]);
+  }
+  al.sort(std::less< int >{});
+  int exp[] = {1, 3, 4, 4, 7, 7, 8, 9};
+  goltsov::LIter< int > ite = al.begin();
+  for (size_t i = 0; i < 8; ++i)
+  {
+    BOOST_CHECK(*ite == exp[i]);
+    ++ite;
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

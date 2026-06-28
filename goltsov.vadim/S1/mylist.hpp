@@ -108,11 +108,18 @@ namespace goltsov
     void spliceAfter(LCIter< T >, List< T >&);
     void spliceAfter(LCIter< T >, List< T >&, LCIter< T >);
     void spliceAfter(LCIter< T >, List< T >&, LCIter< T >, LCIter< T >);
+
+    template< class Compare >
+    void merge(List< T >&, Compare);
+
+    template< class Compare >
+    void sort(Compare);
   private:
     detail::Node< T >* fake_;
     size_t size_;
     detail::Node< T >* createFake();
     void rmFake() noexcept;
+    void splitBlock(List< T >&, size_t) noexcept;
   };
 }
 
@@ -367,7 +374,7 @@ goltsov::LCIter< T > goltsov::List< T >::cend() const noexcept
 template< class T >
 goltsov::LIter< T > goltsov::List< T >::getLast() noexcept
 {
-  LIter< T > now = begin();
+  LIter< T > now = beforeBegin();
   while (now.ptr_ != nullptr && now.next() != nullptr)
   {
     now = now.next();
@@ -377,7 +384,7 @@ goltsov::LIter< T > goltsov::List< T >::getLast() noexcept
 template< class T >
 goltsov::LCIter< T > goltsov::List< T >::getLast() const noexcept
 {
-  LCIter< T > now = cbegin();
+  LCIter< T > now = beforeBegin();
   while (now.ptr_ != nullptr && now.next() != nullptr)
   {
     now = now.next();
@@ -560,5 +567,65 @@ void goltsov::List<T>::spliceAfter(LCIter<T> pos, List<T>& other, LCIter<T> firs
   size_ += count;
   other.size_ -= count;
 }
-
+template< class T >
+template< class Compare >
+void goltsov::List< T >::merge(List< T >& other, Compare comp)
+{
+  if (&other == this)
+  {
+    return;
+  }
+  LIter< T > it = beforeBegin();
+  while (!other.empty())
+  {
+    if (it.next() != end() && comp(*other.begin(), *it.next()))
+    {
+      spliceAfter(it, other, other.beforeBegin());
+    }
+    else if (it.next() == end())
+    {
+      spliceAfter(it, other);
+      return;
+    }
+    else
+    {
+      ++it;
+    }
+  }
+}
+template< class T >
+void goltsov::List< T >::splitBlock(List< T >& other, size_t size) noexcept
+{
+  LIter< T > it = other.getLast();
+  while (!empty() && other.size() < size)
+  {
+    it = other.insertAfter(it, *begin());
+    pop_start();
+  }
+}
+template< class T >
+template< class Compare >
+void goltsov::List< T >::sort(Compare comp)
+{
+  if (size() < 2)
+  {
+    return;
+  }
+  size_t block_size = 1;
+  while (block_size < size())
+  {
+    List< T > right;
+    List< T > left;
+    List< T > merged;
+    while (!empty())
+    {
+      splitBlock(left, block_size);
+      splitBlock(right, block_size);
+      right.merge(left, comp);
+      merged.spliceAfter(merged.beforeBegin(), right);
+    }
+    swap(merged);
+    block_size *= 2;
+  }
+}
 #endif
