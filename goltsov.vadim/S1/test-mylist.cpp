@@ -287,23 +287,95 @@ BOOST_AUTO_TEST_CASE(sort_test)
 BOOST_AUTO_TEST_CASE(partition_test)
 {
   int a[] = {9, 4, 7, 8, 1, 4, 7, 3};
-  goltsov::List< int > al;
-  goltsov::LIter< int > it = al.beforeBegin();
+  goltsov::List<int> al;
+  goltsov::LIter<int> it = al.beforeBegin();
   for (size_t i = 0; i < 8; ++i)
   {
-    it = al.insertAfter(it, a[i]);
+      it = al.insertAfter(it, a[i]);
   }
-  al.partition([](int q)
-    {
-      return q > 4;
-    }
-  );
+  al.partition([](int q){return q > 4;});
   int exp[] = {9, 7, 8, 7, 4, 1, 4, 3};
-  goltsov::LIter< int > ite = al.begin();
+  goltsov::LIter<int> ite = al.begin();
+  for (size_t i = 0; i < 8; ++i, ++ite)
+  {
+      BOOST_CHECK(*ite == exp[i]);
+  }
+  goltsov::List<int> empty;
+  empty.partition([](int q){return q > 4;});
+  BOOST_CHECK(empty.empty());
+  BOOST_CHECK(empty.size() == 0);
+  goltsov::List<int> one;
+  one.push_start(5);
+  one.partition([](int q){return q > 4;});
+  BOOST_CHECK(one.size() == 1);
+  BOOST_CHECK(*one.begin() == 5);
+  int all_true[] = {9, 7, 8, 7, 6, 5};
+  goltsov::List<int> at;
+  it = at.beforeBegin();
+  for (size_t i = 0; i < 6; ++i)
+  {
+    it = at.insertAfter(it, all_true[i]);
+  }
+  at.partition([](int q){return q > 4;});
+  ite = at.begin();
+  for (size_t i = 0; i < 6; ++i, ++ite)
+  {
+    BOOST_CHECK(*ite == all_true[i]);
+  }
+  int all_false[] = {3, 1, 4, 1, 3, 2};
+  goltsov::List<int> af;
+  it = af.beforeBegin();
+  for (size_t i = 0; i < 6; ++i)
+  {
+    it = af.insertAfter(it, all_false[i]);
+  }
+  af.partition([](int q){return q > 4;});
+  ite = af.begin();
+  for (size_t i = 0; i < 6; ++i, ++ite)
+  {
+    BOOST_CHECK(*ite == all_false[i]);
+  }
+  int sorted[] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+  goltsov::List<int> as;
+  it = as.beforeBegin();
+  for (size_t i = 0; i < 9; ++i)
+  {
+    it = as.insertAfter(it, sorted[i]);
+  }
+  as.partition([](int q){return q > 4;});
+  int exp_sorted[] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+  ite = as.begin();
+  for (size_t i = 0; i < 9; ++i, ++ite)
+  {
+    BOOST_CHECK(*ite == exp_sorted[i]);
+  }
+  int reverse[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  goltsov::List<int> ar;
+  it = ar.beforeBegin();
+  for (size_t i = 0; i < 9; ++i)
+  {
+    it = ar.insertAfter(it, reverse[i]);
+  }
+  ar.partition([](int q){return q > 4;});
+  int exp_reverse[] = {5, 6, 7, 8, 9, 1, 2, 3, 4};
+  ite = ar.begin();
+  for (size_t i = 0; i < 9; ++i, ++ite)
+  {
+    BOOST_CHECK(*ite == exp_reverse[i]);
+  }
+  int duplicates[] = {4, 4, 4, 4, 5, 5, 5, 5};
+  goltsov::List<int> ad;
+  it = ad.beforeBegin();
   for (size_t i = 0; i < 8; ++i)
   {
-    BOOST_CHECK(*ite == exp[i]);
-    ++ite;
+    it = ad.insertAfter(it, duplicates[i]);
+  }
+  ad.partition([](int q){return q > 4;});
+  int exp_duplicates[] = {5, 5, 5, 5, 4, 4, 4, 4};
+  ite = ad.begin();
+  for (size_t i = 0; i < 8; ++i, ++ite)
+  {
+    BOOST_CHECK(*ite == exp_duplicates[i]);
   }
 }
 
