@@ -84,11 +84,10 @@ namespace goltsov
     List(List< T >&& other) noexcept;
     List< T >& operator=(const List< T >& other);
     List< T >& operator=(List< T >&& other) noexcept;
-
     LIter< T > begin() noexcept;
-    LCIter< T > begin() const noexcept;
+    LCIter< T > cbegin() const noexcept;
     LIter< T > end() noexcept;
-    LCIter< T > end() const noexcept;
+    LCIter< T > cend() const noexcept;
     LIter< T > getLast() noexcept;
     LCIter< T > getLast() const noexcept;
     template< class ValRef >
@@ -96,13 +95,19 @@ namespace goltsov
     void pop_start() noexcept;
     void pop_end() noexcept;
     template< class ValRef >
-    LIter< T > insert(LIter< T > i, ValRef&& a);
+    LIter< T > insertAfter(LIter< T >, ValRef&&);
     void clear() noexcept;
-
     size_t size() const noexcept;
     bool empty() const noexcept;
-
     void swap(List&) noexcept;
+
+    LIter< T > beforeBegin() noexcept;
+    LCIter< T > beforeBegin() const noexcept;
+    LIter< T > eraseAfter(LIter< T >);
+
+    void spliceAfter(LCIter< T >, List< T >&);
+    void spliceAfter(LCIter< T >, List< T >&, LCIter< T >);
+    void spliceAfter(LCIter< T >, List< T >&, LCIter< T >, LCIter< T >);
   private:
     detail::Node< T >* fake_;
     size_t size_;
@@ -263,7 +268,7 @@ bool goltsov::LCIter< T >::operator!=(const LCIter< T >& other) const noexcept
 template< class T >
 goltsov::detail::Node< T >* goltsov::List< T >::createFake()
 {
-  detail::Node< T >* el = new detail::Node< T > {T(), nullptr};
+  detail::Node< T >* el = new detail::Node< T >{T(), nullptr};
   return el;
 }
 template< class T >
@@ -298,10 +303,10 @@ goltsov::List< T >::List(const List< T >& other):
   {
     return;
   }
-  LIter< T > i = begin();
-  for (LCIter< T > it = other.begin(); it != other.end(); ++it)
+  LIter< T > i = beforeBegin();
+  for (LCIter< T > it = other.cbegin(); it != other.cend(); ++it)
   {
-    i = insert(i, (*it));
+    i = insertAfter(i, (*it));
   }
 }
 template< class T >
@@ -322,10 +327,10 @@ goltsov::List< T >& goltsov::List< T >::operator=(const List< T >& other)
     {
       return (*this);
     }
-    LIter< T > i = begin();
-    for (LCIter< T > it = other.begin(); it != other.end(); ++it)
+    LIter< T > i = beforeBegin();
+    for (LCIter< T > it = other.cbegin(); it != other.end(); ++it)
     {
-      i = insert(i, (*it));
+      i = insertAfter(i, (*it));
     }
   }
   return (*this);
@@ -345,7 +350,7 @@ goltsov::LIter< T > goltsov::List< T >::begin() noexcept
   return LIter< T >(fake_->next);
 }
 template< class T >
-goltsov::LCIter< T > goltsov::List< T >::begin() const noexcept
+goltsov::LCIter< T > goltsov::List< T >::cbegin() const noexcept
 {
   return LCIter< T >(fake_->next);
 }
@@ -355,7 +360,7 @@ goltsov::LIter< T > goltsov::List< T >::end() noexcept
   return LIter< T >(nullptr);
 }
 template< class T >
-goltsov::LCIter< T > goltsov::List< T >::end() const noexcept
+goltsov::LCIter< T > goltsov::List< T >::cend() const noexcept
 {
   return LCIter< T >(nullptr);
 }
@@ -372,7 +377,7 @@ goltsov::LIter< T > goltsov::List< T >::getLast() noexcept
 template< class T >
 goltsov::LCIter< T > goltsov::List< T >::getLast() const noexcept
 {
-  LCIter< T > now = begin();
+  LCIter< T > now = cbegin();
   while (now.ptr_ != nullptr && now.next() != nullptr)
   {
     now = now.next();
@@ -421,21 +426,17 @@ void goltsov::List< T >::pop_end() noexcept
 }
 template< class T >
 template< class ValRef >
-goltsov::LIter< T > goltsov::List< T >::insert(LIter< T > i, ValRef&& a)
+goltsov::LIter< T > goltsov::List< T >::insertAfter(LIter< T > i, ValRef&& a)
 {
-  if (i.ptr_ == nullptr)
+  if (i == end() || i == end())
   {
-    i = push_start(std::forward< ValRef >(a));
-    return LIter< T >(i);
+    throw std::runtime_error("Invalid iter");
   }
-  else
-  {
-    detail::Node< T >* new_el = new detail::Node< T > {std::forward< ValRef >(a), i.next().ptr_};
-    size_++;
-    i.ptr_->next = new_el;
-    i = i.ptr_->next;
-    return LIter< T >(i);
-  }
+  detail::Node< T >* new_el = new detail::Node< T >{std::forward< ValRef >(a), i.next().ptr_};
+  size_++;
+  i.ptr_->next = new_el;
+  i = i.next();
+  return LIter< T >(i);
 }
 template< class T >
 void goltsov::List< T >::clear() noexcept
@@ -463,6 +464,101 @@ void goltsov::List< T >::swap(List& other) noexcept
 {
   std::swap(fake_, other.fake_);
   std::swap(size_, other.size_);
+}
+template< class T >
+goltsov::LIter< T > goltsov::List< T >::beforeBegin() noexcept
+{
+  return LIter< T >(fake_);
+}
+template< class T >
+goltsov::LCIter< T > goltsov::List< T >::beforeBegin() const noexcept
+{
+  return LCIter< T >(fake_);
+}
+template< class T >
+goltsov::LIter< T > goltsov::List< T >::eraseAfter(LIter< T > pos)
+{
+  if (pos == end() || pos.next() == end())
+  {
+    throw std::runtime_error("Invalid iter");
+  }
+  detail::Node< T >* p = pos.ptr_->next->next;
+  delete pos.ptr_->next;
+  pos.ptr_->next = p;
+  --size_;
+  return pos.next();
+}
+template<class T>
+void goltsov::List<T>::spliceAfter(LCIter<T> pos, List<T>& other)
+{
+  if (pos == cend())
+  {
+    throw std::runtime_error("Invalid iter");
+  }
+  spliceAfter(pos, other, other.beforeBegin(), other.end());
+}
+template<class T>
+void goltsov::List<T>::spliceAfter(LCIter<T> pos, List<T>& other, LCIter<T> it)
+{
+  if (pos == cend() || it == other.cend() || it.next() == other.cend())
+  {
+    throw std::runtime_error("Invalid iter");
+  }
+  if (&other == this)
+  {
+    if (pos == it || pos == it.next())
+    {
+      return;
+    }
+  }
+  detail::Node<T>* pos_node = const_cast< detail::Node< T >* >(pos.ptr_);
+  detail::Node<T>* it_node = const_cast< detail::Node< T >* >(it.ptr_);
+  detail::Node<T>* to_move = it_node->next;
+  detail::Node<T>* afterPos = pos_node->next;
+  it_node->next = to_move->next;
+  to_move->next = afterPos;
+  pos_node->next = to_move;
+  --other.size_;
+  ++size_;
+}
+template<class T>
+void goltsov::List<T>::spliceAfter(LCIter<T> pos, List<T>& other, LCIter<T> first, LCIter<T> last)
+{
+  if (pos == cend())
+  {
+    throw std::runtime_error("Invalid iter");
+  }
+  if (first == last || first.next() == last)
+  {
+    return;
+  }
+  if (&other == this)
+  {
+    LCIter<T> check = first;
+    while (check != last)
+    {
+      if (check == pos)
+      {
+        return;
+      }
+      ++check;
+    }
+  }
+  detail::Node<T>* pos_node = const_cast< detail::Node< T >* >(pos.ptr_);
+  detail::Node<T>* first_node = const_cast< detail::Node< T >* >(first.ptr_);
+  detail::Node<T>* last_node = const_cast< detail::Node< T >* >(last.ptr_);
+  detail::Node<T>* i = first_node;
+  size_t count = 0;
+  while (i->next != last_node)
+  {
+    i = i->next;
+    ++count;
+  }
+  i->next = pos_node->next;
+  pos_node->next = first_node->next;
+  first_node->next = last_node;
+  size_ += count;
+  other.size_ -= count;
 }
 
 #endif
