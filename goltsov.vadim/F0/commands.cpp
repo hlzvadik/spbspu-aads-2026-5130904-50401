@@ -276,7 +276,8 @@ std::pair< goltsov::DateTime, goltsov::DateTime > goltsov::detail::findCommonGap
   throw std::runtime_error("<GAP DID NOT FOUND>");
 }
 template< class Predicate >
-goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::findByPredicate(Schedule& schedule, Predicate pred)
+goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::findByPredicate(Schedule& schedule,
+  Predicate pred)
 {
   for (MapIterator< DateTime, Task > it = schedule.tasks.begin(); it != schedule.tasks.end(); ++it)
   {
@@ -288,7 +289,8 @@ goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::findBy
   return schedule.tasks.end();
 }
 template< class Predicate >
-goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::rfindByPredicate(Schedule& schedule, Predicate pred)
+goltsov::MapIterator< goltsov::DateTime, goltsov::Task > goltsov::detail::rfindByPredicate(Schedule& schedule,
+  Predicate pred)
 {
   for (MapIterator< DateTime, Task > it = schedule.tasks.getLast(); it != schedule.tasks.begin(); --it)
   {
@@ -1160,8 +1162,8 @@ void goltsov::findCommonGap(std::ostream& os, State& current_state, const TimeIn
     throw std::runtime_error("<NO SCHEDULE>");
   }
   auto last = current_state.current_schedule->tasks.getLast();
-  for (auto it = current_state.current_context->schedules.begin(); it != current_state.current_context->schedules.end();
-    ++it)
+  for (auto it = current_state.current_context->schedules.begin();
+    it != current_state.current_context->schedules.end(); ++it)
   {
     if (it->second.tasks.getLast() != it->second.tasks.end())
     {

@@ -875,7 +875,7 @@ goltsov::RBTIterator< Key, Value > goltsov::RBTree< Key, Value, Compare >::rotat
   {
     root_ = current;
   }
-  return RBTIterator< Key, Value > (current->right);
+  return RBTIterator< Key, Value >(current->right);
 }
 template< class Key, class Value, class Compare >
 goltsov::RBTIterator< Key, Value >
@@ -1181,14 +1181,14 @@ bool goltsov::RBTConstIterator< Key, Value >::hasNext() const noexcept
 template< class Key, class Value >
 goltsov::RBTConstIterator< Key, Value > goltsov::RBTConstIterator< Key, Value >::prev() const
 {
-  detail::NodeRBT< Key, Value >* current = const_cast< detail::NodeRBT< Key, Value >* > (ptr_);
+  detail::NodeRBT< Key, Value >* current = const_cast< detail::NodeRBT< Key, Value >* >(ptr_);
   if (!current)
   {
     throw std::logic_error("No prev");
   }
   if (current->left)
   {
-    return RBTConstIterator< Key, Value > (detail::falRight(current->left));
+    return RBTConstIterator< Key, Value >(detail::falRight(current->left));
   }
   detail::NodeRBT< Key, Value >* previos = current;
   while (current)
