@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(clear_test)
 
 BOOST_AUTO_TEST_CASE(emplace_test)
 {
-  goltsov::Stack< std::pair<int, std::string> > s;
+  goltsov::Stack< std::pair< int, std::string > > s;
   s.emplace(1, "one");
   BOOST_CHECK(s.size() == 1);
   BOOST_CHECK(s.top().first == 1);
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(emplace_with_complex_object_test)
     NonCopyable& operator=(const NonCopyable&) = delete;
     NonCopyable& operator=(NonCopyable&&) = default;
   };
-  goltsov::Stack<NonCopyable> s;
+  goltsov::Stack< NonCopyable > s;
   BOOST_CHECK_NO_THROW(s.emplace(10, 20));
   BOOST_CHECK(s.size() == 1);
   BOOST_CHECK(s.top().value == 10);
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(emplace_with_three_arguments_test)
       c(z)
     {}
   };
-  goltsov::Stack<ThreeArgs> s;
+  goltsov::Stack< ThreeArgs > s;
   s.emplace(42, 3.14, "hello");
   BOOST_CHECK(s.size() == 1);
   BOOST_CHECK(s.top().a == 42);
