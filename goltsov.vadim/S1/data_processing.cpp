@@ -17,23 +17,23 @@ size_t goltsov::sumWithCheck(size_t a, size_t b)
 
 void goltsov::getData(std::istream& in, List< std::pair< std::string, List< size_t > > >& result, size_t& size)
 {
-  LIter< std::pair< std::string, List< size_t > > > i{};
+  LIter< std::pair< std::string, List< size_t > > > i = result.beforeBegin();
   std::string name;
   while (in >> name && !in.eof())
   {
     size += 1;
     List< size_t > numbers;
     size_t number = 0;
-    LIter< size_t > j{};
+    LIter< size_t > j = numbers.beforeBegin();
     while (in >> number && !in.eof())
     {
-      j = numbers.insert(j, number);
+      j = numbers.insertAfter(j, number);
     }
     if (in.fail())
     {
       in.clear();
     }
-    i = result.insert(i, std::pair< std::string, List< size_t > >{name, numbers});
+    i = result.insertAfter(i, std::pair< std::string, List< size_t > >{name, numbers});
   }
 }
 
@@ -55,14 +55,14 @@ std::ostream& goltsov::printResultNamesAndMakeListOfIterators(std::ostream& out,
   goltsov::List< size_t > > >& data, List< LIter< size_t > >& list_its)
 {
   LIter< std::pair< std::string, List< size_t > > > it = data.begin();
-  LIter< LIter< size_t > > it_list_its = list_its.begin();
+  LIter< LIter< size_t > > it_list_its = list_its.beforeBegin();
   out << (*it).first;
-  it_list_its = list_its.insert(it_list_its, (*it).second.begin());
+  it_list_its = list_its.insertAfter(it_list_its, (*it).second.begin());
   ++it;
   for (; it != data.end(); ++it)
   {
     out << ' ' << (*it).first;
-    it_list_its = list_its.insert(it_list_its, (*it).second.begin());
+    it_list_its = list_its.insertAfter(it_list_its, (*it).second.begin());
   }
   return out;
 }
@@ -73,7 +73,7 @@ std::ostream& goltsov::printResultNumbersAndSums(std::ostream& out, List< LIter<
   bool without_overflows = 1;
   List< size_t > sums;
   size_t size_sums = 0;
-  LIter< size_t > it_sums = sums.begin();
+  LIter< size_t > it_sums = sums.beforeBegin();
   while (!all)
   {
     all = 1;
@@ -123,7 +123,7 @@ std::ostream& goltsov::printResultNumbersAndSums(std::ostream& out, List< LIter<
     }
     if (!all)
     {
-      it_sums = sums.insert(it_sums, sum);
+      it_sums = sums.insertAfter(it_sums, sum);
       size_sums += 1;
       out << '\n';
     }
