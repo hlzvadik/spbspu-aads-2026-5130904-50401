@@ -1,7 +1,7 @@
 #ifndef DATA_PROCESSING_HPP
 #define DATA_PROCESSING_HPP
 #include <string>
-#include "mylist.hpp"
+#include <mylist.hpp>
 namespace goltsov
 {
   size_t sumWithCheck(size_t a, size_t b);
