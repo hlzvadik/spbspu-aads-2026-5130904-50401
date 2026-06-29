@@ -9,7 +9,7 @@ namespace goltsov
   class Queue
   {
   public:
-    Queue() = default;
+    Queue();
     Queue(const Queue< T >& other) = default;
     Queue(Queue< T >&& other) = default;
     ~Queue() = default;
@@ -25,6 +25,9 @@ namespace goltsov
     bool empty() const noexcept;
     size_t size() const noexcept;
     void clear() noexcept;
+
+    template< class... ValRef >
+    void emplace(ValRef&&...);
   private:
     List< T > dates_;
     LIter< T > tail_;
@@ -32,10 +35,15 @@ namespace goltsov
 }
 
 template< class T >
+goltsov::Queue< T >::Queue():
+  dates_(List< T >{}),
+  tail_(dates_.beforeBegin())
+{}
+template< class T >
 template< class ValRef >
 void goltsov::Queue< T >::push(ValRef&& rhs)
 {
-  tail_ = dates_.insert(tail_, std::forward< ValRef >(rhs));
+  tail_ = dates_.insertAfter(tail_, std::forward< ValRef >(rhs));
 }
 template< class T >
 void goltsov::Queue< T >::pop()
@@ -66,7 +74,7 @@ const T& goltsov::Queue< T >::front() const
   {
     throw std::runtime_error("Queue is empty");
   }
-  return (*dates_.begin());
+  return (*dates_.cbegin());
 }
 template< class T >
 bool goltsov::Queue< T >::empty() const noexcept
@@ -83,6 +91,12 @@ void goltsov::Queue< T >::clear() noexcept
 {
   dates_.clear();
   tail_ = LIter< T >();
+}
+template< class T >
+template< class... ValRef >
+void goltsov::Queue< T >::emplace(ValRef&&... args)
+{
+  tail_ = dates_.emplaceAfter(tail_, std::forward< ValRef >(args)...);
 }
 
 #endif

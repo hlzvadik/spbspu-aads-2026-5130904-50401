@@ -25,6 +25,9 @@ namespace goltsov
     bool empty() const noexcept;
     size_t size() const noexcept;
     void clear() noexcept;
+
+    template< class... ValRef >
+    void emplace(ValRef&&...);
   private:
     List< T > dates_;
   };
@@ -61,7 +64,7 @@ const T& goltsov::Stack< T >::top() const
   {
     throw std::runtime_error("Stack is empty");
   }
-  return (*dates_.begin());
+  return (*dates_.cbegin());
 }
 template< class T >
 bool goltsov::Stack< T >::empty() const noexcept
@@ -77,6 +80,12 @@ template< class T >
 void goltsov::Stack< T >::clear() noexcept
 {
   dates_.clear();
+}
+template< class T >
+template< class... ValRef >
+void goltsov::Stack< T >::emplace(ValRef&&... args)
+{
+  dates_.emplaceAfter(dates_.beforeBegin(), std::forward< ValRef >(args)...);
 }
 
 #endif

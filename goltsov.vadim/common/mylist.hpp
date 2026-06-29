@@ -118,6 +118,9 @@ namespace goltsov
 
     template< class Predicate >
     void partition(Predicate);
+
+    template< class... ValRef >
+    LIter< T > emplaceAfter(LIter< T >, ValRef&&...);
   private:
     detail::Node< T >* fake_;
     size_t size_;
@@ -653,5 +656,17 @@ void goltsov::List< T >::partition(Predicate pred)
       ++it;
     }
   }
+}
+template< class T >
+template< class... ValRef >
+goltsov::LIter< T > goltsov::List< T >::emplaceAfter(LIter< T > pos, ValRef&&... val)
+{
+  if (pos == end())
+  {
+    throw std::runtime_error("Bad iter");
+  }
+  pos.ptr_->next = new detail::Node< T >{T(std::forward< ValRef >(val)...), pos.ptr_->next};
+  ++size_;
+  return pos.next();
 }
 #endif
