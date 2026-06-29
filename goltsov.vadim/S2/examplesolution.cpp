@@ -111,11 +111,6 @@ long long int goltsov::eval(goltsov::Queue< std::string > postfix)
     }
     catch (...)
     {
-      result.push(std::stoll(postfix.front()));
-      postfix.pop();
-    }
-    catch (...)
-    {
       lli a, b;
       std::string operation;
       operation = postfix.front();
