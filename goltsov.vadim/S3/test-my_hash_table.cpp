@@ -14,16 +14,16 @@ BOOST_AUTO_TEST_CASE(constructor_test)
   t['a'] = 1;
   t['b'] = 2;
   ht_ci4 t1 (t);
-  BOOST_CHECK(t1.size() == 1 && t1.count() == 2 && t1.countBuckets() == 1);
+  BOOST_CHECK(t1.size() == 4 && t1.count() == 2 && t1.countBuckets() == 2);
   ht_ci4 t2 (std::move(t));
-  BOOST_CHECK(t2.size() == 1 && t2.count() == 2 && t2.countBuckets() == 1);
+  BOOST_CHECK(t2.size() == 4 && t2.count() == 2 && t2.countBuckets() == 2);
   ht_ci4 t3;
   t3['a'] = 1;
   t3['b'] = 2;
   ht_ci4 t4 = t3;
-  BOOST_CHECK(t4.size() == 1 && t4.count() == 2 && t4.countBuckets() == 1);
+  BOOST_CHECK(t4.size() == 4 && t4.count() == 2 && t4.countBuckets() == 2);
   ht_ci4 t5 = std::move(t3);
-  BOOST_CHECK(t5.size() == 1 && t5.count() == 2 && t5.countBuckets() == 1);
+  BOOST_CHECK(t5.size() == 4 && t5.count() == 2 && t5.countBuckets() == 2);
   ht_ci4 t6 (5, 4);
   BOOST_CHECK(t6.size() == 20 && t6.count() == 0 && t6.countBuckets() == 5);
 }
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(swap_test)
   ht_ci4 t1 (2, 2);
   t1['a'] = 1;
   t.swap(t1);
-  BOOST_CHECK(t1.size() == 1 && t1.count() == 2 && t1.countBuckets() == 1
+  BOOST_CHECK(t1.size() == 4 && t1.count() == 2 && t1.countBuckets() == 2
     && t.size() == 4 && t.count() == 1 && t.countBuckets() == 2);
 }
 

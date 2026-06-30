@@ -145,6 +145,11 @@ goltsov::LCIter< T > goltsov::detail::makeLCIterByPtr(const Node< T >* p)
   return LCIter< T >(p);
 }
 template< class T >
+goltsov::LIter< T > goltsov::detail::makeInconstantLIter(goltsov::LCIter< T > it)
+{
+  return LIter< T >(const_cast< Node< T >* >(it.ptr_));
+}
+template< class T >
 goltsov::LIter< T >::LIter() noexcept:
   ptr_(nullptr)
 {}
