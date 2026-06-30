@@ -498,6 +498,10 @@ std::pair< goltsov::HashTableIterator< Key, Value, Hash, Equal >, bool >
   }
   else
   {
+    if (it_now_prev == overflow_.end())
+    {
+      it_now_prev = overflow_.beforeBegin();
+    }
     it_now = overflow_.insertAfter(it_now_prev, detail::NodeHashTable< Key, Value >(
       std::forward< std::pair< TypeKey, TypeValue > >(data).first,
       std::forward< std::pair< TypeKey, TypeValue > >(data).second, true));
